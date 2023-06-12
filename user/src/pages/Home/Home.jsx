@@ -1,5 +1,5 @@
 import { Grid} from "@mui/material";
-import InformationCard from "../../components/InformationCard/InformationCard";
+import ProfileCard from "../../components/ProfileCard/ProfileCard";
 import QuestionCard from "../../components/QuestionCard/QuestionCard";
 import Leaderboard from "../../components/Leaderboard/Leaderboard";
 import QuestionModal from "../../components/QuestionModal/QuestionModal";
@@ -10,7 +10,7 @@ function Home() {
             <Grid item xs={3}>
                 <Grid container direction="column" spacing={2}>
                     <Grid item  position='fixed'>
-                        <InformationCard/>
+                        <ProfileCard/>
                     </Grid>
                     <Grid item position='fixed' sx={{
                         bottom:100,

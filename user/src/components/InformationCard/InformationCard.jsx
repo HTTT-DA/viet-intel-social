@@ -1,109 +1,77 @@
-import {Avatar, Button, Card,  Grid, Typography} from "@mui/material";
+import {Card, FormControl, InputLabel, NativeSelect} from "@mui/material";
+import * as React from "react";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
 
-function InformationCard() {
-    return (
+export default function InformationCard() {
+    return(
         <>
-            <Card sx={{minWidth: 250, backgroundColor: '#151515'}}>
-                <Grid container direction="column" justify="center" alignItems="center">
-                    <Grid item sx={{marginTop:3}}>
-                        <Avatar sx={{width: 75, height: 75}} src="https://i.pinimg.com/236x/09/d4/b1/09d4b1d247d89d7ce3cd159f6b20ecd8.jpg"></Avatar>
+            <Card sx={{backgroundColor: '#151515'}} >
+                <Typography
+                    sx={{
+                        color: '#fff',
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        padding: '1rem'}}
+                >
+                    INFORMATION
+                </Typography>
+                <Grid container spacing={2} sx={{ml:1}}>
+                    <Grid item xs={4} sx={{mb:4}}>
+                        <TextField
+                            id="name"
+                            defaultValue="Phung Anh Khoa"
+                            label="Name"
+                            variant="standard" />
                     </Grid>
-                    <Grid item>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                marginTop: 2,
-                                color:'#8F8F8F',
-                                fontWeight: 'bold'
-                                }}
-                        >Phung Anh Khoa</Typography>
+                    <Grid item xs={4}>
+                        <TextField
+                            id="role"
+                            defaultValue="Admin"
+                            label="Role"
+                            variant="standard" />
                     </Grid>
-                    <Grid item>
-                        <Typography
-                            variant="subtitle1"
-                            sx={{
-                                color: '#928484',
-                                }}
-                        >@Wander</Typography>
-                    </Grid>
-                    <Grid item>
-                        <Button
-                            variant="contained"
-                            sx={{
-                                marginTop: 3,
-                                color: '#000000',
-                                backgroundColor: '#ffffff',
-                                fontWeight: 'bold',
-                                '&:hover': {backgroundColor: '#000000'},
-                            }}
-                        >Edit Profile</Button>
-                    </Grid>
-                    <Grid item sx={{marginTop: 3, marginBottom: 3}}>
-                        <Grid container spacing={4}>
-                            <Grid item xs={4}>
-                                <Grid container direction="column" alignItems="center" >
-                                    <Grid item>
-                                        <Typography
-                                            variant="subtitle1"
-                                            sx={{
-                                                color: 'white',
-                                                fontFamily: 'Roboto',
-                                                fontWeight: 'bold'
-                                                }}
-                                        >
-                                            128
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item>
-                                        Answers
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-                            <Grid item xs={4}>
-                                <Grid container direction="column" alignItems="center" >
-                                    <Grid item>
-                                        <Typography
-                                            variant="subtitle1"
-                                            sx={{
-                                                color: 'white',
-                                                fontFamily: 'Roboto',
-                                                fontWeight: 'bold'
-                                            }}
-                                        >
-                                            38
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item>
-                                        Asks
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-                            <Grid item xs={4}>
-                                <Grid container direction="column" alignItems="center">
-                                    <Grid item>
-                                        <Typography
-                                            variant="subtitle1"
-                                            sx={{
-                                                color: 'white',
-                                                fontFamily: 'Roboto',
-                                                fontWeight: 'bold'
-                                            }}
-                                        >
-                                            74
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item>
-                                        Points
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-                        </Grid>
+                    <Grid item xs={4}>
+                        <TextField
+                            id="gmail"
+                            defaultValue="Wander@gmail.com"
+                            label="Gmail"
+                            variant="standard" />
                     </Grid>
 
+                    <Grid item xs={4}>
+                        <TextField
+                            id="display-name"
+                            defaultValue="Wander"
+                            label="DisplayName"
+                            variant="standard" />
+                    </Grid>
+                    <Grid item xs={4}>
+                        <TextField
+                            id="city"
+                            defaultValue="Ho Chi Minh"
+                            label="City"
+                            variant="standard" />
+                    </Grid>
+                    <Grid item xs={4} sx={{mb:5}}>
+                        <FormControl variant="standard" label="Gender" sx={{ minWidth: 200 }}>
+                            <InputLabel variant="standard" htmlFor="uncontrolled-native">Gender</InputLabel>
+                            <NativeSelect
+                                defaultValue={10}
+                                inputProps={{
+                                    name: 'Gender',
+                                    id: 'uncontrolled-native',
+                                }}
+                            >
+                                <option  value={10}>Male</option >
+                                <option  value={20}>Female</option >
+                            </NativeSelect>
+                        </FormControl>
+                    </Grid>
                 </Grid>
             </Card>
         </>
-    );
+    )
 }
-
-export default InformationCard;
