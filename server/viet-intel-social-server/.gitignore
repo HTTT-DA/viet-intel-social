@@ -1,0 +1,6 @@
+/.idea/
+/vietintelsocial_server/__pycache__/
+/autorun.bat
+/shell.bat
+/venv/
+venv/Lib/
