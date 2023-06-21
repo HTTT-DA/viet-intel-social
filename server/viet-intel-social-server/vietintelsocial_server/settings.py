@@ -37,7 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'vietintelsocial_app'
+    # Django REST Framework
+    'rest_framework',
+    # App name
+    'vietintelsocial_user_app',
+    'vietintelsocial_admin_app'
 ]
 
 MIDDLEWARE = [
