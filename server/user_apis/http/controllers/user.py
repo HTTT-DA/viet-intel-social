@@ -1,7 +1,7 @@
 # Models
-from ..models.user_model import *
+from ..models.user import *
 # Serializers
-from ..serializers.user_serializer import *
+from ..serializers.user import *
 # Helpers
 from ...core.helpers.response import *
 # Rest Framework

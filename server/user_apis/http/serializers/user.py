@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from user_apis.http.models.user_model import *
+from user_apis.http.models.user import *
 from rest_framework.serializers import ModelSerializer
 
 
