@@ -30,10 +30,31 @@ export default function SignUp() {
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
+        const email=  data.get('email');
+        const password = data.get('password');
+        const fullName = data.get('fullName');
+        const displayName = data.get('displayName');
+
+        fetch('http://localhost:8000/user/sign-up', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                "email": email,
+                "password": password,
+                "full name": fullName,
+                "display name": displayName
+            })
+        }).then(
+            (res) => {
+                if (res.status === 200) {
+                    window.location.href = '/';
+                } else {
+                    alert("Sign up failed");
+                }
+            }
+        )
     };
 
     return (

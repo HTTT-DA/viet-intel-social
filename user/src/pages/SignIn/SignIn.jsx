@@ -32,10 +32,27 @@ export default function SignIn() {
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
+        const email=  data.get('email');
+        const password = data.get('password');
+
+        fetch('http://localhost:8000/user/sign-in', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                "email": email,
+                "password": password
+            })
+        }).then(
+            (res) => {
+                if (res.status === 200) {
+                    window.location.href = '/';
+                } else {
+                    alert("Sign in failed");
+                }
+            }
+        )
     };
 
     return (

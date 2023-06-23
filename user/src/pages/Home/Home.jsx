@@ -13,7 +13,7 @@ function Home() {
                         <ProfileCard/>
                     </Grid>
                     <Grid item position='fixed' sx={{
-                        bottom:100,
+                        bottom:20,
                     }}>
                         <QuestionModal/>
                     </Grid>
