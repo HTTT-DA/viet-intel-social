@@ -9,7 +9,8 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import {createTheme, ThemeProvider} from '@mui/material/styles';
+import Cookies from 'js-cookie';
 
 const defaultTheme = createTheme();
 
@@ -30,7 +31,7 @@ export default function SignUp() {
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        const email=  data.get('email');
+        const email = data.get('email');
         const password = data.get('password');
         const fullName = data.get('fullName');
         const displayName = data.get('displayName');
@@ -48,11 +49,19 @@ export default function SignUp() {
             })
         }).then(
             (res) => {
-                if (res.status === 200) {
-                    window.location.href = '/';
-                } else {
-                    alert("Sign up failed");
-                }
+                res.json().then(
+                    (r) => {
+                        switch (r.status){
+                            case 200:
+                                Cookies.set('user', JSON.stringify(r.data));
+                                window.location.href = '/';
+                                break;
+                            default:
+                                alert(r.message);
+                                break;
+                        }
+                    }
+                )
             }
         )
     };
@@ -60,7 +69,7 @@ export default function SignUp() {
     return (
         <ThemeProvider theme={defaultTheme}>
             <Container component="main" maxWidth="xs">
-                <CssBaseline />
+                <CssBaseline/>
                 <Box
                     sx={{
                         marginTop: 8,
@@ -69,13 +78,13 @@ export default function SignUp() {
                         alignItems: 'center',
                     }}
                 >
-                    <Avatar sx={{ m: 1, bgcolor: '#ffffff' }}>
-                        <LockOutlinedIcon sx={{color:'#000000', fontSize:32}}/>
+                    <Avatar sx={{m: 1, bgcolor: '#ffffff'}}>
+                        <LockOutlinedIcon sx={{color: '#000000', fontSize: 32}}/>
                     </Avatar>
                     <Typography component="h1" variant="h5">
                         Sign up
                     </Typography>
-                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{mt: 3}}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
@@ -124,23 +133,25 @@ export default function SignUp() {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2 ,
+                            sx={{
+                                mt: 3, mb: 2,
                                 color: '#ffffff',
                                 backgroundColor: '#000000',
-                                fontWeight: 'bold', '&:hover': {backgroundColor: '#ffffff'}}}
+                                fontWeight: 'bold', '&:hover': {backgroundColor: '#ffffff'}
+                            }}
                         >
                             Sign Up
                         </Button>
                         <Grid container justifyContent="flex-end">
                             <Grid item>
-                                <Link href="#" variant="body2">
+                                <Link href="/sign-in" variant="body2">
                                     Already have an account? Sign in
                                 </Link>
                             </Grid>
                         </Grid>
                     </Box>
                 </Box>
-                <Copyright sx={{ mt: 5 }} />
+                <Copyright sx={{mt: 5}}/>
             </Container>
         </ThemeProvider>
     );

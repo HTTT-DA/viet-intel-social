@@ -5,40 +5,41 @@ import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 
 export default function InformationCard() {
-    return(
+    return (
         <>
-            <Card sx={{backgroundColor: '#151515'}} >
+            <Card sx={{backgroundColor: '#151515'}}>
                 <Typography
                     sx={{
                         color: '#fff',
                         fontSize: '1rem',
                         fontWeight: 'bold',
                         textAlign: 'center',
-                        padding: '1rem'}}
+                        padding: '1rem'
+                    }}
                 >
                     INFORMATION
                 </Typography>
-                <Grid container spacing={2} sx={{ml:1}}>
-                    <Grid item xs={4} sx={{mb:4}}>
+                <Grid container spacing={2} sx={{ml: 1}}>
+                    <Grid item xs={4} sx={{mb: 4}}>
                         <TextField
                             id="name"
                             defaultValue="Phung Anh Khoa"
                             label="Name"
-                            variant="standard" />
+                            variant="standard"/>
                     </Grid>
                     <Grid item xs={4}>
                         <TextField
                             id="role"
                             defaultValue="Admin"
                             label="Role"
-                            variant="standard" />
+                            variant="standard"/>
                     </Grid>
                     <Grid item xs={4}>
                         <TextField
                             id="gmail"
                             defaultValue="Wander@gmail.com"
                             label="Gmail"
-                            variant="standard" />
+                            variant="standard"/>
                     </Grid>
 
                     <Grid item xs={4}>
@@ -46,17 +47,17 @@ export default function InformationCard() {
                             id="display-name"
                             defaultValue="Wander"
                             label="DisplayName"
-                            variant="standard" />
+                            variant="standard"/>
                     </Grid>
                     <Grid item xs={4}>
                         <TextField
                             id="city"
                             defaultValue="Ho Chi Minh"
                             label="City"
-                            variant="standard" />
+                            variant="standard"/>
                     </Grid>
-                    <Grid item xs={4} sx={{mb:5}}>
-                        <FormControl variant="standard" label="Gender" sx={{ minWidth: 200 }}>
+                    <Grid item xs={4} sx={{mb: 5}}>
+                        <FormControl variant="standard" label="Gender" sx={{minWidth: 200}}>
                             <InputLabel variant="standard" htmlFor="uncontrolled-native">Gender</InputLabel>
                             <NativeSelect
                                 defaultValue={10}
@@ -65,8 +66,8 @@ export default function InformationCard() {
                                     id: 'uncontrolled-native',
                                 }}
                             >
-                                <option  value={10}>Male</option >
-                                <option  value={20}>Female</option >
+                                <option value={10}>Male</option>
+                                <option value={20}>Female</option>
                             </NativeSelect>
                         </FormControl>
                     </Grid>

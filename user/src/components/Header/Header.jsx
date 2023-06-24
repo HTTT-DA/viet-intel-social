@@ -1,22 +1,24 @@
 import * as React from 'react';
 
-import { styled, alpha } from '@mui/material/styles';
+import {styled, alpha} from '@mui/material/styles';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import AdbIcon from '@mui/icons-material/Adb';
 import SearchIcon from '@mui/icons-material/Search';
 
+import Cookies from 'js-cookie';
+
 import {
     ListItem, ListItemAvatar, ListItemText,
     MenuItem, Button, Avatar, Container,
     Menu, Typography, IconButton, Toolbar, Box,
-    AppBar, InputBase
+    AppBar, InputBase, Link
 } from "@mui/material";
 
 const pages = ['Question', 'Leaderboard', 'about'];
 const settings = ['Profile', 'Logout'];
 
-const Search = styled('div')(({ theme }) => ({
+const Search = styled('div')(({theme}) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
     backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -31,7 +33,7 @@ const Search = styled('div')(({ theme }) => ({
     },
 }));
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
+const SearchIconWrapper = styled('div')(({theme}) => ({
     padding: theme.spacing(0, 2),
     height: '100%',
     position: 'absolute',
@@ -41,7 +43,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
     justifyContent: 'center',
 }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
+const StyledInputBase = styled(InputBase)(({theme}) => ({
     color: 'inherit',
     '& .MuiInputBase-input': {
         padding: theme.spacing(1, 1, 1, 0),
@@ -61,6 +63,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 function Header() {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const user= Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
 
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
@@ -74,12 +77,13 @@ function Header() {
     };
 
     const handleCloseUserMenu = () => {
+        Cookies.remove('user');
         setAnchorElUser(null);
     };
 
     return (
         <>
-            <AppBar position="fixed" style={{backgroundColor: '#151515', left: 0, right:0, top:0}}>
+            <AppBar position="fixed" style={{backgroundColor: '#151515', left: 0, right: 0, top: 0}}>
                 <Container maxWidth="xl">
                     <Toolbar disableGutters>
                         <AdbIcon sx={{display: {xs: 'none', md: 'flex'}, mr: 1}}/>
@@ -162,29 +166,41 @@ function Header() {
                         <Box sx={{flexGrow: 1}}>
                             <Search>
                                 <SearchIconWrapper>
-                                    <SearchIcon />
+                                    <SearchIcon/>
                                 </SearchIconWrapper>
                                 <StyledInputBase
                                     placeholder="Search…"
-                                    inputProps={{ 'aria-label': 'search' }}
+                                    inputProps={{'aria-label': 'search'}}
                                 />
                             </Search>
                         </Box>
 
                         <Box sx={{flexGrow: 0}}>
-                            <ListItem>
-                                <ListItemAvatar>
-                                    <Avatar sx={{'&:hover': {cursor: 'pointer'}}} alt="Remy Sharp" src="https://i.pinimg.com/236x/09/d4/b1/09d4b1d247d89d7ce3cd159f6b20ecd8.jpg"/>
-                                </ListItemAvatar>
-                                <IconButton>
-                                    <ListItemText onClick={handleOpenUserMenu}
-                                                  primary="Wander"
-                                                  secondary="Phung Anh Khoa"
-                                                  primaryTypographyProps={{ textAlign: 'left' }}
-                                    />
-                                </IconButton>
-                            </ListItem>
-
+                            {user ? (
+                                    <ListItem>
+                                        <ListItemAvatar>
+                                            <Avatar sx={{'&:hover': {cursor: 'pointer'}}} alt="Remy Sharp"
+                                                        src={user.avatar}/>
+                                        </ListItemAvatar>
+                                        <IconButton>
+                                            <ListItemText onClick={handleOpenUserMenu}
+                                                          primary={user.display_name}
+                                                          secondary={user.name}
+                                                          primaryTypographyProps={{textAlign: 'left'}}
+                                            />
+                                        </IconButton>
+                                    </ListItem>
+                                )
+                                : (
+                                    <Link
+                                        underline="none"
+                                        color="white"
+                                        href="/sign-in"
+                                        sx={{
+                                            ml:4
+                                        }}
+                                    >SIGN UP / SIGN IN</Link>
+                                )}
                             <Menu
                                 sx={{mt: '45px'}}
                                 id="menu-appbar"

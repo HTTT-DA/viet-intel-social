@@ -1,9 +1,9 @@
 from django.http import JsonResponse
 
 
-def responseData(data="", statusCode=1, message="Success"):
+def responseData(data="", status=1, message="Success"):
     result = {
-        'status': statusCode,
+        'status': status,
         'message': message,
         'data': data
     }
