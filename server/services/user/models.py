@@ -19,3 +19,14 @@ class User(models.Model):
     answer_count = models.PositiveIntegerField(default=0)
     question_count = models.PositiveIntegerField(default=0)
     point = models.PositiveIntegerField(default=0)
+
+
+class UserPoint(models.Model):
+    year = models.PositiveIntegerField(primary_key=True)
+    month = models.PositiveIntegerField()
+    point = models.PositiveIntegerField(default=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('year', 'month', 'user'),)
+        db_table = 'UserPoint'

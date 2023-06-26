@@ -7,59 +7,116 @@ import {
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {Favorite, FavoriteBorder} from "@mui/icons-material";
+import Cookies from "js-cookie";
 
-export default function QuestionCard() {
+export default function QuestionCard(props) {
+    const user= Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
+    const [question, setQuestion] = React.useState(props.question);
+    const handleLike = () => {
+        if (user) {
+            fetch('http://localhost:8000/question/like', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "question_id": props.question.id,
+                    "user_id": user.id
+                })
+            }).then();
+            setQuestion({
+                ...question,
+                likes: [...question.likes, user]
+            });
+        } else {
+            alert('Please login to like this question!');
+        }
+    }
+
+    const handleCancelLike = () => {
+        if (user) {
+            fetch('http://localhost:8000/question/like', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "question_id": props.question.id,
+                    "user_id": user.id
+                })
+            }).then();
+            setQuestion({
+                ...question,
+                likes: question.likes.filter((like) => like.id !== user.id)
+            });
+        } else {
+            alert('Please login to like this question!');
+        }
+    }
+
     return (
-        <Card sx={{ maxWidth: 600, backgroundColor:'#151515' }}>
+        <Card sx={{maxWidth: 600, backgroundColor: '#151515'}}>
             <CardHeader
                 avatar={
-                    <Avatar src="https://i.pinimg.com/236x/16/b6/2c/16b62cc395060364b8c073eefbd1368c.jpg" aria-label="recipe"/>
+                    <Avatar src={question.user.avatar}
+                            aria-label="recipe"/>
                 }
                 action={
                     <IconButton aria-label="settings">
-                        <MoreVertIcon />
+                        <MoreVertIcon/>
                     </IconButton>
                 }
-                title="Vergil"
-                subheader= {
-                <>
-                    <span>June 07, 2023 | </span>
-                    <Link href="#" underline="none" sx={{fontWeight:'bold'}}>@ProgrammingQuestion</Link>
-                </>
+                title={question.user.name}
+                subheader={
+                    <>
+                        <span>{question.created_at} | </span>
+                        <Link href="#" underline="none" sx={{fontWeight: 'bold'}}>@{question.category.name}</Link>
+                    </>
                 }
 
             />
             <CardContent>
-                <Typography >
-                    This impressive paella is a perfect party dish and a fun meal to cook
-                    together with your guests. Add 1 cup of frozen peas along with the mussels,
-                    if you like.
+                <Typography>
+                    {question.content}
                 </Typography>
                 <Typography
                     sx={{
                         marginTop: 2,
-                        color: '#9D9999',
+                        color: '#ff0000',
                         fontSize: 12,
-                        }}
+                    }}
                 >
-                    @OOP &ensp;  @Java &ensp;  @ProgrammingQuestion &ensp;  @Java &ensp;  @ProgrammingQuestion
+                    {question.tags.map((tag) => (
+                        '@' + tag.name + " "
+                    ))}
                 </Typography>
             </CardContent>
-            <CardActions disableSpacing >
+            <CardActions disableSpacing>
                 <IconButton aria-label="add to favorites">
-                    <Checkbox icon={<FavoriteBorder sx={{fontSize:'28px'}} />}
-                              checkedIcon={<Favorite sx={{color:"#FF3030", fontSize:'28px'}} />} />
+                    {user && question.likes.find((like) => like.id === user.id)
+                        ?
+                        (
+                            <Checkbox
+                                icon={<FavoriteBorder sx={{fontSize: '28px'}}/>}
+                                checkedIcon={<Favorite sx={{color: "#FF3030", fontSize: '28px'}}/>}
+                                checked={true}
+                                onChange={handleCancelLike}
+                            />
+                        )
+                        :
+                        (
+                            <Checkbox
+                                icon={<FavoriteBorder sx={{fontSize: '28px'}}/>}
+                                checkedIcon={<Favorite sx={{color: "#FF3030", fontSize: '28px'}}/>}
+                                checked={false}
+                                onChange={handleLike}
+                            />
+                        )}
+
                 </IconButton>
                 <IconButton aria-label="answer">
-                    <ChatBubbleOutlineIcon sx={{fontSize:'26px'}} />
+                    <ChatBubbleOutlineIcon sx={{fontSize: '26px'}}/>
                 </IconButton>
-                <Typography
-                    sx={{
-                        fontSize: 12,
-                        }}
-                >
-                    124 answers
-                </Typography>
             </CardActions>
         </Card>
     );
