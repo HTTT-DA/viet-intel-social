@@ -75,3 +75,36 @@ class UserController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(message='Error', status=500, data={})
+
+    @staticmethod
+    @require_http_methods(['PUT'])
+    def updateUser(request, userId):
+        try:
+            data = json.loads(request.body)
+            User.objects.filter(id=userId).update(**data)
+            user = User.objects.get(id=userId)
+            return responseData(message='Success', status=200, data=UserSerializer(user).data)
+        except Exception as e:
+            print(e)
+            return responseData(message='Error', status=500, data={})
+
+    @staticmethod
+    @require_http_methods(['PUT'])
+    def changePassword(request, userId):
+        try:
+            data = json.loads(request.body)
+            oldPassword = data.get('old_password')
+            newPassword = data.get('new_password')
+
+            if not userId or not oldPassword or not newPassword:
+                return responseData(message='User id, old password and new password are required', status=400, data={})
+
+            user = User.objects.filter(id=userId, password=oldPassword).first()
+            if user is None:
+                return responseData(message='User not found', status=404, data={})
+
+            User.objects.filter(id=userId).update(password=newPassword)
+            return responseData(message='Success', status=200, data={})
+        except Exception as e:
+            print(e)
+            return responseData(message='Error', status=500, data={})

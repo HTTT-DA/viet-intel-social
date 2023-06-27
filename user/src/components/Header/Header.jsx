@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 
 const pages = ['Question', 'Leaderboard', 'about'];
-const settings = ['Profile', 'Logout'];
 
 const Search = styled('div')(({theme}) => ({
     position: 'relative',
@@ -63,7 +62,7 @@ const StyledInputBase = styled(InputBase)(({theme}) => ({
 function Header() {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
-    const user= Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
+    const user = Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
 
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
@@ -72,14 +71,24 @@ function Header() {
         setAnchorElUser(event.currentTarget);
     };
 
+    const handleCloseUserMenu = () => {
+        setAnchorElUser(null);
+    }
+
     const handleCloseNavMenu = () => {
         setAnchorElNav(null);
     };
 
-    const handleCloseUserMenu = () => {
+    const handleLogout = () => {
         Cookies.remove('user');
         setAnchorElUser(null);
+        window.location.href = '/';
     };
+
+    const handleOpenProfile = () => {
+        setAnchorElUser(null)
+        window.location.href = '/profile';
+    }
 
     return (
         <>
@@ -180,7 +189,7 @@ function Header() {
                                     <ListItem>
                                         <ListItemAvatar>
                                             <Avatar sx={{'&:hover': {cursor: 'pointer'}}} alt="Remy Sharp"
-                                                        src={user.avatar}/>
+                                                    src={user.avatar}/>
                                         </ListItemAvatar>
                                         <IconButton>
                                             <ListItemText onClick={handleOpenUserMenu}
@@ -197,7 +206,7 @@ function Header() {
                                         color="white"
                                         href="/sign-in"
                                         sx={{
-                                            ml:4
+                                            ml: 4
                                         }}
                                     >SIGN UP / SIGN IN</Link>
                                 )}
@@ -217,11 +226,12 @@ function Header() {
                                 open={Boolean(anchorElUser)}
                                 onClose={handleCloseUserMenu}
                             >
-                                {settings.map((setting) => (
-                                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                        <Typography textAlign="center">{setting}</Typography>
-                                    </MenuItem>
-                                ))}
+                                <MenuItem key="profile" onClick={handleOpenProfile}>
+                                    <Typography textAlign="center">profile</Typography>
+                                </MenuItem>
+                                <MenuItem key="logout" onClick={handleLogout}>
+                                    <Typography textAlign="center">logout</Typography>
+                                </MenuItem>
                             </Menu>
                         </Box>
                     </Toolbar>

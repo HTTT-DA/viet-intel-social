@@ -1,10 +1,32 @@
-import {Card, FormControl, InputLabel, NativeSelect} from "@mui/material";
+import { Card, FormControl, InputLabel, NativeSelect} from "@mui/material";
 import * as React from "react";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
+import Cookies from "js-cookie";
 
-export default function InformationCard() {
+export default function InformationCard(props) {
+    const handleChange = (event) => {
+        const {id, value} = event.target;
+        fetch('http://localhost:8000/user/update/'+ props.user.id+'/', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                [id]: value,
+            })
+        }).then(
+            (res) => {
+                res.json().then(
+                    (r) => {
+                        Cookies.set('user', JSON.stringify(r.data));
+                    }
+                )
+            }
+        )
+    }
+
     return (
         <>
             <Card sx={{backgroundColor: '#151515'}}>
@@ -23,51 +45,62 @@ export default function InformationCard() {
                     <Grid item xs={4} sx={{mb: 4}}>
                         <TextField
                             id="name"
-                            defaultValue="Phung Anh Khoa"
+                            defaultValue={props.user.name}
                             label="Name"
-                            variant="standard"/>
+                            variant="standard"
+                            onBlur={handleChange}
+                        />
                     </Grid>
                     <Grid item xs={4}>
                         <TextField
                             id="role"
-                            defaultValue="Admin"
+                            defaultValue={props.user.role}
                             label="Role"
-                            variant="standard"/>
+                            disabled
+                            variant="standard"
+                        />
                     </Grid>
                     <Grid item xs={4}>
                         <TextField
-                            id="gmail"
-                            defaultValue="Wander@gmail.com"
-                            label="Gmail"
-                            variant="standard"/>
+                            id="email"
+                            defaultValue={props.user.email}
+                            label="Email"
+                            variant="standard"
+                            onBlur={handleChange}
+                        />
                     </Grid>
 
                     <Grid item xs={4}>
                         <TextField
-                            id="display-name"
-                            defaultValue="Wander"
+                            id="display_name"
+                            defaultValue={props.user.display_name}
                             label="DisplayName"
-                            variant="standard"/>
+                            variant="standard"
+                            onBlur={handleChange}
+                        />
                     </Grid>
                     <Grid item xs={4}>
                         <TextField
                             id="city"
-                            defaultValue="Ho Chi Minh"
+                            defaultValue={props.user.city}
                             label="City"
-                            variant="standard"/>
+                            variant="standard"
+                            onBlur={handleChange}
+                        />
                     </Grid>
                     <Grid item xs={4} sx={{mb: 5}}>
                         <FormControl variant="standard" label="Gender" sx={{minWidth: 200}}>
-                            <InputLabel variant="standard" htmlFor="uncontrolled-native">Gender</InputLabel>
+                            <InputLabel variant="standard" htmlFor="gender">Gender</InputLabel>
                             <NativeSelect
-                                defaultValue={10}
+                                defaultValue={props.user.gender}
                                 inputProps={{
                                     name: 'Gender',
-                                    id: 'uncontrolled-native',
+                                    id: 'gender',
                                 }}
+                                onBlur={handleChange}
                             >
-                                <option value={10}>Male</option>
-                                <option value={20}>Female</option>
+                                <option value="MALE">Male</option>
+                                <option value="FEMALE">Female</option>
                             </NativeSelect>
                         </FormControl>
                     </Grid>

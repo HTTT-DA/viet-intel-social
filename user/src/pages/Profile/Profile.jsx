@@ -4,12 +4,15 @@ import Link from '@mui/material/Link';
 import {Avatar, Button, Card, Grid, Typography} from "@mui/material";
 import InformationCard from "../../components/InformationCard/InformationCard";
 import ChangePasswordCard from "../../components/ChangePasswordCard/ChangePasswordCard";
+import Cookies from "js-cookie";
 function handleClickBreadcrumb(event) {
     event.preventDefault();
     console.info('You clicked a breadcrumb.');
 }
 
 export default function Profile() {
+    const user = Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
+
     return (
         <>
             <div role="presentation" onClick={handleClickBreadcrumb}>
@@ -17,13 +20,9 @@ export default function Profile() {
                     <Link underline="hover" color="inherit" href="/">
                         Home
                     </Link>
-                    <Link
-                        underline="hover"
-                        color="inherit"
-                        href="/profile"
-                    >
+                    <Typography color="inherit">
                         Profile
-                    </Link>
+                    </Typography>
                 </Breadcrumbs>
             </div>
             <Grid container spacing={3}>
@@ -33,7 +32,7 @@ export default function Profile() {
                             <Card sx={{backgroundColor: '#151515'}} >
                                 <Grid container direction="column" justify="center" alignItems="center">
                                     <Grid item sx={{mt:4}}>
-                                        <Avatar sx={{width: 175, height: 175}} src="https://i.pinimg.com/236x/09/d4/b1/09d4b1d247d89d7ce3cd159f6b20ecd8.jpg"></Avatar>
+                                        <Avatar sx={{width: 175, height: 175}} src={user.avatar}></Avatar>
                                     </Grid>
                                     <Grid item sx={{mb:3}}>
                                         <Button
@@ -54,13 +53,13 @@ export default function Profile() {
                             <Card sx={{backgroundColor: '#151515'}} >
                                 <Grid container direction="column" sx={{ml:3, mt:1, mb: 1}}>
                                     <Typography>
-                                        You posted 8 questions
+                                        You posted {user.question_count} questions
                                     </Typography>
                                     <Typography>
-                                        You answered 4 questions
+                                        You answered {user.answer_count} questions
                                     </Typography>
                                     <Typography>
-                                        You got 74 points
+                                        You got {user.point} points
                                     </Typography>
                                 </Grid>
                             </Card>
@@ -69,10 +68,10 @@ export default function Profile() {
                 </Grid>
                 <Grid item xs={8}>
                     <Grid item>
-                        <InformationCard/>
+                        <InformationCard user={user}/>
                     </Grid>
                     <Grid item sx={{mt:2}}>
-                        <ChangePasswordCard/>
+                        <ChangePasswordCard id={user.id}/>
                     </Grid>
                 </Grid>
             </Grid>
