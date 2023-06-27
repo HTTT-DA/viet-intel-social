@@ -4,7 +4,7 @@ from datetime import datetime
 from django.views.decorators.http import require_http_methods
 from rest_framework.viewsets import ViewSet
 from services.user.models import User, UserPoint
-from services.user.serializer import UserSerializer, UserPointSerializer
+from services.user.serializer import UserSerializer, UserPointSerializer, OtherUserSerializer
 from utils.response import responseData
 
 
@@ -105,6 +105,16 @@ class UserController(ViewSet):
 
             User.objects.filter(id=userId).update(password=newPassword)
             return responseData(message='Success', status=200, data={})
+        except Exception as e:
+            print(e)
+            return responseData(message='Error', status=500, data={})
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getUserProfileById(request, userId):
+        try:
+            user = User.objects.get(id=userId)
+            return responseData(message='Success', status=200, data=OtherUserSerializer(user).data)
         except Exception as e:
             print(e)
             return responseData(message='Error', status=500, data={})

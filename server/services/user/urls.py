@@ -8,4 +8,5 @@ urlpatterns = [
     path('leaderboard', UserController.getLeaderboardOfMonth),
     path('update/<int:userId>/', UserController.updateUser),
     path('change-password/<int:userId>/', UserController.changePassword),
+    path('profile/<int:userId>/', UserController.getUserProfileById),
 ]

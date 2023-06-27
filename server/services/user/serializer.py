@@ -23,6 +23,13 @@ class UserPointIdSerializer(ModelSerializer):
         fields = ('id', 'avatar', 'name', 'display_name')
 
 
+class OtherUserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'name', 'avatar', 'display_name', 'email', 'gender',
+                  'city', 'role', 'question_count', 'answer_count', 'point')
+
+
 class UserPointSerializer(ModelSerializer):
     user = serializers.SerializerMethodField('getUserInfo')
 
