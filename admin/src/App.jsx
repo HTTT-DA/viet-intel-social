@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from './components/Layout/Layout';
-import Profile from './pages/Profile/Profile';
 
 
 function App() {
@@ -10,7 +9,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Layout />}/>
                 <Route path="/dashboard" element={<Layout />}/>
-                <Route path="/profile" element={<Layout><Profile /></Layout>}/>
+                <Route path="/profile" element={<Layout></Layout>}/>
                 <Route path="/category" element={<Layout />}/>
                 <Route path="/notification" element={<Layout />}/>
                 <Route path="/content-censorship" element={<Layout />}/>
