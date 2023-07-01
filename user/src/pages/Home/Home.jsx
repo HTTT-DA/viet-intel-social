@@ -4,8 +4,11 @@ import QuestionCard from "../../components/QuestionCard/QuestionCard";
 import Leaderboard from "../../components/Leaderboard/Leaderboard";
 import QuestionModal from "../../components/QuestionModal/QuestionModal"
 import {useEffect, useState} from "react";
+import * as React from "react";
+import Cookies from "js-cookie";
 
 function Home() {
+    const [user] = React.useState(Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null);
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -34,12 +37,10 @@ function Home() {
                 <Grid item xs={3}>
                     <Grid container direction="column" spacing={2}>
                         <Grid item position='fixed'>
-                            <ProfileCard/>
+                            <ProfileCard user={user}/>
                         </Grid>
-                        <Grid item position='fixed' sx={{
-                            bottom: 20,
-                        }}>
-                            <QuestionModal/>
+                        <Grid item position='fixed' sx={{bottom: 20,}}>
+                            {user && <QuestionModal user={user}/>}
                         </Grid>
                     </Grid>
                 </Grid>

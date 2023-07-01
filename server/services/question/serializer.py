@@ -39,7 +39,7 @@ class QuestionSerializer(ModelSerializer):
 class TagSerializer(ModelSerializer):
     class Meta:
         model = Tag
-        fields = ('name',)
+        fields = ('name', 'id')
 
 
 class CategorySerializer(ModelSerializer):

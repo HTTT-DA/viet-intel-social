@@ -1,12 +1,11 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import AddIcon from "@mui/icons-material/Add";
 import {
     Avatar,
     Fab,
-    FormControl,
+    FormControl, Input,
     InputLabel,
     ListItem,
     ListItemAvatar,
@@ -14,6 +13,9 @@ import {
     Select
 } from "@mui/material";
 import Button from "@mui/material/Button";
+import {useEffect} from "react";
+import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
 
 const style = {
     position: 'absolute',
@@ -30,17 +32,121 @@ const style = {
     borderRadius: 2
 };
 
-export default function QuestionModal() {
+export default function QuestionModal(props) {
     const [open, setOpen] = React.useState(false);
+    const [tag, setTag] = React.useState('');
     const [category, setCategory] = React.useState('');
+    const [categoryList, setCategoryList] = React.useState([]);
+    const [tagList, setTagList] = React.useState([]);
+    const [tagChosen, setTagChosen] = React.useState([]);
+
+    useEffect(() => {
+        fetch("http://localhost:8000/question/get-list-category", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(
+            (res) => {
+                res.json().then(
+                    (r) => {
+                        setCategoryList(r.data);
+                    }
+                )
+            }
+        )
+
+        fetch("http://localhost:8000/question/get-list-tag", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(
+            (res) => {
+                res.json().then(
+                    (r) => {
+                        setTagList(r.data);
+                    }
+                )
+            }
+        )
+    }, [])
+
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const handleChangeCategory = (event) => {
         setCategory(event.target.value);
     };
+    const handleChangeTag = (event) => {
+        setTag(event.target.value);
+    };
+    const handleAddTag = (event) => {
+        if (event.target.value === "") return;
+
+        const checkTag = tagChosen.find((item) => item.name === event.target.value);
+        if (checkTag !== undefined) return;
+
+        setTagChosen([...tagChosen, {
+            id: tagList.find((item) => item.name === event.target.value).id,
+            name: event.target.value
+        }])
+    }
+    const handleRemoveTag = (event) => {
+        let tagId = event.target.value;
+        setTagChosen(tagChosen.filter((item) => item.id !== parseInt(tagId)))
+    }
+    const handleAddNewTag = (event) => {
+        if (event.target.value === "" || event.target.value === undefined) return;
+
+        fetch("http://localhost:8000/question/create-tag", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                "name": event.target.value
+            })
+        }).then(
+            (res) => {
+                res.json().then(
+                    (r) => {
+                        setTagChosen([...tagChosen, {id: r.data[0].id, name: r.data[0].name}]);
+                    }
+                )
+            }
+        )
+    }
+    const handleCreateQuestion = () => {
+        fetch("http://localhost:8000/question/create-question", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                "content": document.getElementById("content").value,
+                "category_id": category,
+                "user_id": props.user.id,
+                "tags": tagChosen.map((item) => item.id)
+            })
+        }).then(
+            (res) => {
+                res.json().then(
+                    (r) => {
+                        if(r.status===200){
+                            window.location.reload();
+                            alert("Create question successfully!");
+                        }
+                        else {
+                            alert("Create question failed!");
+                        }
+                    }
+                )
+            }
+        )
+    }
 
     return (
-        <div>
+        <>
             <Fab onClick={handleOpen} color="primary" aria-label="add" sx={{
                 backgroundColor: '#151515',
                 '&:hover': {backgroundColor: '#f50057',}
@@ -58,39 +164,85 @@ export default function QuestionModal() {
                     <ListItem sx={{p: 0, mt: 2}}>
                         <ListItemAvatar>
                             <Avatar alt="Remy Sharp" sx={{width: 50, height: 50}}
-                                    src="https://i.pinimg.com/236x/09/d4/b1/09d4b1d247d89d7ce3cd159f6b20ecd8.jpg"/>
+                                    src={props.user.avatar}/>
                         </ListItemAvatar>
                         <FormControl sx={{width: 300, ml: 2}}>
                             <InputLabel id="category-label">Category</InputLabel>
                             <Select
                                 labelId="category-label"
-                                id="category-id"
+                                id="category"
                                 value={category}
                                 label="category"
                                 onChange={handleChangeCategory}
                             >
-                                <MenuItem sx={{color:'blue'}} value={1}>@ProgrammingQuestion</MenuItem>
-                                <MenuItem sx={{color:'blue'}} value={2}>@CookingQuestion</MenuItem>
-                                <MenuItem sx={{color:'blue'}} value={3}>@BookQuestion</MenuItem>
+                                {categoryList.map((item) => (
+                                    <MenuItem key={item.id} sx={{color: 'blue'}} value={item.id}>
+                                        @{item.name}
+                                    </MenuItem>
+                                ))}
                             </Select>
                         </FormControl>
                     </ListItem>
-                    <Typography id="modal-modal-description" sx={{mt: 2}}>
-                        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                    </Typography>
-                    <Typography id="modal-modal-tag" sx={{mt: 2, color: '#000000', mb: 2}}>
-                        @OOP &nbsp; @Java &nbsp; @C++ &nbsp;
-                        <Fab variant="extended" color="white" aria-label="add">
-                            TAG
-                            <AddIcon sx={{mr: 1, ml: 1}}/>
-                        </Fab>
-                    </Typography>
+                    <Input
+                        id="content"
+                        placeholder="What is your question?"
+                        multiline
+                        rows={4}
+                        fullWidth
+                        sx={{
+                            mt: 2,
+                            color: '#000000',
+                            border: '0.1px solid #868686',
+                        }}
+                    >
+                    </Input>
+                    <Grid container spacing={2} sx={{mt: 0.5}}>
+                        <Grid item xs={8}>
+                            {tagChosen.map((item) => (
+                                <Fab
+                                    variant="extended"
+                                    sx={{'&:hover': {backgroundColor: 'red'}}}
+                                    color="action"
+                                    aria-label="add"
+                                    onClick={handleRemoveTag}
+                                    key={item.id}
+                                    value={item.id}
+                                >
+                                    {item.name}
+                                </Fab>
+                            ))}
+                        </Grid>
+                        <Grid item xs={4}>
+                            <FormControl fullWidth>
+                                <InputLabel id="tag">Select Tag</InputLabel>
+                                <Select
+                                    labelId="tag"
+                                    id="tag"
+                                    label="Tag"
+                                    value={tag}
+                                    onBlur={handleAddTag}
+                                    onChange={handleChangeTag}
+                                >
+                                    <MenuItem key="0" value=""> Select tag </MenuItem>
+                                    {tagList.map((option) => (
+                                        <MenuItem key={option.id} value={option.name}> {option.name} </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <TextField
+                                sx={{mt: 1}}
+                                label="Add New Tag"
+                                variant="outlined"
+                                onBlur={handleAddNewTag}
+                            />
+
+                        </Grid>
+                    </Grid>
                     <Button
                         type="submit"
                         fullWidth
                         variant="contained"
+                        onClick={handleCreateQuestion}
                         sx={{
                             mt: 2,
                             color: '#000000',
@@ -102,6 +254,6 @@ export default function QuestionModal() {
                     </Button>
                 </Box>
             </Modal>
-        </div>
+        </>
     );
 }

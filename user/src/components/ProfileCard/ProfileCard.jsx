@@ -1,20 +1,17 @@
 import {Avatar, Button, Card, Grid, Typography} from "@mui/material";
 import * as React from "react";
-import Cookies from "js-cookie";
 
-function ProfileCard() {
-    const [user] = React.useState(Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null);
-
+function ProfileCard(props) {
     return (
         <>
             <Card sx={{minWidth: 250, backgroundColor: '#151515'}}>
                 <Grid container direction="column" justify="center" alignItems="center">
                     {
-                        user ? (
+                        props.user ? (
                                 <>
                                     <Grid item sx={{marginTop: 3}}>
                                         <Avatar sx={{width: 75, height: 75}}
-                                                src={user.avatar}></Avatar>
+                                                src={props.user.avatar}></Avatar>
                                     < /Grid>
                                     <Grid item>
                                         <Typography
@@ -24,7 +21,7 @@ function ProfileCard() {
                                                 color: '#8F8F8F',
                                                 fontWeight: 'bold'
                                             }}
-                                        >{user.name}</Typography>
+                                        >{props.user.name}</Typography>
                                     </Grid>
                                     <Grid item>
                                         <Typography
@@ -32,7 +29,7 @@ function ProfileCard() {
                                             sx={{
                                                 color: '#928484',
                                             }}
-                                        >{user.display_name}</Typography>
+                                        >{props.user.display_name}</Typography>
                                     </Grid>
                                     <Grid item>
                                         <Button
@@ -60,7 +57,7 @@ function ProfileCard() {
                                                                 fontWeight: 'bold'
                                                             }}
                                                         >
-                                                            {user.answer_count}
+                                                            {props.user.answer_count}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item>
@@ -79,7 +76,7 @@ function ProfileCard() {
                                                                 fontWeight: 'bold'
                                                             }}
                                                         >
-                                                            {user.question_count}
+                                                            {props.user.question_count}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item>
@@ -98,7 +95,7 @@ function ProfileCard() {
                                                                 fontWeight: 'bold'
                                                             }}
                                                         >
-                                                            {user.point}
+                                                            {props.user.point}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item>
