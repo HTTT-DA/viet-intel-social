@@ -1,12 +1,12 @@
 from django.db import models
 
 
-class Category(models.Model):
-    class Meta:
-        db_table = 'Category'
-
-    id = models.PositiveIntegerField(primary_key=True)
-    name = models.CharField(max_length=50)
+# class Category(models.Model):
+#     class Meta:
+#         db_table = 'Category'
+#
+#     id = models.PositiveIntegerField(primary_key=True)
+#     name = models.CharField(max_length=50)
 
 
 class Question(models.Model):
@@ -18,7 +18,7 @@ class Question(models.Model):
     status = models.CharField(max_length=50)
     created_at = models.DateField()
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='user_id')
-    category = models.ForeignKey('Category', on_delete=models.CASCADE)
+    category = models.ForeignKey('category.Category', on_delete=models.CASCADE)
     tags = models.ManyToManyField('Tag', through='QuestionTag')
     likes = models.ManyToManyField('user.User', through='QuestionLike')
 
