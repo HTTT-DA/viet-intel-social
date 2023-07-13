@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'services.user',
     'services.question',
+    'services.category'
 ]
 
 MIDDLEWARE = [

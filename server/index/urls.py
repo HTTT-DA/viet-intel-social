@@ -20,6 +20,7 @@ from django.conf.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('category/', include("services.category.urls")),
     path('user/', include("services.user.urls")),
     path('question/', include("services.question.urls"))
 ]
