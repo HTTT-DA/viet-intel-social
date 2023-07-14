@@ -14,6 +14,8 @@ import {
     Menu, Typography, IconButton, Toolbar, Box,
     AppBar, InputBase, Link
 } from "@mui/material";
+import {useContext} from "react";
+import {SearchQuestionContext} from "../../context/SearchQuestionContext";
 
 const pages = ['Question', 'Leaderboard', 'about'];
 
@@ -62,8 +64,13 @@ const StyledInputBase = styled(InputBase)(({theme}) => ({
 function Header() {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const { searchInput, handleSearchInputChange } = useContext(SearchQuestionContext);
     const user = Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
 
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        handleSearchInputChange(value);
+    };
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
     };
@@ -179,6 +186,8 @@ function Header() {
                                 </SearchIconWrapper>
                                 <StyledInputBase
                                     placeholder="Search…"
+                                    value={searchInput}
+                                    onChange={handleInputChange}
                                     inputProps={{'aria-label': 'search'}}
                                 />
                             </Search>

@@ -15,7 +15,11 @@ class QuestionController(ViewSet):
     @require_http_methods(['GET'])
     def getAllQuestionOrderByNewestTime(request):
         try:
-            questions = Question.objects.all().order_by('-created_at')[:10]
+            search = request.GET.get('search')
+            if search != '':
+                questions = Question.objects.filter(content__icontains=search).order_by('-created_at')[:10]
+            else:
+                questions = Question.objects.all().order_by('-created_at')[:10]
             for question in questions:
                 question.created_at = question.created_at.strftime("%d %B, %Y")
             return responseData(data=QuestionSerializer(questions, many=True).data)

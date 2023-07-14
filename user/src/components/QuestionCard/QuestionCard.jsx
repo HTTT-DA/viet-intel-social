@@ -10,8 +10,12 @@ import {Favorite, FavoriteBorder} from "@mui/icons-material";
 import Cookies from "js-cookie";
 
 export default function QuestionCard(props) {
-    const user= Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
+    const user = Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
     const [question, setQuestion] = React.useState(props.question);
+
+    const handeCommentQuestion = (id) => {
+        console.log(id);
+    }
     const handleLike = () => {
         if (user) {
             fetch('http://localhost:8000/question/like', {
@@ -114,7 +118,7 @@ export default function QuestionCard(props) {
                         )}
 
                 </IconButton>
-                <IconButton aria-label="answer">
+                <IconButton aria-label="answer" onClick={()=>{handeCommentQuestion(question.id)}}>
                     <ChatBubbleOutlineIcon sx={{fontSize: '26px'}}/>
                 </IconButton>
             </CardActions>

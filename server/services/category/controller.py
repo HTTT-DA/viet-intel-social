@@ -30,9 +30,7 @@ class CategoryController(ViewSet):
     def getAvailableCategories(request):
         try:
             queryset = Category.objects.filter(is_deleted=False)
-            serializer = CategorySerializer(queryset, many=True)
-            print(serializer.data)
-            return responseData(data=serializer.data)
+            return responseData(data=CategorySerializer(queryset, many=True).data)
         except IntegrityError as e:
             print(e)
             return responseData(None, status=4, message="Error when get available categories from Category-Services")

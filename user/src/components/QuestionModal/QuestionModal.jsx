@@ -41,7 +41,7 @@ export default function QuestionModal(props) {
     const [tagChosen, setTagChosen] = React.useState([]);
 
     useEffect(() => {
-        fetch("http://localhost:8000/question/get-list-category", {
+        fetch("http://localhost:8000/category/get-available-categories", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
