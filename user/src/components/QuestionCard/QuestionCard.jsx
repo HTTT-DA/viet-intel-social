@@ -70,7 +70,9 @@ export default function QuestionCard(props) {
                         <MoreVertIcon/>
                     </IconButton>
                 }
-                title={question.user.name}
+                title={
+                    <Link href={`/profile/${question.user.id}`} underline="none" sx={{fontWeight: 'bold'}}>{question.user.name}</Link>
+                }
                 subheader={
                     <>
                         <span>{question.created_at} | </span>

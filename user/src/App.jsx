@@ -14,8 +14,8 @@ function App() {
                 <Route path="/" element={<SearchQuestionProvider><Layout><Home /></Layout></SearchQuestionProvider>}/>
                 <Route path="/sign-in" element={<SignIn />}/>
                 <Route path="/sign-up" element={<SignUp />}/>
-                <Route path="/profile" element={<Layout><Profile /></Layout>}/>
-                <Route path="/profile/:id" element={<Layout><OtherProfile /></Layout>}/>
+                <Route path="/profile" element={<SearchQuestionProvider><Layout><Profile /></Layout></SearchQuestionProvider>}/>
+                <Route path="/profile/:id" element={<SearchQuestionProvider><Layout><OtherProfile /></Layout></SearchQuestionProvider>}/>
             </Routes>
         </BrowserRouter>
     </>

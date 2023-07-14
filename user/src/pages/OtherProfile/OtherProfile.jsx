@@ -4,12 +4,14 @@ import Link from '@mui/material/Link';
 import {Avatar, Card,Grid,Typography} from "@mui/material";
 import {useEffect} from "react";
 import OtherInformationCard from "../../components/OtherInformationCard/OthereInformationCard";
+import {useParams} from "react-router-dom";
 
 export default function OtherProfile() {
     const [user, setUser] = React.useState(null);
+    const {id} = useParams();
 
     useEffect(() => {
-        fetch("http://localhost:8000/user/profile/1", {
+        fetch("http://localhost:8000/user/profile/"+id, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -23,7 +25,7 @@ export default function OtherProfile() {
                 )
             }
         )
-    }, []);
+    }, [id]);
 
 
     return (
@@ -38,10 +40,10 @@ export default function OtherProfile() {
                         <Typography color="text.primary">{user.name}</Typography>
                     </Breadcrumbs>
                 </div>
-                ):(<Typography>hehe</Typography>)}
+            ):(<> </>)}
             <Grid container spacing={3}>
                 <Grid item xs={4}>
-                    {user?(
+                    {user? (
                         <Grid container direction="column">
                             <Grid item>
                                 <Card sx={{backgroundColor: '#151515'}} >
@@ -68,11 +70,11 @@ export default function OtherProfile() {
                                 </Card>
                             </Grid>
                         </Grid>
-                    ):(<Typography>hehe</Typography>)}
+                    ):(<></>)}
                 </Grid>
                 <Grid item xs={8}>
                     <Grid item>
-                        {user?<OtherInformationCard user={user}/>:(<Typography>hehe</Typography>)}
+                        {user ? (<OtherInformationCard user={user}/>):(<></>)}
                     </Grid>
                 </Grid>
             </Grid>

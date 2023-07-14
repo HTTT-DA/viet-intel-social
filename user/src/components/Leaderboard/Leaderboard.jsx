@@ -4,13 +4,14 @@ import {
     TableRow, Paper, Typography, Avatar, IconButton, ListItemText, ListItem
 } from '@mui/material';
 import {useEffect} from "react";
+import Link from "@mui/material/Link";
 
 
 export default function Leaderboard() {
     const [rankings, setRankings] = React.useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:8000/user/leaderboard',{
+        fetch('http://localhost:8000/user/leaderboard', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -23,12 +24,13 @@ export default function Leaderboard() {
                     }
                 )
             }
-        ).catch(()=>{})
-    },[])
+        ).catch(() => {
+        })
+    }, [])
 
     return (
         <>
-            <Card sx={{minWidth: 325, backgroundColor: '#151515'}} >
+            <Card sx={{minWidth: 325, backgroundColor: '#151515'}}>
                 <Grid container direction="column">
                     <Grid item>
                         <Grid container direction="row" justifyContent="space-between" alignItems="center"
@@ -51,39 +53,50 @@ export default function Leaderboard() {
                     </Grid>
 
                     <Grid item>
-                        <TableContainer component={Paper} sx={{ overflow: 'hidden' }}>
-                            <Table sx={{ minWidth: 250, backgroundColor: '#151515'}} aria-label="custom pagination table">
+                        <TableContainer component={Paper} sx={{overflow: 'hidden'}}>
+                            <Table sx={{minWidth: 250, backgroundColor: '#151515'}}
+                                   aria-label="custom pagination table">
                                 <TableBody>
-                                    {rankings.map((ranking,index) => (
+                                    {rankings.map((ranking, index) => (
                                         <TableRow key={index}>
                                             <TableCell component="th" scope="row" sx={{
                                                 color: '#ffffff',
                                                 fontSize: 12,
                                                 fontWeight: 600,
-                                                p:2
+                                                p: 2
                                             }}>
-                                                {index+1}
+                                                {index + 1}
                                             </TableCell>
-                                            <TableCell style={{ width: 320 }} sx={{p: 1}}>
+                                            <TableCell style={{width: 320}} sx={{p: 1}}>
                                                 <ListItem sx={{width: '100px', height: '25px'}}>
                                                     <Avatar alt="Remy Sharp" src={ranking.user.avatar}
                                                             sx={{width: 30, height: 30, marginRight: 1}}
                                                     />
                                                     <IconButton>
-                                                        <ListItemText primary= {ranking.user.name}
-                                                                      secondary= {ranking.user.display_name}
-                                                                      primaryTypographyProps={{ textAlign: 'left', fontSize: 12, fontWeight: 600 }}
-                                                                      secondaryTypographyProps={{ textAlign: 'left', fontSize: 10, fontWeight: 300 }}
+                                                        <ListItemText primary={
+                                                            <Link href={`/profile/${ranking.user.id}`} underline="none" sx={{fontWeight: 'bold'}}>{ranking.user.name}</Link>
+                                                        }
+                                                                      secondary={ranking.user.display_name}
+                                                                      primaryTypographyProps={{
+                                                                          textAlign: 'left',
+                                                                          fontSize: 12,
+                                                                          fontWeight: 600
+                                                                      }}
+                                                                      secondaryTypographyProps={{
+                                                                          textAlign: 'left',
+                                                                          fontSize: 10,
+                                                                          fontWeight: 300
+                                                                      }}
                                                         />
                                                     </IconButton>
                                                 </ListItem>
                                             </TableCell>
-                                            <TableCell style={{ width: 160 }} align="right" sx={{
+                                            <TableCell style={{width: 160}} align="right" sx={{
                                                 color: '#767676',
                                                 fontSize: 10,
                                                 fontWeight: 600,
                                                 p: 1
-                                            }} >
+                                            }}>
                                                 {ranking.point}
                                             </TableCell>
                                         </TableRow>
