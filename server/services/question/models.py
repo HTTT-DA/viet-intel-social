@@ -17,6 +17,8 @@ class Question(models.Model):
     content = models.CharField(max_length=400)
     status = models.CharField(max_length=50)
     created_at = models.DateField()
+    rating = models.IntegerField()
+    like_count = models.IntegerField()
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='user_id')
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
     tags = models.ManyToManyField('Tag', through='QuestionTag')

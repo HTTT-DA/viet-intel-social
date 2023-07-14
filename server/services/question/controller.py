@@ -23,6 +23,73 @@ class QuestionController(ViewSet):
             return responseData(data=[])
 
     @staticmethod
+    @require_http_methods(['GET'])
+    def getAllQuestionByCategory(request):
+        try:
+            category_id = request.GET.get('categoryID')
+            questions = Question.objects.filter(category_id=category_id).order_by('-created_at')[:10]
+            for question in questions:
+                question.created_at = question.created_at.strftime("%d %B, %Y")
+            return responseData(data=QuestionSerializer(questions, many=True).data)
+        except Exception as e:
+            print(e)
+            return responseData(data=[])
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getQuestionOrderByTime(request):
+        try:
+            time = request.GET.get('time')
+            questions = []
+            if time == 'DEST':
+                questions = Question.objects.all().order_by('-created_at')[:10]
+            elif time == 'ASC':
+                questions = Question.objects.all().order_by('created_at')[:10]
+
+            for question in questions:
+                question.created_at = question.created_at.strftime("%d %B, %Y")
+            return responseData(data=QuestionSerializer(questions, many=True).data)
+        except Exception as e:
+            print(e)
+            return responseData(data=[])
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getQuestionOrderByLike(request):
+        try:
+            like = request.GET.get('like')
+            questions = []
+            if like == 'DEST':
+                questions = Question.objects.all().order_by('-like_count')[:10]
+            elif like == 'ASC':
+                questions = Question.objects.all().order_by('like_count')[:10]
+
+            for question in questions:
+                question.created_at = question.created_at.strftime("%d %B, %Y")
+            return responseData(data=QuestionSerializer(questions, many=True).data)
+        except Exception as e:
+            print(e)
+            return responseData(data=[])
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getQuestionOrderByRating(request):
+        try:
+            rating = request.GET.get('rating')
+            questions = []
+            if rating == 'DEST':
+                questions = Question.objects.all().order_by('-rating')[:10]
+            elif rating == 'ASC':
+                questions = Question.objects.all().order_by('rating')[:10]
+
+            for question in questions:
+                question.created_at = question.created_at.strftime("%d %B, %Y")
+            return responseData(data=QuestionSerializer(questions, many=True).data)
+        except Exception as e:
+            print(e)
+            return responseData(data=[])
+
+    @staticmethod
     @require_http_methods(['POST'])
     def likeQuestion(request):
         try:
