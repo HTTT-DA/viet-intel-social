@@ -4,7 +4,8 @@ from datetime import datetime
 from django.views.decorators.http import require_http_methods
 from rest_framework.viewsets import ViewSet
 
-from services.question.models import Question, QuestionLike, Category, Tag, QuestionTag
+from services.question.models import Question, QuestionLike, Tag, QuestionTag
+from services.category.models import Category
 from services.question.serializer import QuestionSerializer, CategorySerializer, TagSerializer
 from utils.response import responseData
 
