@@ -195,13 +195,13 @@ function Header() {
 
                         <Box sx={{flexGrow: 0}}>
                             {user ? (
-                                    <ListItem>
+                                    <ListItem onClick={handleOpenUserMenu}>
                                         <ListItemAvatar>
                                             <Avatar sx={{'&:hover': {cursor: 'pointer'}}} alt="Remy Sharp"
                                                     src={user.avatar}/>
                                         </ListItemAvatar>
                                         <IconButton>
-                                            <ListItemText onClick={handleOpenUserMenu}
+                                            <ListItemText
                                                           primary={user.display_name}
                                                           secondary={user.name}
                                                           primaryTypographyProps={{textAlign: 'left'}}

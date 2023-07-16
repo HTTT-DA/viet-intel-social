@@ -117,7 +117,7 @@ function ProfileCard(props) {
                                             mb: 10
                                         }}
                                     >
-                                        Please login to see your points
+                                        Please login for more information
                                     </Typography>
                                 </>
                             )

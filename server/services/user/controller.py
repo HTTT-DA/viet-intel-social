@@ -47,7 +47,7 @@ class UserController(ViewSet):
             if user is not None:
                 return responseData(message='User already exists', status=401, data={})
 
-            userResponse = User.objects.create(
+            User.objects.create(
                 email=email,
                 password=password,
                 name=fullName,
@@ -61,6 +61,9 @@ class UserController(ViewSet):
                 question_count=0,
                 point=0
             )
+
+            userResponse = User.objects.filter(email=email).first()
+
             return responseData(message='Success', status=200, data=UserSerializer(userResponse).data)
         except Exception as e:
             print(e)

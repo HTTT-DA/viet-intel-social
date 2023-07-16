@@ -13,4 +13,6 @@ urlpatterns = [
     path('get-list-tag', QuestionController.getListTag),
     path('create-tag', QuestionController.createTag),
     path('create-question', QuestionController.createQuestion),
+    path('evaluate', QuestionController.evaluateQuestion),
+    path('rating', QuestionController.ratingQuestion),
 ]

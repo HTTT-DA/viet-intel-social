@@ -1,16 +1,21 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
-from services.question.models import Question, Tag
+from services.question.models import Question, Tag, QuestionRating
 from services.category.models import Category
 from services.user.serializer import UserSerializer, UserIdSerializer
+
+
+class QuestionRatingSerializer(ModelSerializer):
+    class Meta:
+        model = QuestionRating
+        fields = "__all__"
 
 
 class QuestionSerializer(ModelSerializer):
     user = serializers.SerializerMethodField('getUserInfo')
     tags = serializers.SerializerMethodField('getTags')
     category = serializers.SerializerMethodField('getCategory')
-    likes = serializers.SerializerMethodField('getLike')
 
     class Meta:
         model = Question

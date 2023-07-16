@@ -4,7 +4,7 @@ from datetime import datetime
 from django.views.decorators.http import require_http_methods
 from rest_framework.viewsets import ViewSet
 
-from services.question.models import Question, QuestionLike, Tag, QuestionTag
+from services.question.models import Question, QuestionLike, Tag, QuestionTag, QuestionEvaluation, QuestionRating
 from services.category.models import Category
 from services.question.serializer import QuestionSerializer, CategorySerializer, TagSerializer
 from utils.response import responseData
@@ -25,7 +25,7 @@ class QuestionController(ViewSet):
             return responseData(data=QuestionSerializer(questions, many=True).data)
         except Exception as e:
             print(e)
-            return responseData(data=[])
+            return responseData(data=[], message='Error', status=500)
 
     @staticmethod
     @require_http_methods(['GET'])
@@ -168,3 +168,45 @@ class QuestionController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(data=False, message='Create question failed', status=500)
+
+    @staticmethod
+    @require_http_methods(['POST'])
+    def evaluateQuestion(request):
+        try:
+            data = json.loads(request.body)
+            question_id = data['question_id']
+            evaluation_type = data['evaluation_type']
+            user_id = data['user_id']
+
+            if QuestionEvaluation.objects.filter(question_id=question_id, user_id=user_id).exists():
+                QuestionEvaluation.objects\
+                    .filter(question_id=question_id, user_id=user_id)\
+                    .update(evaluation_type=evaluation_type)
+            else:
+                QuestionEvaluation.objects\
+                    .create(question_id=question_id, user_id=user_id, evaluation_type=evaluation_type)
+
+            return responseData(data=True, message='Evaluate question successfully', status=200)
+        except Exception as e:
+            print(e)
+            return responseData(data=False)
+
+
+    @staticmethod
+    @require_http_methods(['POST'])
+    def ratingQuestion(request):
+        try:
+            data = json.loads(request.body)
+            question_id = data['question_id']
+            rating = data['rating']
+            user_id = data['user_id']
+
+            if QuestionRating.objects.filter(question_id=question_id, user_id=user_id).exists():
+                QuestionRating.objects.filter(question_id=question_id, user_id=user_id).update(star_number=rating)
+            else:
+                QuestionRating.objects.create(question_id=question_id, user_id=user_id, star_number=rating)
+
+            return responseData(data=True, message='Rate question successfully', status=200)
+        except Exception as e:
+            print(e)
+            return responseData(data=False, message='Rate question failed', status=500)
