@@ -9,6 +9,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { requestLogin } from "@/api-services";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -25,13 +26,21 @@ export default function Login() {
     }
   }, [navigate]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get("email"),
       password: data.get("password"),
     });
+
+    const res = await requestLogin()
+    if(res?.data) {
+      window.localStorage.setItem("userId", res.data.id);
+      window.localStorage.setItem("email", res.data.email);
+      window.localStorage.setItem("accessToken", res.data.accessToken);
+      navigate("/");
+    }
   };
 
   return (
