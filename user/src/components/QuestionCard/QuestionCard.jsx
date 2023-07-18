@@ -7,15 +7,20 @@ import {
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {Favorite, FavoriteBorder} from "@mui/icons-material";
-import Cookies from "js-cookie";
 import FlagIcon from '@mui/icons-material/Flag';
 import RecommendIcon from '@mui/icons-material/Recommend';
+import {useNavigate} from "react-router-dom";
+import jwt from "jwt-decode";
 
 export default function QuestionCard(props) {
-    const user = Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
+    const [user] =
+            React.useState( localStorage.getItem('access_token')
+            ? jwt(localStorage.getItem('access_token')) : null);
     const [question, setQuestion] = React.useState(props.question);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
+    const navigate = useNavigate();
+
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -172,13 +177,13 @@ export default function QuestionCard(props) {
                     </>
                 }
                 title={
-                    <Link href={`/profile/${question.user.id}`} underline="none"
+                    <Link component="button" onClick={()=>{navigate(`/profile/${question.user.id}`)}} underline="none"
                           sx={{fontWeight: 'bold'}}>{question.user.name}</Link>
                 }
                 subheader={
                     <>
                         <span>{question.created_at} | </span>
-                        <Link href="#" underline="none" sx={{fontWeight: 'bold'}}>@{question.category.name}</Link>
+                        <Link component="button" underline="none" sx={{fontWeight: 'bold'}}>@{question.category.name}</Link>
                     </>
                 }
 

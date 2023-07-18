@@ -1,7 +1,9 @@
 import {Avatar, Button, Card, Grid, Typography} from "@mui/material";
 import * as React from "react";
+import {useNavigate} from "react-router-dom";
 
 function ProfileCard(props) {
+    const navigate = useNavigate();
     return (
         <>
             <Card sx={{minWidth: 250, backgroundColor: '#151515'}}>
@@ -33,7 +35,7 @@ function ProfileCard(props) {
                                     </Grid>
                                     <Grid item>
                                         <Button
-                                            href="/profile"
+                                            onClick={()=>{navigate('/profile')}}
                                             variant="contained"
                                             sx={{
                                                 marginTop: 3,

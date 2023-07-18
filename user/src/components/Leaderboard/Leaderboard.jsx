@@ -5,10 +5,12 @@ import {
 } from '@mui/material';
 import {useEffect} from "react";
 import Link from "@mui/material/Link";
+import {useNavigate} from "react-router-dom";
 
 
 export default function Leaderboard() {
     const [rankings, setRankings] = React.useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetch('http://localhost:8000/user/leaderboard', {
@@ -74,7 +76,7 @@ export default function Leaderboard() {
                                                     />
                                                     <IconButton>
                                                         <ListItemText primary={
-                                                            <Link href={`/profile/${ranking.user.id}`} underline="none" sx={{fontWeight: 'bold'}}>{ranking.user.name}</Link>
+                                                            <Link onClick={()=>{navigate(`/profile/${ranking.user.id}`)}} underline="none" sx={{fontWeight: 'bold'}}>{ranking.user.name}</Link>
                                                         }
                                                                       secondary={ranking.user.display_name}
                                                                       primaryTypographyProps={{

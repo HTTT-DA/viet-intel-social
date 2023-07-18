@@ -4,9 +4,10 @@ import Link from '@mui/material/Link';
 import {Avatar, Card,Grid,Typography} from "@mui/material";
 import {useEffect} from "react";
 import OtherInformationCard from "../../components/OtherInformationCard/OthereInformationCard";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 
 export default function OtherProfile() {
+    const navigate = useNavigate();
     const [user, setUser] = React.useState(null);
     const {id} = useParams();
 
@@ -33,7 +34,7 @@ export default function OtherProfile() {
             {user?(
                 <div role="presentation">
                     <Breadcrumbs aria-label="breadcrumb" sx={{mt:3, mb:3}}>
-                        <Link underline="hover" color="inherit" href="/">
+                        <Link underline="hover" component="button" color="inherit" onClick={()=>{navigate('/')}}>
                             Home
                         </Link>
                         <Typography color="text.primary">Profile</Typography>

@@ -6,8 +6,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AdbIcon from '@mui/icons-material/Adb';
 import SearchIcon from '@mui/icons-material/Search';
 
-import Cookies from 'js-cookie';
-
 import {
     ListItem, ListItemAvatar, ListItemText,
     MenuItem, Button, Avatar, Container,
@@ -16,6 +14,8 @@ import {
 } from "@mui/material";
 import {useContext} from "react";
 import {SearchQuestionContext} from "../../context/SearchQuestionContext";
+import {useNavigate} from "react-router-dom";
+import jwt from "jwt-decode";
 
 const pages = ['Question', 'Leaderboard', 'about'];
 
@@ -65,7 +65,10 @@ function Header() {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
     const { searchInput, handleSearchInputChange } = useContext(SearchQuestionContext);
-    const user = Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
+    const [user] =
+        React.useState( localStorage.getItem('access_token')
+            ? jwt(localStorage.getItem('access_token')) : null);
+    const navigate = useNavigate();
 
     const handleInputChange = (e) => {
         const value = e.target.value;
@@ -87,14 +90,15 @@ function Header() {
     };
 
     const handleLogout = () => {
-        Cookies.remove('user');
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
         setAnchorElUser(null);
         window.location.href = '/';
     };
 
     const handleOpenProfile = () => {
         setAnchorElUser(null)
-        window.location.href = '/profile';
+        navigate('/profile')
     }
 
     return (
@@ -103,11 +107,11 @@ function Header() {
                 <Container maxWidth="xl">
                     <Toolbar disableGutters>
                         <AdbIcon sx={{display: {xs: 'none', md: 'flex'}, mr: 1}}/>
-                        <Typography
+                        <Link
                             variant="h6"
                             noWrap
-                            component="a"
-                            href="/"
+                            component="button"
+                            onClick={() => navigate('/')}
                             sx={{
                                 mr: 2,
                                 display: {xs: 'none', md: 'flex'},
@@ -115,12 +119,12 @@ function Header() {
                                 fontWeight: 700,
                                 letterSpacing: '.3rem',
                                 color: 'inherit',
-                                textDecoration: 'none',
                                 marginRight: 5,
+                                textDecoration: 'none'
                             }}
                         >
                             VIETINTELSOCIAL
-                        </Typography>
+                        </Link>
 
                         <Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'none'}}}>
                             <IconButton
@@ -211,11 +215,12 @@ function Header() {
                                 )
                                 : (
                                     <Link
+                                        component="button"
                                         underline="none"
-                                        color="white"
-                                        href="/sign-in"
+                                        onClick={() => navigate('/sign-in')}
                                         sx={{
-                                            ml: 4
+                                            ml: 4,
+                                            color:"white"
                                         }}
                                     >SIGN UP / SIGN IN</Link>
                                 )}

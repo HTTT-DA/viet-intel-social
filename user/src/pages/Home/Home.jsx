@@ -5,11 +5,13 @@ import Leaderboard from "../../components/Leaderboard/Leaderboard";
 import QuestionModal from "../../components/QuestionModal/QuestionModal"
 import {useContext, useEffect, useState} from "react";
 import * as React from "react";
-import Cookies from "js-cookie";
+import jwt from 'jwt-decode';
 import {SearchQuestionContext} from "../../context/SearchQuestionContext";
 
 function Home() {
-    const [user] = React.useState(Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null);
+    const [user] =
+        React.useState( localStorage.getItem('access_token')
+        ? jwt(localStorage.getItem('access_token')) : null);
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [categoryList, setCategoryList] = useState([]);

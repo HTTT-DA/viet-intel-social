@@ -16,6 +16,7 @@ import Button from "@mui/material/Button";
 import {useEffect} from "react";
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
+import {useNavigate} from "react-router-dom";
 
 const style = {
     position: 'absolute',
@@ -39,6 +40,7 @@ export default function QuestionModal(props) {
     const [categoryList, setCategoryList] = React.useState([]);
     const [tagList, setTagList] = React.useState([]);
     const [tagChosen, setTagChosen] = React.useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetch("http://localhost:8000/category/get-available-categories", {
@@ -133,7 +135,7 @@ export default function QuestionModal(props) {
                 res.json().then(
                     (r) => {
                         if(r.status===200){
-                            window.location.reload();
+                            navigate('/')
                             alert("Create question successfully!");
                         }
                         else {

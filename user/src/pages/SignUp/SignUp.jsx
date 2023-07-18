@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import Cookies from 'js-cookie';
+import {useNavigate} from "react-router-dom";
 
 const defaultTheme = createTheme();
 
@@ -28,6 +29,7 @@ function Copyright(props) {
 }
 
 export default function SignUp() {
+    const navigate = useNavigate();
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -54,7 +56,7 @@ export default function SignUp() {
                         switch (r.status){
                             case 200:
                                 Cookies.set('user', JSON.stringify(r.data));
-                                window.location.href = '/';
+                                navigate('/');
                                 break;
                             default:
                                 alert(r.message);
@@ -144,7 +146,7 @@ export default function SignUp() {
                         </Button>
                         <Grid container justifyContent="flex-end">
                             <Grid item>
-                                <Link href="/sign-in" variant="body2">
+                                <Link onClick={()=>{navigate('/sign-in')}} variant="body2">
                                     Already have an account? Sign in
                                 </Link>
                             </Grid>

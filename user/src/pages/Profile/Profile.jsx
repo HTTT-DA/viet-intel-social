@@ -4,20 +4,24 @@ import Link from '@mui/material/Link';
 import {Avatar, Button, Card, Grid, Typography} from "@mui/material";
 import InformationCard from "../../components/InformationCard/InformationCard";
 import ChangePasswordCard from "../../components/ChangePasswordCard/ChangePasswordCard";
-import Cookies from "js-cookie";
+import {useNavigate} from "react-router-dom";
+import jwt from "jwt-decode";
 function handleClickBreadcrumb(event) {
     event.preventDefault();
     console.info('You clicked a breadcrumb.');
 }
 
 export default function Profile() {
-    const user = Cookies.get('user') ? JSON.parse(Cookies.get('user')) : null;
+    const navigate = useNavigate();
+    const [user] =
+        React.useState( localStorage.getItem('access_token')
+            ? jwt(localStorage.getItem('access_token')) : null);
 
     return (
         <>
             <div role="presentation" onClick={handleClickBreadcrumb}>
                 <Breadcrumbs aria-label="breadcrumb" sx={{mt:3, mb:3}}>
-                    <Link underline="hover" color="inherit" href="/">
+                    <Link underline="hover" component="button" color="inherit" onClick={()=>{navigate('/')}}>
                         Home
                     </Link>
                     <Typography color="inherit">
