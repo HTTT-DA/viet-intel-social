@@ -3,8 +3,6 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -13,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {useNavigate} from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const defaultTheme = createTheme();
 
@@ -30,6 +29,7 @@ function Copyright(props) {
 }
 
 export default function SignIn() {
+    const [verify, setVerify] = React.useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = (event) => {
@@ -106,14 +106,18 @@ export default function SignIn() {
                             id="password"
                             autoComplete="current-password"
                         />
-                        <FormControlLabel
-                            control={<Checkbox value="remember" color="primary"/>}
-                            label="Remember me"
-                        />
+                        {!verify ?
+                            (<ReCAPTCHA
+                                sitekey="6LeFtDcnAAAAAGvENlR6WLFh0t92i2uGTZV_dLG6"
+                                onChange={() => {setVerify(true)}}
+                            />)
+                            : <></>
+                        }
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
+                            disabled={!verify}
                             sx={{
                                 mt: 3, mb: 2,
                                 color: '#ffffff',

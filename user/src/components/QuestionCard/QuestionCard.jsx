@@ -180,6 +180,7 @@ export default function QuestionCard(props) {
                     <Link component="button" onClick={()=>{navigate(`/profile/${question.user.id}`)}} underline="none"
                           sx={{fontWeight: 'bold'}}>{question.user.name}</Link>
                 }
+
                 subheader={
                     <>
                         <span>{question.created_at} | </span>
