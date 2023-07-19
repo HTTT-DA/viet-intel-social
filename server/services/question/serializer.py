@@ -48,9 +48,10 @@ class TagSerializer(ModelSerializer):
 
 
 class CategorySerializer(ModelSerializer):
+    isDeleted = serializers.BooleanField(source='is_deleted')
     class Meta:
         model = Category
-        fields = ('name', 'id')
+        fields = "__all__"
 
 
 class QuestionLikeSerializer(ModelSerializer):
