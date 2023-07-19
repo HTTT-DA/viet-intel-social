@@ -22,7 +22,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return access_token, refresh_token
 
-    def get_token_for_admin(self, user):
+    @classmethod
+    def get_token_for_admin(cls, user):
         refresh_token = super().get_token(user)
         access_token = refresh_token.access_token
         access_token['id'] = user.id
@@ -31,6 +32,24 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         access_token['role'] = user.role
 
         return access_token, refresh_token
+
+    @classmethod
+    def get_new_access_token(cls, user):
+        access_token = super().get_token(user).access_token
+
+        access_token['id'] = user.id
+        access_token['name'] = user.name
+        access_token['email'] = user.email
+        access_token['avatar'] = user.avatar
+        access_token['display_name'] = user.display_name
+        access_token['city'] = user.city
+        access_token['gender'] = user.gender
+        access_token['answer_count'] = user.answer_count
+        access_token['question_count'] = user.question_count
+        access_token['point'] = user.point
+        access_token['role'] = user.role
+
+        return access_token
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

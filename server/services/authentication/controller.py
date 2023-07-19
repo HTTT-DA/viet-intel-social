@@ -1,5 +1,8 @@
 import json
+import time
 
+import jwt
+from decouple import config
 from django.core.validators import EmailValidator
 from django.views.decorators.http import require_http_methods
 from rest_framework.viewsets import ViewSet
@@ -103,6 +106,28 @@ class AuthController(ViewSet):
 
             User.objects.filter(id=userId).update(password=newPassword)
             return responseData(message='Success', status=200, data={})
+        except Exception as e:
+            print(e)
+            return responseData(message='Error', status=500, data={})
+
+    @staticmethod
+    @require_http_methods(['POST'])
+    def getNewAccessToken(request):
+        try:
+            data = json.loads(request.body)
+            refresh_token = data.get('refresh_token').strip()
+            if not refresh_token:
+                return responseData(message='Refresh token is required', status=400, data={})
+
+            decoded = jwt.decode(refresh_token, config('JWT_SECRET_KEY'), algorithms=[config('JWT_ALGORITHM')])
+
+            user = User.objects.filter(id=decoded['user_id']).first()
+
+            access_token = MyTokenObtainPairSerializer().get_new_access_token(user)
+
+            return responseData(message='Success', status=200, data={
+                'access_token': str(access_token),
+            })
         except Exception as e:
             print(e)
             return responseData(message='Error', status=500, data={})
