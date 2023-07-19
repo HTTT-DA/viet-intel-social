@@ -4,43 +4,13 @@ from datetime import datetime
 from django.core.validators import EmailValidator
 from django.views.decorators.http import require_http_methods
 from rest_framework.viewsets import ViewSet
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from services.user.models import User, UserPoint
-from services.user.serializer import UserSerializer, UserPointSerializer, OtherUserSerializer, \
-    MyTokenObtainPairSerializer
+from services.user.serializer import UserSerializer, UserPointSerializer, OtherUserSerializer
 from utils.response import responseData
 
 
 class UserController(ViewSet):
-    @staticmethod
-    @require_http_methods(['POST'])
-    def signIn(request):
-        try:
-            data = json.loads(request.body)
-
-            email = data.get('email').strip()
-            if not EmailValidator(email):
-                return responseData(message='Email is invalid', status=400, data={})
-
-            password = data.get('password').strip()
-
-            if not email or not password:
-                return responseData(message='Email and password are required', status=401, data={})
-
-            data = User.objects.filter(email=email, password=password).first()
-            if data is None:
-                return responseData(message='Email or password is incorrect', status=404, data={})
-
-            access_token, refresh_token = MyTokenObtainPairSerializer.get_token(data)
-            print('access: ', access_token)
-            print('ref: ', refresh_token)
-
-            return responseData(message='Success', status=200, data=UserSerializer(data).data)
-        except Exception as e:
-            print(e)
-            return responseData(message='Error', status=500, data={})
-
     @staticmethod
     @require_http_methods(['POST'])
     def signUp(request):
@@ -137,7 +107,3 @@ class UserController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(message='Error', status=500, data={})
-
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = MyTokenObtainPairSerializer

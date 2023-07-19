@@ -20,11 +20,10 @@ from django.conf.urls import include
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
 urlpatterns = [
-    # path('admin/', admin.site.urls),
-    path('admin/', include("services.admin.urls")),
+    path('admin/', admin.site.urls),
+    path('auth/', include("services.authentication.urls")),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('category/', include("services.category.urls")),
     path('user/', include("services.user.urls")),
     path('question/', include("services.question.urls"))
 ]
