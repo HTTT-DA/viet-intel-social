@@ -22,8 +22,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return access_token, refresh_token
 
-    def get_token_for_admin(cls, user):
-        refresh_token = super(MyTokenObtainPairSerializer, cls).get_token(user)
+    def get_token_for_admin(self, user):
+        refresh_token = super().get_token(user)
         access_token = refresh_token.access_token
         access_token['id'] = user.id
         access_token['email'] = user.email

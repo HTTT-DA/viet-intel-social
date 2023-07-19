@@ -3,5 +3,7 @@ from django.urls import path
 from services.authentication.controller import AuthController
 
 urlpatterns = [
-    path('login', AuthController.signIn)
+    path('sign-in', AuthController.signIn),
+    path('change-password/<int:userId>/', AuthController.changePassword),
+    path('sign-up', AuthController.signUp)
 ]

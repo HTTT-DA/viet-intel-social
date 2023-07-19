@@ -9,12 +9,12 @@ urlpatterns = [
     path('get-questions-by-like', QuestionController.getQuestionOrderByLike),
     path('get-questions-by-rating', QuestionController.getQuestionOrderByRating),
     path('like', QuestionController.likeQuestion),
-    # path('get-list-category', QuestionController.getListCategory),
-    path('get-list-tag', QuestionController.getListTag),
-    path('create-tag', QuestionController.createTag),
     path('create-question', QuestionController.createQuestion),
     path('evaluate', QuestionController.evaluateQuestion),
     path('rating', QuestionController.ratingQuestion),
+    # Tag
+    path('get-list-tag', QuestionController.getListTag),
+    path('create-tag', QuestionController.createTag),
     # Category
     path('get-all-categories', CategoryController.getAllCategories),
     path('get-available-categories', CategoryController.getAvailableCategories),
