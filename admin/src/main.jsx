@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Login from "./pages/login/index.jsx";
+// import Login from "./pages/login/index.jsx";
 import Category from "./pages/category";
 import NotFound from "./pages/notFound";
 import MainLayout from "./layouts/MainLayout";
@@ -23,10 +23,10 @@ const router = createBrowserRouter([
       },
     ],
   },
-  {
-    path: "/login",
-    element: <Login />,
-  },
+  // {
+  //   path: "/login",
+  //   element: <Login />,
+  // },
   // 404 not found
   {
     path: "*",
