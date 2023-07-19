@@ -1,8 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
-from services.question.models import Question, Tag, QuestionRating
-from services.category.models import Category
+from services.question.models import Question, Tag, QuestionRating, Category
 from services.user.serializer import UserSerializer, UserIdSerializer
 
 

@@ -6,8 +6,7 @@ from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
 from rest_framework.viewsets import ViewSet
 
-from services.question.models import Question, QuestionLike, Tag, QuestionTag, QuestionEvaluation, QuestionRating
-from services.category.models import Category
+from services.question.models import Question, QuestionLike, Tag, QuestionTag, QuestionEvaluation, QuestionRating, Category
 from services.question.serializer import QuestionSerializer, CategorySerializer, TagSerializer
 from utils.response import responseData
 

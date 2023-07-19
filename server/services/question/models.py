@@ -13,7 +13,6 @@ class Category(models.Model):
         return self.name
 
 
-
 class Question(models.Model):
     class Meta:
         db_table = 'Question'
@@ -25,7 +24,7 @@ class Question(models.Model):
     rating = models.IntegerField()
     like_count = models.IntegerField()
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='user_id')
-    category = models.ForeignKey('category.Category', on_delete=models.CASCADE)
+    category = models.ForeignKey('Category', on_delete=models.CASCADE)
     tags = models.ManyToManyField('Tag', through='QuestionTag', related_name='tag_id')
     likes = models.ManyToManyField('user.User', through='QuestionLike', related_name='like_id')
     ratings = models.ManyToManyField('user.User', through='QuestionRating', related_name='rating_id')
