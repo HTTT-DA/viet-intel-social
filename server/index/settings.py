@@ -155,8 +155,8 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
 
-    "ALGORITHM": "HS256",
-    "SIGNING_KEY": config('APP_SECRET_KEY'),
+    "ALGORITHM": config('JWT_ALGORITHM'),
+    "SIGNING_KEY": config('JWT_SECRET_KEY'),
     "VERIFYING_KEY": "",
     "AUDIENCE": None,
     "ISSUER": None,
