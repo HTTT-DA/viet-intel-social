@@ -7,3 +7,10 @@ export async function requestLogin(email, password) {
   });
   return response.data;
 }
+
+export async function getListCategories() {
+  const response = await axios.get(
+    `${import.meta.env.VITE_API_URL}/category/get-all-categories`
+  );
+  return response.data;
+}
