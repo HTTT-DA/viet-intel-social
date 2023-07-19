@@ -65,3 +65,27 @@ class CategoryController(ViewSet):
                                 message="Error when add category into DB in Category-Services")
 
         return responseData(None, message="Add category successfully from Category-Services")
+
+    @staticmethod
+    @require_http_methods(['POST'])
+    def deleteCategory(request):
+        validateMailRegex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        data = json.loads(request.body)
+        userEmail = data.get("email", None)
+        idCategory = data.get("idCategory", None)
+
+        # Validate input
+        if userEmail is None or idCategory is None \
+                or not isinstance(userEmail, str) or not isinstance(idCategory, int) \
+                or not re.fullmatch(validateMailRegex, userEmail):
+            return responseData(None, status=5, message="Invalid input when delete category from Category-Services")
+
+        # Delete Category
+        try:
+            Category.objects.filter(id=idCategory).update(is_deleted=True)
+        except IntegrityError as e:
+            print(e)
+            return responseData(None, status=4,
+                                message="Error when delete category in Category-Services")
+
+        return responseData(None, message="Delete category successfully from Category-Services")
