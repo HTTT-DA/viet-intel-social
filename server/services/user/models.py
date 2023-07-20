@@ -33,7 +33,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_authenticated = models.BooleanField(default=False)
     last_login = models.DateTimeField(null=True)
     is_superuser = models.BooleanField(default=False)
-    is_NotifyWhenUserPostQuestion = models.BooleanField(default=False)
 
     objects = CustomUserManager()
     USERNAME_FIELD = 'email'
