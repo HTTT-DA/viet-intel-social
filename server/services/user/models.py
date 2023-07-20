@@ -26,9 +26,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     gender = models.CharField(max_length=50)
     status = models.CharField(max_length=50)
     get_notification = models.CharField(max_length=50)
-    answer_count = models.PositiveIntegerField(default=0)
-    question_count = models.PositiveIntegerField(default=0)
-    point = models.PositiveIntegerField(default=0)
+    answer_count = models.IntegerField(default=0)
+    question_count = models.IntegerField(default=0)
+    point = models.IntegerField(default=0)
     is_anonymous = models.BooleanField(default=False)
     is_authenticated = models.BooleanField(default=False)
     last_login = models.DateTimeField(null=True)
@@ -43,9 +43,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class UserPoint(models.Model):
-    year = models.PositiveIntegerField(primary_key=True)
-    month = models.PositiveIntegerField()
-    point = models.PositiveIntegerField(default=0)
+    year = models.IntegerField(primary_key=True)
+    month = models.IntegerField()
+    point = models.IntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
