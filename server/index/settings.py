@@ -196,6 +196,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-# Will change to vietintelnetwork@gmail.com later
-EMAIL_HOST_USER = 'cafefinn.21@gmail.com'
-EMAIL_HOST_PASSWORD = 'vphnthhcxetfobzk'
+EMAIL_HOST_USER = 'vietintelnetwork@gmail.com'
+EMAIL_HOST_PASSWORD = 'kynkldyajurglbha'
