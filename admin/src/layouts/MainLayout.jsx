@@ -11,19 +11,22 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import HomeIcon from "@mui/icons-material/Home";
 import Link from "@mui/material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import Switch from "@mui/material/Switch";
+
+const label = { inputProps: { "aria-label": "Switch demo" } };
 
 function MainLayout() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  useEffect(() => {
-    if (
-      !window.localStorage.getItem("userId") ||
-      !window.localStorage.getItem("email") ||
-      !window.localStorage.getItem("accessToken")
-    ) {
-      navigate("/login");
-    }
-  }, [navigate]);
+  // useEffect(() => {
+  //   if (
+  //     !window.localStorage.getItem("userId") ||
+  //     !window.localStorage.getItem("email") ||
+  //     !window.localStorage.getItem("accessToken")
+  //   ) {
+  //     navigate("/login");
+  //   }
+  // }, [navigate]);
 
   const breadcrumbs = [
     <Link
@@ -102,10 +105,12 @@ function MainLayout() {
               <SettingsIcon />
               <AccountCircleIcon />
               <NotificationsIcon />
+              <Switch {...label} defaultChecked />
             </div>
           </div>
           <Outlet />
         </div>
+        <div className={styles[""]}></div>
       </div>
     </>
   );

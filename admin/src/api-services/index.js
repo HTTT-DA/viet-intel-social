@@ -10,7 +10,7 @@ export async function requestLogin(email, password) {
 
 export async function getListCategories() {
   const response = await axios.get(
-    `${import.meta.env.VITE_API_URL}/category/get-all-categories`
+    `${import.meta.env.VITE_API_URL}/question/get-all-categories`
   );
   return response.data;
 }

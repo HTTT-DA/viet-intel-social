@@ -72,10 +72,12 @@
   border-radius: 10px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
   .header-menu {
     display: flex;
     gap: 16px;
+    align-items: center;
 
     & > svg {
       cursor: pointer;
