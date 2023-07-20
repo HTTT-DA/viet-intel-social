@@ -29,11 +29,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     answer_count = models.IntegerField(default=0)
     question_count = models.IntegerField(default=0)
     point = models.IntegerField(default=0)
+    ranker = models.CharField(max_length=50)
     is_anonymous = models.BooleanField(default=False)
     is_authenticated = models.BooleanField(default=False)
     last_login = models.DateTimeField(null=True)
     is_superuser = models.BooleanField(default=False)
-    is_NotifyWhenUserPostQuestion = models.BooleanField(default=False)
 
     objects = CustomUserManager()
     USERNAME_FIELD = 'email'
