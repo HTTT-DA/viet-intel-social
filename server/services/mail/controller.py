@@ -10,7 +10,7 @@ from utils.response import responseData
 class MailController():
     @csrf_exempt
     def sendNotificationEmail(request):
-        admin_emails = list(User.objects.filter(role='admin', is_NotifyWhenUserPostQuestion=True).values_list('email', flat=True))
+        admin_emails = list(User.objects.filter(role='admin', get_notification=True).values_list('email', flat=True))
 
         default_subject = 'Notification'
         default_message = 'A user has posted a question'
