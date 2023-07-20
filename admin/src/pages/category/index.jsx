@@ -1,39 +1,19 @@
-import { getListCategories } from "@/api-services/index";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import CssBaseline from '@mui/material/CssBaseline';
-import Button from "@mui/material/Button";
+import { getListCategories, deleteCategory } from "@/api-services/index";
+import CategoryList from "./components/categoryList";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
-
 import { useEffect, useState } from "react";
 
-const handleDeleteRow = (id) => {
-  
-};
-
-const handleAddRow = () => {
-
-};
-
-function Category() {
+const Category = () => {
   const [categories, setCategories] = useState([]);
-
-  console.log(import.meta.env.VITE_API_URL);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getListCategories();
-        console.log(response)
         setCategories(response.data);
       } catch (error) {
         console.error(error);
@@ -41,8 +21,31 @@ function Category() {
     };
 
     fetchData();
-  }, []);
+  }, [categories]);
 
+  const handleDeleteRow = async (id) => {
+    try {
+      const result = await deleteCategory(id);
+
+      // Nếu chỉnh sửa thành công, cập nhật lại state categories
+      if (result) {
+        setCategories((prevCategories) =>
+          prevCategories.map((category) =>
+            category.id === id ? { ...category, is_deleted: true } : category
+          )
+        );
+      } else {
+        console.log("Chỉnh sửa không thành công!");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleAddRow = () => {
+    // Xử lý thêm category, có thể gọi API để thêm category trên server
+    // Sau khi thêm thành công, cập nhật lại state categories
+  };
 
   return (
     <div>
@@ -60,55 +63,15 @@ function Category() {
             color="primary"
             size="large"
             endIcon={<AddCircleIcon />}
+            onClick={handleAddRow}
           >
             Add
           </Button>
         </Box>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <b>ID</b>
-              </TableCell>
-              <TableCell style={{ paddingLeft: "300px" }}>
-                <b>Name</b>
-              </TableCell>
-              <TableCell style={{ paddingLeft: "60px" }}>
-                <b>Status</b>
-              </TableCell>
-              <TableCell style={{ paddingLeft: "60px" }}></TableCell>
-              {/* Thêm các tiêu đề cột khác */}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {categories.map((category) => (
-              <TableRow key={category.id}>
-                <TableCell>{category.id}</TableCell>
-                <TableCell style={{ paddingLeft: "300px" }}>
-                  {category.isDeleted ? (
-                    <i>{category.name}</i>
-                  ) : (
-                    <b>{category.name}</b>
-                  )}
-                </TableCell>
-                <TableCell style={{ paddingLeft: "60px" }}>
-                  {category.isDeleted ? <i>Inactive</i> : <b>Active</b>}
-                </TableCell>
-                <TableCell style={{ paddingLeft: "60px" }}>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    disabled={category.isDeleted}
-                    onClick={() => handleDeleteRow(category.id)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-                {/* Thêm các ô dữ liệu cho các cột khác */}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <CategoryList
+          categories={categories}
+          handleDeleteRow={handleDeleteRow}
+        />
         <Box
           display="flex"
           justifyContent="center"
@@ -122,6 +85,6 @@ function Category() {
       </Box>
     </div>
   );
-}
+};
 
 export default Category;
