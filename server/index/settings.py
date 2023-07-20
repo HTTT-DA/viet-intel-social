@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'services.user',
     'services.question',
     'services.authentication',
+    'services.mail',
 ]
 
 MIDDLEWARE = [
@@ -187,3 +188,14 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer"
 }
+
+# Configure email backend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# SMTP settings for Gmail
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+# Will change to vietintelnetwork@gmail.com later
+EMAIL_HOST_USER = 'cafefinn.21@gmail.com'
+EMAIL_HOST_PASSWORD = 'vphnthhcxetfobzk'

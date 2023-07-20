@@ -23,4 +23,5 @@ urlpatterns = [
     path('auth/', include("services.authentication.urls")),
     path('user/', include("services.user.urls")),
     path('question/', include("services.question.urls")),
+    path('mail/', include("services.mail.urls")),
 ]
