@@ -10,12 +10,10 @@ import {Favorite, FavoriteBorder} from "@mui/icons-material";
 import FlagIcon from '@mui/icons-material/Flag';
 import RecommendIcon from '@mui/icons-material/Recommend';
 import {useNavigate} from "react-router-dom";
-import jwt from "jwt-decode";
+import CheckACTokenAndRFToken from "../../utils/CheckACTokenAndRFToken";
 
 export default function QuestionCard(props) {
-    const [user] =
-            React.useState( localStorage.getItem('access_token')
-            ? jwt(localStorage.getItem('access_token')) : null);
+    const [user] = React.useState(CheckACTokenAndRFToken());
     const [question, setQuestion] = React.useState(props.question);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -240,7 +238,7 @@ export default function QuestionCard(props) {
                     :
                     (
                         <Rating
-                            value="0"
+                            value={0}
                             onChange={(event, newRating) => {
                                 handleRating(question.id, newRating)
                             }}

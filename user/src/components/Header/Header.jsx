@@ -15,7 +15,7 @@ import {
 import {useContext} from "react";
 import {SearchQuestionContext} from "../../context/SearchQuestionContext";
 import {useNavigate} from "react-router-dom";
-import jwt from "jwt-decode";
+import CheckACTokenAndRFToken from "../../utils/CheckACTokenAndRFToken";
 
 const pages = ['Question', 'Leaderboard', 'about'];
 
@@ -65,9 +65,7 @@ function Header() {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
     const { searchInput, handleSearchInputChange } = useContext(SearchQuestionContext);
-    const [user] =
-        React.useState( localStorage.getItem('access_token')
-            ? jwt(localStorage.getItem('access_token')) : null);
+    const [user] = React.useState(CheckACTokenAndRFToken());
     const navigate = useNavigate();
 
     const handleInputChange = (e) => {

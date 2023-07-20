@@ -10,7 +10,6 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
-import Cookies from 'js-cookie';
 import {useNavigate} from "react-router-dom";
 
 const defaultTheme = createTheme();
@@ -38,7 +37,7 @@ export default function SignUp() {
         const fullName = data.get('fullName');
         const displayName = data.get('displayName');
 
-        fetch('http://localhost:8000/user/sign-up', {
+        fetch('http://localhost:8000/auth/sign-up', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -55,7 +54,8 @@ export default function SignUp() {
                     (r) => {
                         switch (r.status){
                             case 200:
-                                Cookies.set('user', JSON.stringify(r.data));
+                                localStorage.setItem('refresh_token', r.data.refresh_token);
+                                localStorage.setItem('access_token', r.data.access_token);
                                 navigate('/');
                                 break;
                             default:
