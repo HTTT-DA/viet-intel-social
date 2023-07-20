@@ -19,5 +19,5 @@ urlpatterns = [
     path('get-all-categories', CategoryController.getAllCategories),
     path('get-available-categories', CategoryController.getAvailableCategories),
     path('add-category', CategoryController.addCategory),
-    path('delete-category', CategoryController.deleteCategory)
+    path('delete-category/<int:categoryId>/', CategoryController.deleteCategory)
 ]
