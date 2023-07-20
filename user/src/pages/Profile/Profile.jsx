@@ -5,7 +5,7 @@ import {Avatar, Button, Card, Grid, Typography} from "@mui/material";
 import InformationCard from "../../components/InformationCard/InformationCard";
 import ChangePasswordCard from "../../components/ChangePasswordCard/ChangePasswordCard";
 import {useNavigate} from "react-router-dom";
-import jwt from "jwt-decode";
+import CheckACTokenAndRFToken from "../../utils/CheckACTokenAndRFToken";
 function handleClickBreadcrumb(event) {
     event.preventDefault();
     console.info('You clicked a breadcrumb.');
@@ -13,9 +13,7 @@ function handleClickBreadcrumb(event) {
 
 export default function Profile() {
     const navigate = useNavigate();
-    const [user] =
-        React.useState( localStorage.getItem('access_token')
-            ? jwt(localStorage.getItem('access_token')) : null);
+    const [user] = React.useState(CheckACTokenAndRFToken());
 
     return (
         <>

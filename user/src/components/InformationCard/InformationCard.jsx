@@ -3,12 +3,11 @@ import * as React from "react";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
-import Cookies from "js-cookie";
 
 export default function InformationCard(props) {
     const handleChange = (event) => {
         const {id, value} = event.target;
-        fetch('http://localhost:8000/user/update/'+ props.user.id+'/', {
+        fetch('http://localhost:8000/auth/update/'+ props.user.id+'/', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -20,7 +19,8 @@ export default function InformationCard(props) {
             (res) => {
                 res.json().then(
                     (r) => {
-                        Cookies.set('user', JSON.stringify(r.data));
+                        localStorage.setItem('refresh_token', r.data.refresh_token);
+                        localStorage.setItem('access_token', r.data.access_token);
                     }
                 )
             }
@@ -53,9 +53,9 @@ export default function InformationCard(props) {
                     </Grid>
                     <Grid item xs={4}>
                         <TextField
-                            id="role"
-                            defaultValue={props.user.role}
-                            label="Role"
+                            id="ranker"
+                            defaultValue={props.user.ranker}
+                            label="Ranker"
                             disabled
                             variant="standard"
                         />

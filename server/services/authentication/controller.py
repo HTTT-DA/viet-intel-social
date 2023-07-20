@@ -1,5 +1,4 @@
 import json
-import time
 
 import jwt
 from decouple import config
@@ -79,7 +78,13 @@ class AuthController(ViewSet):
                 get_notification=True,
                 answer_count=0,
                 question_count=0,
-                point=0
+                point=0,
+                ranker='SILVER',
+                is_anonymous=False,
+                is_authenticated=False,
+                last_login=None,
+                is_superuser=False,
+                gender='MALE'
             )
 
             userResponse = User.objects.filter(email=email).first()

@@ -5,13 +5,11 @@ import Leaderboard from "../../components/Leaderboard/Leaderboard";
 import QuestionModal from "../../components/QuestionModal/QuestionModal"
 import {useContext, useEffect, useState} from "react";
 import * as React from "react";
-import jwt from 'jwt-decode';
 import {SearchQuestionContext} from "../../context/SearchQuestionContext";
+import CheckACTokenAndRFToken from "../../utils/CheckACTokenAndRFToken";
 
 function Home() {
-    const [user] =
-        React.useState( localStorage.getItem('access_token')
-        ? jwt(localStorage.getItem('access_token')) : null);
+    const [user] = React.useState(CheckACTokenAndRFToken());
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [categoryList, setCategoryList] = useState([]);
@@ -19,11 +17,13 @@ function Home() {
     const [time, setTime] = React.useState('');
     const [rating, setRating] = React.useState('');
     const [like, setLike] = React.useState('');
+    const [offset, setOffset] = useState(1);
+
     const {searchInput} = useContext(SearchQuestionContext);
 
     const handleChangeCategory = (event) => {
         setLoading(true);
-        fetch('http://localhost:8000/question/get-questions-by-category?categoryID=' + event.target.value, {
+        fetch('http://localhost:8000/question/get-questions-by-category?categoryID=' + event.target.value + '&offset=0', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -38,15 +38,17 @@ function Home() {
                         setRating('');
                         setTime('');
                         setLoading(false);
+                        setOffset(1);
                     }
                 )
             }
-        ).catch(() => {});
+        ).catch(() => {
+        });
     };
 
     const handleChangeTime = (event) => {
         setLoading(true);
-        fetch('http://localhost:8000/question/get-questions-by-time?time=' + event.target.value, {
+        fetch('http://localhost:8000/question/get-questions-by-time?time=' + event.target.value  + '&offset=0', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -61,15 +63,17 @@ function Home() {
                         setLike('');
                         setRating('');
                         setLoading(false);
+                        setOffset(1);
                     }
                 )
             }
-        ).catch(() => {});
+        ).catch(() => {
+        });
     };
 
     const handleChangeRating = (event) => {
         setLoading(true);
-        fetch('http://localhost:8000/question/get-questions-by-rating?rating=' + event.target.value, {
+        fetch('http://localhost:8000/question/get-questions-by-rating?rating=' + event.target.value  + '&offset=0', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -84,15 +88,17 @@ function Home() {
                         setLike('');
                         setTime('');
                         setLoading(false);
+                        setOffset(1);
                     }
                 )
             }
-        ).catch(() => {});
+        ).catch(() => {
+        });
     };
 
     const handleChangeLike = (event) => {
         setLoading(true);
-        fetch('http://localhost:8000/question/get-questions-by-like?like=' + event.target.value, {
+        fetch('http://localhost:8000/question/get-questions-by-like?like=' + event.target.value  + '&offset=0', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -107,15 +113,106 @@ function Home() {
                         setCategory('');
                         setTime('');
                         setLoading(false);
+                        setOffset(1);
                     }
                 )
             }
-        ).catch(() => {});
+        ).catch(() => {
+        });
+    };
+
+    const fetchMoreData = () => {
+        setLoading(true);
+
+        if (category !== '')
+            fetch('http://localhost:8000/question/get-questions-by-category?categoryID=' + category + '&offset=' + offset, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then(
+                (res) => {
+                    res.json().then(
+                        (r) => {
+                            setQuestions(prevQuestions => [...prevQuestions, ...r.data]);
+                        }
+                    )
+                }
+            );
+        else if (time !== '')
+            fetch('http://localhost:8000/question/get-questions-by-time?time=' + time + '&offset=' + offset, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then(
+                (res) => {
+                    res.json().then(
+                        (r) => {
+                            setQuestions(prevQuestions => [...prevQuestions, ...r.data]);
+                        }
+                    )
+                }
+            );
+        else if (rating !== '')
+            fetch('http://localhost:8000/question/get-questions-by-rating?rating=' + rating + '&offset=' + offset, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then(
+                (res) => {
+                    res.json().then(
+                        (r) => {
+                            setQuestions(prevQuestions => [...prevQuestions, ...r.data]);
+                        }
+                    )
+                }
+            );
+        else if (like !== '')
+            fetch('http://localhost:8000/question/get-questions-by-like?like=' + like + '&offset=' + offset, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then(
+                (res) => {
+                    res.json().then(
+                        (r) => {
+                            setQuestions(prevQuestions => [...prevQuestions, ...r.data]);
+                        }
+                    )
+                }
+            );
+        else
+            fetch('http://localhost:8000/question/get-questions?search=' + searchInput + '&offset=' + offset, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then(
+                (res) => {
+                    res.json().then(
+                        (r) => {
+                            setQuestions(prevQuestions => [...prevQuestions, ...r.data]);
+                        }
+                    )
+                }
+            );
+        setOffset(offset + 1);
+        setLoading(false);
+    };
+
+    const handleScroll = () => {
+        if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || loading) {
+            return;
+        }
+        fetchMoreData();
     };
 
     useEffect(() => {
         setLoading(true);
-        fetch('http://localhost:8000/question/get-questions?search='+searchInput, {
+        fetch('http://localhost:8000/question/get-questions?search=' + searchInput + '&offset=0', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -126,14 +223,20 @@ function Home() {
                     (r) => {
                         setQuestions(r.data);
                         setLoading(false);
+                        setLike('');
+                        setRating('');
+                        setCategory('');
+                        setTime('');
+                        setOffset(1);
                     }
                 )
             }
-        ).catch(() => {})
+        ).catch(() => {
+        })
     }, [searchInput]);
 
     useEffect(() => {
-        fetch("http://localhost:8000/category/get-available-categories", {
+        fetch("http://localhost:8000/question/get-available-categories", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -146,9 +249,14 @@ function Home() {
                     }
                 )
             }
-        ).catch(() => {});
-    },[]);
+        ).catch(() => {
+        });
+    }, []);
 
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    });
 
     return (
         <>
@@ -228,6 +336,11 @@ function Home() {
                         </Grid>
                     </Card>
                     <Grid container direction="column" spacing={3}>
+                        {questions.map((question) => (
+                            <Grid key={question.id} item>
+                                <QuestionCard key={question.id} question={question}/>
+                            </Grid>
+                        ))}
                         {
                             loading &&
                             <Grid container justifyContent="center">
@@ -236,11 +349,6 @@ function Home() {
                                 </Grid>
                             </Grid>
                         }
-                        {questions.map((question) => (
-                            <Grid key={question.id} item>
-                                <QuestionCard key={question.id} question={question}/>
-                            </Grid>
-                        ))}
                     </Grid>
                 </Grid>
                 <Grid item xs={3}>

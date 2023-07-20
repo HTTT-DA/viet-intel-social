@@ -17,7 +17,7 @@ export default function ChangePasswordCard(props) {
         }
         else {
             const oldPassword = document.getElementById('oldPassword').value;
-            fetch('http://localhost:8000/user/change-password/'+props.id+'/', {
+            fetch('http://localhost:8000/auth/change-password/'+props.id+'/', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

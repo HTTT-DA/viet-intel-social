@@ -31,9 +31,9 @@ export default function OtherInformationCard(props) {
                     </Grid>
                     <Grid item xs={4}>
                         <TextField
-                            id="role"
-                            defaultValue={props.user.role}
-                            label="Role"
+                            id="ranker"
+                            defaultValue={props.user.ranker}
+                            label="Ranker"
                             disabled
                             variant="standard"
                         />

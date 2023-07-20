@@ -43,7 +43,7 @@ export default function QuestionModal(props) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch("http://localhost:8000/category/get-available-categories", {
+        fetch("http://localhost:8000/question/get-available-categories", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
