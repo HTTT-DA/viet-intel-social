@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'services.question',
     'services.authentication',
     'services.mail',
+    'services.export',
 ]
 
 MIDDLEWARE = [

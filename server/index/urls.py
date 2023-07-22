@@ -24,4 +24,5 @@ urlpatterns = [
     path('user/', include("services.user.urls")),
     path('question/', include("services.question.urls")),
     path('mail/', include("services.mail.urls")),
+    path('export/', include("services.export.urls")),
 ]
