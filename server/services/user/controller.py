@@ -6,7 +6,7 @@ from rest_framework.viewsets import ViewSet
 
 from services.authentication.authentication import MyTokenObtainPairSerializer
 from services.user.models import User, UserPoint
-from services.user.serializer import UserSerializer, UserPointSerializer, OtherUserSerializer
+from services.user.serializer import UserPointSerializer, OtherUserSerializer
 from utils.response import responseData
 
 

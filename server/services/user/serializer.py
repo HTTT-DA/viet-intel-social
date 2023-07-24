@@ -8,7 +8,7 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'name', 'email', 'avatar', 'display_name', 'city',
-                  'gender', 'answer_count', 'question_count', 'point', 'role')
+                  'gender', 'answer_count', 'question_count', 'point', 'ranker')
 
 
 class UserIdSerializer(ModelSerializer):
@@ -27,7 +27,7 @@ class OtherUserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'name', 'avatar', 'display_name', 'email', 'gender',
-                  'city', 'role', 'question_count', 'answer_count', 'point')
+                  'city', 'ranker', 'question_count', 'answer_count', 'point')
 
 
 class UserPointSerializer(ModelSerializer):

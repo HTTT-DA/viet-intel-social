@@ -1,12 +1,16 @@
 # controller.py
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.viewsets import ViewSet
+
+from services.answer.models import Answer
 from services.user.models import User
-from services.question.models import Question, Answer
+from services.question.models import Question
 
 from django.http import HttpResponse
 from datetime import datetime
 
 import csv
+
 
 def export(name, model):
     fields = [f.name for f in model._meta.fields]
@@ -25,16 +29,16 @@ def export(name, model):
 
     return response
 
-class ExportController():
-    @csrf_exempt
-    def exportUser(request):
-        return export('user', User)
-    
-    @csrf_exempt
-    def exportQuestion(request):
-        return export('question', Question)
-    
-    @csrf_exempt
-    def exportAnswer(request):
-        return export('answer', Answer)
 
+class ExportController(ViewSet):
+    @csrf_exempt
+    def exportUser(self):
+        return export('user', User)
+
+    @csrf_exempt
+    def exportQuestion(self):
+        return export('question', Question)
+
+    @csrf_exempt
+    def exportAnswer(self):
+        return export('answer', Answer)

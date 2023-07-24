@@ -1,6 +1,6 @@
 from django.urls import path
 
-from services.question.controller import QuestionController, CategoryController
+from services.question.controller import QuestionController
 
 urlpatterns = [
     path('get-questions', QuestionController.getAllQuestionOrderByNewestTime),
@@ -15,9 +15,4 @@ urlpatterns = [
     # Tag
     path('get-list-tag', QuestionController.getListTag),
     path('create-tag', QuestionController.createTag),
-    # Category
-    path('get-all-categories', CategoryController.getAllCategories),
-    path('get-available-categories', CategoryController.getAvailableCategories),
-    path('add-category', CategoryController.addCategory),
-    path('delete-category/<int:categoryId>/', CategoryController.deleteCategory)
 ]

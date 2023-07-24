@@ -21,7 +21,7 @@ class AuthController(ViewSet):
         try:
             data = json.loads(request.body)
 
-            email = data.get('email').strip()
+            email = data.get('email')
             if not EmailValidator(email):
                 return responseData(message='Email is invalid', status=400, data={})
 
@@ -41,7 +41,6 @@ class AuthController(ViewSet):
                 'refresh_token': str(refresh_token)
             })
         except Exception as e:
-            print(traceback.format_exc())
             print(e)
             return responseData(message='Error', status=500, data={})
 

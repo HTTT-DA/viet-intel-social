@@ -1,7 +1,8 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
-from services.question.models import Question, Tag, QuestionRating, Category
+from services.category.serializer import CategorySerializer
+from services.question.models import Question, Tag, QuestionRating
 from services.user.serializer import UserSerializer, UserIdSerializer
 
 
@@ -45,13 +46,6 @@ class TagSerializer(ModelSerializer):
     class Meta:
         model = Tag
         fields = ('name', 'id')
-
-
-class CategorySerializer(ModelSerializer):
-    isDeleted = serializers.BooleanField(source='is_deleted')
-    class Meta:
-        model = Category
-        fields = "__all__"
 
 
 class QuestionLikeSerializer(ModelSerializer):

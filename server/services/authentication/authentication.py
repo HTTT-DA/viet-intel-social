@@ -18,7 +18,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         access_token['answer_count'] = user.answer_count
         access_token['question_count'] = user.question_count
         access_token['point'] = user.point
-        access_token['role'] = user.role
+        access_token['ranker'] = user.ranker
 
         return access_token, refresh_token
 
@@ -47,7 +47,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         access_token['answer_count'] = user.answer_count
         access_token['question_count'] = user.question_count
         access_token['point'] = user.point
-        access_token['role'] = user.role
+        access_token['ranker'] = user.ranker
 
         return access_token
 
