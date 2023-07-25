@@ -1,15 +1,24 @@
-import { getListCategories, deleteCategory } from "@/api-services/index";
-import CategoryList from "./components/categoryList";
+import { deleteCategory, getListCategories } from "@/api-services/index";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
+import CategoryList from "./components/categoryList";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
-
+  const [openDialog, setOpenDialog] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [nameError, setNameError] = useState("");
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,9 +51,39 @@ const Category = () => {
     }
   };
 
-  const handleAddRow = () => {
-    // Xử lý thêm category, có thể gọi API để thêm category trên server
-    // Sau khi thêm thành công, cập nhật lại state categories
+  const handleAddButton = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setNameError(""); // Clear the nameError when closing the dialog
+  };
+
+  const handleSaveCategory = () => {
+    // Validate the input
+    if (newCategoryName.length === 0) {
+      setNameError("Category name is required");
+    } else if (newCategoryName.length > 30) {
+      setNameError("Category name must be less than 30 characters");
+    } else if (
+      /\d/.test(newCategoryName) ||
+      /[!@#$%^&*(),.?":{}|<>]/.test(newCategoryName) ||
+      /[áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựíìỉĩịýỳỷỹỵÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÍÌỈĨỊÝỲỶỸỴ]/.test(
+        newCategoryName
+      )
+    ) {
+      setNameError(
+        "Category name cannot contain numbers, special characters, or Vietnamese diacritics"
+      );
+    } else {
+      // Perform the add category action here, e.g., call API to add the category to the database
+      console.log("Category added:", newCategoryName);
+      // Clear the input field and error message
+      setNewCategoryName("");
+      setNameError("");
+      setOpenDialog(false);
+    }
   };
 
   return (
@@ -63,7 +102,7 @@ const Category = () => {
             color="primary"
             size="large"
             endIcon={<AddCircleIcon />}
-            onClick={handleAddRow}
+            onClick={handleAddButton}
           >
             Add
           </Button>
@@ -83,6 +122,38 @@ const Category = () => {
           </Stack>
         </Box>
       </Box>
+
+      {/* Form Dialogs */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>
+          <b>Add New Category</b>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Please enter the name of the new Category:
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Category Name"
+            type="text"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            fullWidth
+            variant="standard"
+            error={Boolean(nameError)}
+            helperText={nameError}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">
+            <b>Cancel</b>
+          </Button>
+          <Button onClick={handleSaveCategory} color="primary">
+            <b>Save</b>
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
