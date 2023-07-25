@@ -1,6 +1,6 @@
 import Header from "./Header";
 import {Container} from "@mui/material";
-function Layout ({children}) {
+function Index ({children}) {
     return(
         <>
             <Header/>
@@ -11,4 +11,4 @@ function Layout ({children}) {
     )
 }
 
-export default Layout;
+export default Index;

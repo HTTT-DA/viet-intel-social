@@ -2,10 +2,10 @@ import * as React from 'react';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import {Avatar, Button, Card, Grid, Typography} from "@mui/material";
-import InformationCard from "../../components/InformationCard/InformationCard";
-import ChangePasswordCard from "../../components/ChangePasswordCard/ChangePasswordCard";
+import InformationCard from "../components/InformationCard";
+import ChangePasswordCard from "../components/ChangePasswordCard";
 import {useNavigate} from "react-router-dom";
-import CheckACTokenAndRFToken from "../../utils/CheckACTokenAndRFToken";
+import CheckACTokenAndRFToken from "../utils/CheckACTokenAndRFToken";
 function handleClickBreadcrumb(event) {
     event.preventDefault();
     console.info('You clicked a breadcrumb.');

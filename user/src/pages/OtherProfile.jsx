@@ -3,7 +3,7 @@ import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import {Avatar, Card,Grid,Typography} from "@mui/material";
 import {useEffect} from "react";
-import OtherInformationCard from "../../components/OtherInformationCard/OthereInformationCard";
+import OtherInformationCard from "../components/OthereInformationCard";
 import {useNavigate, useParams} from "react-router-dom";
 
 export default function OtherProfile() {

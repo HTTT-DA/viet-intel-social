@@ -17,7 +17,7 @@ export default function ChangePasswordCard(props) {
         }
         else {
             const oldPassword = document.getElementById('oldPassword').value;
-            fetch('http://localhost:8000/auth/change-password/'+props.id+'/', {
+            fetch('http://localhost:8000/auth/change-password/' + props.id + '/', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ export default function ChangePasswordCard(props) {
                 })
             }).then(()=>{
                 setOpen(true);
-            })
+            });
         }
     }
 
@@ -80,7 +80,6 @@ export default function ChangePasswordCard(props) {
                 <Snackbar
                     open={open}
                     autoHideDuration={3000}
-                    onClose={handleClose}
                     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                     sx={{mt:10}}
                 >

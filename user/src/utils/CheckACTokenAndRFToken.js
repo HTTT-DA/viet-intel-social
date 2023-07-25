@@ -26,23 +26,26 @@ export default function CheckACTokenAndRFToken() {
                     body: JSON.stringify({
                         refresh: refresh_token
                     })
-                }).then(r =>{
-                    if (r.status === 200) {
-                        r.json().then(data => {
-                            localStorage.setItem('access_token', data.access);
-                            return jwt(data.access)
-                        })
+                }).then(
+                    (res) => {
+                        res.json().then(
+                            (r) => {
+                                switch (r.status) {
+                                    case 200:
+                                        localStorage.setItem('access_token', r.data.access_token);
+                                        return jwt(r.data.access_token)
+                                    default:
+                                        localStorage.removeItem('access_token');
+                                        localStorage.removeItem('refresh_token');
+                                        return null;
+                                }
+                            }
+                        )
                     }
-                    else{
-                        localStorage.removeItem('access_token');
-                        localStorage.removeItem('refresh_token');
-                        return null;
-                    }
-                })
+                )
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.log(e);
         return null;
     }

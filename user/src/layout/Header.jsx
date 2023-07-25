@@ -13,9 +13,9 @@ import {
     AppBar, InputBase, Link
 } from "@mui/material";
 import {useContext} from "react";
-import {SearchQuestionContext} from "../../context/SearchQuestionContext";
+import {SearchQuestionContext} from "../context/SearchQuestionContext";
 import {useNavigate} from "react-router-dom";
-import CheckACTokenAndRFToken from "../../utils/CheckACTokenAndRFToken";
+import CheckACTokenAndRFToken from "../utils/CheckACTokenAndRFToken";
 
 const pages = ['Question', 'Leaderboard', 'about'];
 

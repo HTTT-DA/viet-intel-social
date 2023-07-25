@@ -1,12 +1,12 @@
 import {Card, CircularProgress, FormControl, Grid, InputLabel, MenuItem, Select} from "@mui/material";
-import ProfileCard from "../../components/ProfileCard/ProfileCard";
-import QuestionCard from "../../components/QuestionCard/QuestionCard";
-import Leaderboard from "../../components/Leaderboard/Leaderboard";
-import QuestionModal from "../../components/QuestionModal/QuestionModal"
+import ProfileCard from "../components/ProfileCard";
+import QuestionCard from "../components/QuestionCard";
+import Leaderboard from "../components/Leaderboard";
+import QuestionModal from "../components/QuestionModal"
 import {useContext, useEffect, useState} from "react";
 import * as React from "react";
-import {SearchQuestionContext} from "../../context/SearchQuestionContext";
-import CheckACTokenAndRFToken from "../../utils/CheckACTokenAndRFToken";
+import {SearchQuestionContext} from "../context/SearchQuestionContext";
+import CheckACTokenAndRFToken from "../utils/CheckACTokenAndRFToken";
 
 function Home() {
     const [user] = React.useState(CheckACTokenAndRFToken());
@@ -236,7 +236,7 @@ function Home() {
     }, [searchInput]);
 
     useEffect(() => {
-        fetch("http://localhost:8000/question/get-available-categories", {
+        fetch("http://localhost:8000/category/get-available-categories", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

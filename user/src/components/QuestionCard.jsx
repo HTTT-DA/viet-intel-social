@@ -4,13 +4,13 @@ import {
     Card, CardHeader, CardContent, CardActions,
     Avatar, IconButton, Typography, Link, Checkbox, MenuItem, Menu, ListItemIcon, Rating
 } from '@mui/material';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {Favorite, FavoriteBorder} from "@mui/icons-material";
 import FlagIcon from '@mui/icons-material/Flag';
 import RecommendIcon from '@mui/icons-material/Recommend';
 import {useNavigate} from "react-router-dom";
-import CheckACTokenAndRFToken from "../../utils/CheckACTokenAndRFToken";
+import CheckACTokenAndRFToken from "../utils/CheckACTokenAndRFToken";
+import AnswerModal from "./AnswerModal";
 
 export default function QuestionCard(props) {
     const [user] = React.useState(CheckACTokenAndRFToken());
@@ -39,12 +39,14 @@ export default function QuestionCard(props) {
                     "rating": Number(value)
                 })
             }).then();
-            question.ratings.push(user.id);
+            question.ratings.push({
+                "user_id": user.id,
+                "star_number": Number(value)
+            });
             setQuestion({
                 ...question,
                 ratings: question.ratings
             });
-            alert('Thank you for your rating!');
         } else {
             alert('Please login to rate this question!');
         }
@@ -70,10 +72,6 @@ export default function QuestionCard(props) {
         }
         setAnchorEl(null);
     };
-
-    const handeCommentQuestion = (id) => {
-        console.log(id);
-    }
 
     const handleLike = () => {
         if (user) {
@@ -175,14 +173,17 @@ export default function QuestionCard(props) {
                     </>
                 }
                 title={
-                    <Link component="button" onClick={()=>{navigate(`/profile/${question.user.id}`)}} underline="none"
+                    <Link component="button" onClick={() => {
+                        navigate(`/profile/${question.user.id}`)
+                    }} underline="none"
                           sx={{fontWeight: 'bold'}}>{question.user.name}</Link>
                 }
 
                 subheader={
                     <>
                         <span>{question.created_at} | </span>
-                        <Link component="button" underline="none" sx={{fontWeight: 'bold'}}>@{question.category.name}</Link>
+                        <Link component="button" underline="none"
+                              sx={{fontWeight: 'bold'}}>@{question.category.name}</Link>
                     </>
                 }
 
@@ -225,15 +226,19 @@ export default function QuestionCard(props) {
                             />
                         )}
                 </IconButton>
-                <IconButton aria-label="answer" onClick={() => {
-                    handeCommentQuestion(question.id)
-                }}>
-                    <ChatBubbleOutlineIcon sx={{fontSize: '26px'}}/>
-                </IconButton>
-                {user && question.ratings.find((id) => id === user.id)
+                <AnswerModal id={question.id}/>
+                {user && question.ratings.find(rating => rating.user_id === user.id)
                     ?
                     (
-                        <></>
+                        <Rating
+                            value={question.ratings.find(rating => rating.user_id === user.id).star_number}
+                            onChange={(event, newRating) => {
+                                handleRating(question.id, newRating)
+                            }}
+                            sx={{
+                                left: '55%',
+                            }}
+                        />
                     )
                     :
                     (
