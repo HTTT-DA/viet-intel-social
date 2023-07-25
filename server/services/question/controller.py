@@ -7,6 +7,7 @@ from rest_framework.viewsets import ViewSet
 from services.category.models import Category
 from services.question.models import Question, QuestionLike, Tag, QuestionTag, QuestionEvaluation, QuestionRating
 from services.question.serializer import QuestionSerializer, CategorySerializer, TagSerializer
+from utils.covertDate import convertDate
 from utils.response import responseData
 
 
@@ -16,14 +17,16 @@ class QuestionController(ViewSet):
     def getAllQuestionOrderByNewestTime(request):
         try:
             search = request.GET.get('search')
-            offset = request.GET.get('offset') if int(request.GET.get('offset')) else 0
+            offset = request.GET.get('offset') if int(request.GET.get('offset')) else '0'
             if search != '':
                 questions = Question.objects.filter(content__icontains=search) \
                                 .order_by('-created_at')[int(offset) * 10:int(offset) * 10 + 10]
             else:
                 questions = Question.objects.all().order_by('-created_at')[int(offset) * 10:int(offset) * 10 + 10]
             for question in questions:
-                question.created_at = question.created_at.strftime("%d %B, %Y")
+                question.created_at = convertDate(question.created_at)
+                question.ratings = QuestionRating.objects.filter(question_id=question.id) \
+                    .values('user_id', 'star_number')
             return responseData(data=QuestionSerializer(questions, many=True).data)
         except Exception as e:
             print(e)
@@ -34,11 +37,13 @@ class QuestionController(ViewSet):
     def getAllQuestionByCategory(request):
         try:
             category_id = request.GET.get('categoryID')
-            offset = request.GET.get('offset') if request.GET.get('offset') else 0
+            offset = request.GET.get('offset') if request.GET.get('offset') else '0'
             questions = Question.objects.filter(category_id=category_id) \
                             .order_by('-created_at')[int(offset) * 10:int(offset) * 10 + 10]
             for question in questions:
-                question.created_at = question.created_at.strftime("%d %B, %Y")
+                question.created_at = convertDate(question.created_at)
+                question.ratings = QuestionRating.objects.filter(question_id=question.id) \
+                    .values('user_id', 'star_number')
             return responseData(data=QuestionSerializer(questions, many=True).data)
         except Exception as e:
             print(e)
@@ -49,7 +54,7 @@ class QuestionController(ViewSet):
     def getQuestionOrderByTime(request):
         try:
             time = request.GET.get('time')
-            offset = request.GET.get('offset') if request.GET.get('offset') else 0
+            offset = request.GET.get('offset') if request.GET.get('offset') else '0'
             questions = []
             if time == 'DEST':
                 questions = Question.objects.all().order_by('-created_at')[int(offset) * 10:int(offset) * 10 + 10]
@@ -57,7 +62,9 @@ class QuestionController(ViewSet):
                 questions = Question.objects.all().order_by('created_at')[int(offset) * 10:int(offset) * 10 + 10]
 
             for question in questions:
-                question.created_at = question.created_at.strftime("%d %B, %Y")
+                question.created_at = convertDate(question.created_at)
+                question.ratings = QuestionRating.objects.filter(question_id=question.id) \
+                    .values('user_id', 'star_number')
             return responseData(data=QuestionSerializer(questions, many=True).data)
         except Exception as e:
             print(e)
@@ -68,7 +75,7 @@ class QuestionController(ViewSet):
     def getQuestionOrderByLike(request):
         try:
             like = request.GET.get('like')
-            offset = request.GET.get('offset') if request.GET.get('offset') else 0
+            offset = request.GET.get('offset') if request.GET.get('offset') else '0'
             questions = []
             if like == 'DEST':
                 questions = Question.objects.all().order_by('-like_count')[int(offset) * 10:int(offset) * 10 + 10]
@@ -76,7 +83,9 @@ class QuestionController(ViewSet):
                 questions = Question.objects.all().order_by('like_count')[int(offset) * 10:int(offset) * 10 + 10]
 
             for question in questions:
-                question.created_at = question.created_at.strftime("%d %B, %Y")
+                question.created_at = convertDate(question.created_at)
+                question.ratings = QuestionRating.objects.filter(question_id=question.id) \
+                    .values('user_id', 'star_number')
             return responseData(data=QuestionSerializer(questions, many=True).data)
         except Exception as e:
             print(e)
@@ -87,7 +96,7 @@ class QuestionController(ViewSet):
     def getQuestionOrderByRating(request):
         try:
             rating = request.GET.get('rating')
-            offset = request.GET.get('offset') if request.GET.get('offset') else 0
+            offset = request.GET.get('offset') if request.GET.get('offset') else '0'
             questions = []
             if rating == 'DEST':
                 questions = Question.objects.all().order_by('-rating')[int(offset) * 10:int(offset) * 10 + 10]
@@ -95,7 +104,9 @@ class QuestionController(ViewSet):
                 questions = Question.objects.all().order_by('rating')[int(offset) * 10:int(offset) * 10 + 10]
 
             for question in questions:
-                question.created_at = question.created_at.strftime("%d %B, %Y")
+                question.created_at = convertDate(question.created_at)
+                question.ratings = QuestionRating.objects.filter(question_id=question.id) \
+                    .values('user_id', 'star_number')
             return responseData(data=QuestionSerializer(questions, many=True).data)
         except Exception as e:
             print(e)

@@ -13,3 +13,12 @@ class Answer(models.Model):
     status = models.CharField(max_length=50)
     reference = models.CharField(max_length=100)
     image = models.CharField(max_length=100)
+
+
+class AnswerEvaluation(models.Model):
+    class Meta:
+        db_table = 'AnswerEvaluation'
+
+    answer = models.ForeignKey('Answer', on_delete=models.CASCADE, related_name='answer')
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='answer_user')
+    evaluation_type = models.CharField(max_length=50)

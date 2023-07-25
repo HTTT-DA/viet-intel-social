@@ -47,3 +47,18 @@ class UserController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(message='Error', status=500, data={})
+
+    @staticmethod
+    @require_http_methods(['PUT'])
+    def updateAvatar(request, UserId):
+        try:
+            data = json.loads(request.body)
+            avatar = data['avatar']
+            User.objects.filter(id=UserId).update(avatar=avatar)
+            access_token, refresh_token = MyTokenObtainPairSerializer().get_token_for_user(User.objects.get(id=UserId))
+            return responseData(message='Success', status=200, data={
+                'access_token': str(access_token)
+            })
+        except Exception as e:
+            print(e)
+            return responseData(message='Error', status=500, data={})

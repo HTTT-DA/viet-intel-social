@@ -15,7 +15,6 @@ class Question(models.Model):
     category = models.ForeignKey('category.Category', on_delete=models.CASCADE, related_name='category_id')
     tags = models.ManyToManyField('Tag', through='QuestionTag', related_name='tag_id')
     likes = models.ManyToManyField('user.User', through='QuestionLike', related_name='like_id')
-    ratings = models.ManyToManyField('user.User', through='QuestionRating', related_name='rating_id')
 
 
 class Tag(models.Model):
@@ -56,6 +55,9 @@ class QuestionRating(models.Model):
     class Meta:
         db_table = 'QuestionRating'
 
-    question = models.ForeignKey('Question', on_delete=models.CASCADE)
-    user = models.ForeignKey('user.User', on_delete=models.CASCADE)
+    question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='question_rating')
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='question_rating_user')
     star_number = models.IntegerField()
+
+    def __str__(self):
+        return str(self.star_number)

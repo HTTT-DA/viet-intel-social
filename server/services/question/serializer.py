@@ -16,6 +16,7 @@ class QuestionSerializer(ModelSerializer):
     user = serializers.SerializerMethodField('getUserInfo')
     tags = serializers.SerializerMethodField('getTags')
     category = serializers.SerializerMethodField('getCategory')
+    ratings = serializers.ListField()
 
     class Meta:
         model = Question
