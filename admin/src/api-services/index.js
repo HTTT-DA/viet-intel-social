@@ -16,7 +16,7 @@ export async function requestLogin(email, password) {
 export async function getListCategories() {
   try {
     const response = await axios.get(
-      `${import.meta.env.VITE_API_URL}/question/get-all-categories`
+      `${import.meta.env.VITE_API_URL}/category/get-all-categories`
     );
     return response.data;
   } catch (error) {
@@ -27,7 +27,7 @@ export async function getListCategories() {
 
 export async function deleteCategory(id) {
   try {
-    await axios.post(`${import.meta.env.VITE_API_URL}/question/delete-category/${id}/`);
+    await axios.post(`${import.meta.env.VITE_API_URL}/category/delete-category/${id}/`);
     return true;
   } catch (error) {
     console.error(error);

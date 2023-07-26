@@ -8,6 +8,7 @@ urlpatterns = [
     path('get-questions-by-time', QuestionController.getQuestionOrderByTime),
     path('get-questions-by-like', QuestionController.getQuestionOrderByLike),
     path('get-questions-by-rating', QuestionController.getQuestionOrderByRating),
+    path('get-list-questions', QuestionController.getListQuestions),
     path('like', QuestionController.likeQuestion),
     path('create-question', QuestionController.createQuestion),
     path('evaluate', QuestionController.evaluateQuestion),

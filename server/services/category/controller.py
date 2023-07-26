@@ -62,3 +62,16 @@ class CategoryController(ViewSet):
                                 message="Error when delete category in Category-Services")
 
         return responseData(None, message="Delete category successfully from Category-Services")
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def findCategories(request):
+        category = request.data.get('categoryName')
+        
+        try:
+            queryset = Category.objects.all()
+            serializer = CategorySerializer(queryset, many=True)
+            return responseData(data=serializer.data)
+        except IntegrityError as e:
+            print(e)
+            return responseData(None, status=4, message="Error when get all categories from Category-Services")
