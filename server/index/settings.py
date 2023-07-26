@@ -45,10 +45,9 @@ INSTALLED_APPS = [
     'services.user',
     'services.question',
     'services.authentication',
-    'services.mail',
-    'services.export',
     'services.category',
     'services.answer',
+    'services.utils', 
 ]
 
 MIDDLEWARE = [
