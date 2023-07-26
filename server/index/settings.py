@@ -97,24 +97,6 @@ DATABASES = {
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.user.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.user.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.user.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.user.password_validation.NumericPasswordValidator',
-    },
-]
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -192,12 +174,15 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer"
 }
 
+AUTHENTICATION_BACKENDS = [
+    'services.authentication.authentication.CustomUserModelBackend',
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+]
+
 # Configure email backend
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-# SMTP settings for Gmail
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'vietintelnetwork@gmail.com'
-EMAIL_HOST_PASSWORD = 'kynkldyajurglbha'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
