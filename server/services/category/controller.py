@@ -53,12 +53,14 @@ class CategoryController(ViewSet):
     @staticmethod
     @require_http_methods(['POST'])
     def deleteCategory(request, categoryId):
-        # Delete Category
         try:
             Category.objects.filter(id=categoryId).update(is_deleted=True)
         except IntegrityError as e:
             print(e)
-            return responseData(None, status=4,
-                                message="Error when delete category in Category-Services")
+            return responseData(
+                None,
+                status=4,
+                message="Error when delete category in Category-Services"
+            )
 
         return responseData(None, message="Delete category successfully from Category-Services")

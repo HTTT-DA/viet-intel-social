@@ -1,13 +1,12 @@
 import json
-from datetime import datetime
 
 from django.views.decorators.http import require_http_methods
 from rest_framework.viewsets import ViewSet
 
 from services.category.models import Category
-from services.question.models import Question, QuestionLike, Tag, QuestionTag, QuestionEvaluation, QuestionRating
+from services.question.models import Tag
 from services.question.serializer import QuestionSerializer, CategorySerializer, TagSerializer
-from utils.covertDate import convertDate
+from services.question.service import QuestionService
 from utils.response import responseData
 
 
@@ -16,18 +15,10 @@ class QuestionController(ViewSet):
     @require_http_methods(['GET'])
     def getAllQuestionOrderByNewestTime(request):
         try:
-            search = request.GET.get('search')
+            search = request.GET.get('search') if request.GET.get('search') else ''
             offset = request.GET.get('offset') if int(request.GET.get('offset')) else '0'
-            if search != '':
-                questions = Question.objects.filter(content__icontains=search) \
-                                .order_by('-created_at')[int(offset) * 10:int(offset) * 10 + 10]
-            else:
-                questions = Question.objects.all().order_by('-created_at')[int(offset) * 10:int(offset) * 10 + 10]
-            for question in questions:
-                question.created_at = convertDate(question.created_at)
-                question.ratings = QuestionRating.objects.filter(question_id=question.id) \
-                    .values('user_id', 'star_number')
-            return responseData(data=QuestionSerializer(questions, many=True).data)
+            data = QuestionService.getAllQuestionOrderByNewestTime(search, offset)
+            return responseData(data=QuestionSerializer(data, many=True).data)
         except Exception as e:
             print(e)
             return responseData(data=[], message='Error', status=500)
@@ -38,13 +29,8 @@ class QuestionController(ViewSet):
         try:
             category_id = request.GET.get('categoryID')
             offset = request.GET.get('offset') if request.GET.get('offset') else '0'
-            questions = Question.objects.filter(category_id=category_id) \
-                            .order_by('-created_at')[int(offset) * 10:int(offset) * 10 + 10]
-            for question in questions:
-                question.created_at = convertDate(question.created_at)
-                question.ratings = QuestionRating.objects.filter(question_id=question.id) \
-                    .values('user_id', 'star_number')
-            return responseData(data=QuestionSerializer(questions, many=True).data)
+            data = QuestionService.getAllQuestionByCategory(category_id, offset)
+            return responseData(data=QuestionSerializer(data, many=True).data)
         except Exception as e:
             print(e)
             return responseData(data=[], message='Error', status=500)
@@ -53,19 +39,10 @@ class QuestionController(ViewSet):
     @require_http_methods(['GET'])
     def getQuestionOrderByTime(request):
         try:
-            time = request.GET.get('time')
+            time = request.GET.get('time') if request.GET.get('time') else 'DEST'
             offset = request.GET.get('offset') if request.GET.get('offset') else '0'
-            questions = []
-            if time == 'DEST':
-                questions = Question.objects.all().order_by('-created_at')[int(offset) * 10:int(offset) * 10 + 10]
-            elif time == 'ASC':
-                questions = Question.objects.all().order_by('created_at')[int(offset) * 10:int(offset) * 10 + 10]
-
-            for question in questions:
-                question.created_at = convertDate(question.created_at)
-                question.ratings = QuestionRating.objects.filter(question_id=question.id) \
-                    .values('user_id', 'star_number')
-            return responseData(data=QuestionSerializer(questions, many=True).data)
+            data = QuestionService.getQuestionOrderByTime(time, offset)
+            return responseData(data=QuestionSerializer(data, many=True).data)
         except Exception as e:
             print(e)
             return responseData(data=[])
@@ -74,19 +51,10 @@ class QuestionController(ViewSet):
     @require_http_methods(['GET'])
     def getQuestionOrderByLike(request):
         try:
-            like = request.GET.get('like')
+            like = request.GET.get('like') if request.GET.get('like') else 'DEST'
             offset = request.GET.get('offset') if request.GET.get('offset') else '0'
-            questions = []
-            if like == 'DEST':
-                questions = Question.objects.all().order_by('-like_count')[int(offset) * 10:int(offset) * 10 + 10]
-            elif like == 'ASC':
-                questions = Question.objects.all().order_by('like_count')[int(offset) * 10:int(offset) * 10 + 10]
-
-            for question in questions:
-                question.created_at = convertDate(question.created_at)
-                question.ratings = QuestionRating.objects.filter(question_id=question.id) \
-                    .values('user_id', 'star_number')
-            return responseData(data=QuestionSerializer(questions, many=True).data)
+            data = QuestionService.getQuestionOrderByLike(like, offset)
+            return responseData(data=QuestionSerializer(data, many=True).data)
         except Exception as e:
             print(e)
             return responseData(data=[])
@@ -95,19 +63,10 @@ class QuestionController(ViewSet):
     @require_http_methods(['GET'])
     def getQuestionOrderByRating(request):
         try:
-            rating = request.GET.get('rating')
+            rating = request.GET.get('rating') if request.GET.get('rating') else 'DEST'
             offset = request.GET.get('offset') if request.GET.get('offset') else '0'
-            questions = []
-            if rating == 'DEST':
-                questions = Question.objects.all().order_by('-rating')[int(offset) * 10:int(offset) * 10 + 10]
-            elif rating == 'ASC':
-                questions = Question.objects.all().order_by('rating')[int(offset) * 10:int(offset) * 10 + 10]
-
-            for question in questions:
-                question.created_at = convertDate(question.created_at)
-                question.ratings = QuestionRating.objects.filter(question_id=question.id) \
-                    .values('user_id', 'star_number')
-            return responseData(data=QuestionSerializer(questions, many=True).data)
+            data = QuestionService.getQuestionOrderByRating(rating, offset)
+            return responseData(data=QuestionSerializer(data, many=True).data)
         except Exception as e:
             print(e)
             return responseData(data=[])
@@ -117,16 +76,8 @@ class QuestionController(ViewSet):
     def likeQuestion(request):
         try:
             data = json.loads(request.body)
-            question_id = data['question_id']
-            user_id = data['user_id']
-
-            questionLike = QuestionLike.objects.filter(question_id=question_id, user_id=user_id)
-            if questionLike.exists():
-                questionLike.delete()
-                return responseData(data=False)
-            else:
-                QuestionLike.objects.create(question_id=question_id, user_id=user_id)
-                return responseData(data=True)
+            QuestionService.likeQuestion(data['question_id'], data['user_id'])
+            return responseData(data=True)
         except Exception as e:
             print(e)
             return responseData(data=False)
@@ -156,9 +107,8 @@ class QuestionController(ViewSet):
     def createTag(request):
         try:
             data = json.loads(request.body)
-            name = data['name']
-            Tag.objects.create(name=name)
-            TagResponse = Tag.objects.filter(name=name)
+            Tag.objects.create(name=data['name'])
+            TagResponse = Tag.objects.filter(name=data['name'])
             return responseData(data=TagSerializer(TagResponse, many=True).data)
         except Exception as e:
             print(e)
@@ -169,19 +119,7 @@ class QuestionController(ViewSet):
     def createQuestion(request):
         try:
             data = json.loads(request.body)
-            content = data['content']
-            category_id = data['category_id']
-            user_id = data['user_id']
-            tags = data['tags']
-            current_date = datetime.now().strftime('%Y-%m-%d')
-
-            Question.objects.create(content=content, category_id=category_id,
-                                    user_id=user_id, created_at=current_date, status='WAITING')
-            question = Question.objects.filter(user_id=user_id, category_id=category_id).last()
-
-            for tag in tags:
-                QuestionTag.objects.create(question_id=question.id, tag_id=tag)
-
+            QuestionService.createQuestion(data)
             return responseData(data=True, message='Create question successfully', status=200)
         except Exception as e:
             print(e)
@@ -192,18 +130,7 @@ class QuestionController(ViewSet):
     def evaluateQuestion(request):
         try:
             data = json.loads(request.body)
-            question_id = data['question_id']
-            evaluation_type = data['evaluation_type']
-            user_id = data['user_id']
-
-            if QuestionEvaluation.objects.filter(question_id=question_id, user_id=user_id).exists():
-                QuestionEvaluation.objects \
-                    .filter(question_id=question_id, user_id=user_id) \
-                    .update(evaluation_type=evaluation_type)
-            else:
-                QuestionEvaluation.objects \
-                    .create(question_id=question_id, user_id=user_id, evaluation_type=evaluation_type)
-
+            QuestionService.evaluateQuestion(data)
             return responseData(data=True, message='Evaluate question successfully', status=200)
         except Exception as e:
             print(e)
@@ -214,15 +141,7 @@ class QuestionController(ViewSet):
     def ratingQuestion(request):
         try:
             data = json.loads(request.body)
-            question_id = data['question_id']
-            rating = data['rating']
-            user_id = data['user_id']
-
-            if QuestionRating.objects.filter(question_id=question_id, user_id=user_id).exists():
-                QuestionRating.objects.filter(question_id=question_id, user_id=user_id).update(star_number=rating)
-            else:
-                QuestionRating.objects.create(question_id=question_id, user_id=user_id, star_number=rating)
-
+            QuestionService.ratingQuestion(data)
             return responseData(data=True, message='Rate question successfully', status=200)
         except Exception as e:
             print(e)

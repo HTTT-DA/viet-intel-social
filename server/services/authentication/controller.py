@@ -8,10 +8,8 @@ from rest_framework.viewsets import ViewSet
 
 from services.user.models import User
 from services.user.serializer import UserSerializer
-from services.authentication.authentication import MyTokenObtainPairSerializer
+from services.authentication.custom import MyTokenObtainPairSerializer
 from utils.response import responseData
-
-import traceback
 
 
 class AuthController(ViewSet):

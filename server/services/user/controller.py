@@ -4,7 +4,7 @@ from datetime import datetime
 from django.views.decorators.http import require_http_methods
 from rest_framework.viewsets import ViewSet
 
-from services.authentication.authentication import MyTokenObtainPairSerializer
+from services.authentication.custom import MyTokenObtainPairSerializer
 from services.user.models import User, UserPoint
 from services.user.serializer import UserPointSerializer, OtherUserSerializer
 from utils.response import responseData
@@ -15,7 +15,9 @@ class UserController(ViewSet):
     @require_http_methods(['GET'])
     def getLeaderboardOfMonth(request):
         try:
-            data = UserPoint.objects.filter(year=datetime.now().year, month=datetime.now().month).order_by('-point')[:10]
+            data = UserPoint.objects\
+                       .filter(year=datetime.now().year, month=datetime.now().month)\
+                       .order_by('-point')[:10]
             return responseData(message='Success', status=200, data=UserPointSerializer(data, many=True).data)
         except Exception as e:
             print(e)
@@ -53,8 +55,7 @@ class UserController(ViewSet):
     def updateAvatar(request, UserId):
         try:
             data = json.loads(request.body)
-            avatar = data['avatar']
-            User.objects.filter(id=UserId).update(avatar=avatar)
+            User.objects.filter(id=UserId).update(avatar=data['avatar'])
             access_token, refresh_token = MyTokenObtainPairSerializer().get_token_for_user(User.objects.get(id=UserId))
             return responseData(message='Success', status=200, data={
                 'access_token': str(access_token)
