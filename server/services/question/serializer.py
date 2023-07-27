@@ -53,3 +53,38 @@ class QuestionLikeSerializer(ModelSerializer):
     class Meta:
         model = Question
         fields = ('user', 'question')
+
+
+class QuestionAdminSerializer(ModelSerializer):
+    user = serializers.SerializerMethodField('getUserInfo')
+    category = serializers.SerializerMethodField('getCategoryInfo')
+
+    class Meta:
+        model = Question
+        fields = ('id', 'content', 'status', 'created_at', 'user', 'category')
+
+    def to_representation(self, instance):
+        detail_mode = self.context.get('detail_mode', True)
+        if not detail_mode:
+            # Nếu không ở chế độ chi tiết, loại bỏ các trường không cần thiết
+            ret = super().to_representation(instance)
+            ret.pop('content', None)
+            ret.pop('created_at', None)
+            return ret
+        return super().to_representation(instance)
+
+    @staticmethod
+    def getUserInfo(obj):
+        userData = {
+            'userId': obj.user.id if obj.user else -1,
+            'userEmail': obj.user.email if obj.user else ''
+        }
+        return userData
+
+    @staticmethod
+    def getCategoryInfo(obj):
+        categoryData = {
+            'categoryId': obj.category.id if obj.category else -1,
+            'categoryName': obj.category.name if obj.category else ''
+        }
+        return categoryData

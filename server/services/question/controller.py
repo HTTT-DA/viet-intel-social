@@ -4,8 +4,8 @@ from django.views.decorators.http import require_http_methods
 from rest_framework.viewsets import ViewSet
 
 from services.category.models import Category
-from services.question.models import Tag
-from services.question.serializer import QuestionSerializer, CategorySerializer, TagSerializer
+from services.question.models import Tag, Question
+from services.question.serializer import QuestionSerializer, CategorySerializer, TagSerializer, QuestionAdminSerializer
 from services.question.service import QuestionService
 from utils.response import responseData
 
@@ -84,19 +84,6 @@ class QuestionController(ViewSet):
 
     @staticmethod
     @require_http_methods(['GET'])
-    def getListQuestions(request):
-        try:
-            question = Question.objects.all()
-            serializer = QuestionSerializer(question, many=True)
-            print(serializer.data)
-            return responseData(data=[])
-        except Exception as e:
-            print(e)
-            return responseData(data=[])
-
-
-    @staticmethod
-    @require_http_methods(['GET'])
     def getListCategory(request):
         try:
             category = Category.objects.all()
@@ -159,3 +146,35 @@ class QuestionController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(data=False, message='Rate question failed', status=500)
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getAllQuestionsForAdmin(request):
+        status = request.GET.get('status')  # Lấy giá trị của query parameter 'status'
+        userEmail = request.GET.get('userEmail')  # Lấy giá trị của query parameter 'user_email'
+        print(status)
+        print(userEmail)
+        try:
+            questions = Question.objects.all()
+
+            if status:
+                questions = questions.filter(status=status)
+            if userEmail:
+                questions = questions.filter(user__email=userEmail)
+
+            serializer = QuestionAdminSerializer(questions, many=True, context={'detail_mode': False})
+            return responseData(data=serializer.data)
+        except Exception as e:
+            print(e)
+            return responseData(None, status=4, message="Error when get all questions A in Questions Service")
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getDetailQuestionForAdmin(request, questionId):
+        try:
+            question = Question.objects.filter(id=questionId)
+            serializer = QuestionAdminSerializer(question, many=True, context={'detail_mode': True})
+            return responseData(data=serializer.data)
+        except Exception as e:
+            print(e)
+            return responseData(None, status=4, message="Error when get detail question A in Questions Service")

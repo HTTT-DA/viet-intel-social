@@ -69,7 +69,6 @@ class CategoryController(ViewSet):
     @require_http_methods(['GET'])
     def findCategories(request):
         category = request.data.get('categoryName')
-        
         try:
             queryset = Category.objects.all()
             serializer = CategorySerializer(queryset, many=True)
