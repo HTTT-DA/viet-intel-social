@@ -1,4 +1,4 @@
-import { deleteCategory, getListCategories } from "@/api-services/index";
+import { getListCategories } from "@/api-services/index";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -30,32 +30,13 @@ const Category = () => {
     };
 
     fetchData();
-  }, [categories]);
-
-  const handleDeleteRow = async (id) => {
-    try {
-      const result = await deleteCategory(id);
-
-      // Nếu chỉnh sửa thành công, cập nhật lại state categories
-      if (result) {
-        setCategories((prevCategories) =>
-          prevCategories.map((category) =>
-            category.id === id ? { ...category, is_deleted: true } : category
-          )
-        );
-      } else {
-        console.log("Chỉnh sửa không thành công!");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  }, []);
 
   const handleAddButton = () => {
     setOpenDialog(true);
   };
 
-  const handleCloseDialog = () => {
+  const handleCloseAddDialog = () => {
     setOpenDialog(false);
     setNameError(""); // Clear the nameError when closing the dialog
   };
@@ -78,7 +59,7 @@ const Category = () => {
       );
     } else {
       // Perform the add category action here, e.g., call API to add the category to the database
-      console.log("Category added:", newCategoryName);
+      
       // Clear the input field and error message
       setNewCategoryName("");
       setNameError("");
@@ -107,10 +88,7 @@ const Category = () => {
             Add
           </Button>
         </Box>
-        <CategoryList
-          categories={categories}
-          handleDeleteRow={handleDeleteRow}
-        />
+        <CategoryList categories={categories} setCategories={setCategories} />
         <Box
           display="flex"
           justifyContent="center"
@@ -124,7 +102,7 @@ const Category = () => {
       </Box>
 
       {/* Form Dialogs */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
+      <Dialog open={openDialog} onClose={handleCloseAddDialog}>
         <DialogTitle>
           <b>Add New Category</b>
         </DialogTitle>
@@ -146,7 +124,7 @@ const Category = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="secondary">
+          <Button onClick={handleCloseAddDialog} color="primary">
             <b>Cancel</b>
           </Button>
           <Button onClick={handleSaveCategory} color="primary">

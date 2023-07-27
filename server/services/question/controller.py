@@ -84,6 +84,19 @@ class QuestionController(ViewSet):
 
     @staticmethod
     @require_http_methods(['GET'])
+    def getListQuestions(request):
+        try:
+            question = Question.objects.all()
+            serializer = QuestionSerializer(question, many=True)
+            print(serializer.data)
+            return responseData(data=[])
+        except Exception as e:
+            print(e)
+            return responseData(data=[])
+
+
+    @staticmethod
+    @require_http_methods(['GET'])
     def getListCategory(request):
         try:
             category = Category.objects.all()
