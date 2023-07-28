@@ -38,7 +38,7 @@ export default function SignIn() {
         const email = data.get('email');
         const password = data.get('password');
 
-        fetch('http://localhost:8000/auth/sign-in', {
+        fetch('http://localhost:8000/api/users/sign-in', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

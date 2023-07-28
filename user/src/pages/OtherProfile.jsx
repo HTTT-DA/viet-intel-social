@@ -12,7 +12,7 @@ export default function OtherProfile() {
     const {id} = useParams();
 
     useEffect(() => {
-        fetch("http://localhost:8000/user/profile/"+id, {
+        fetch("http://localhost:8000/api/users/"+id, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

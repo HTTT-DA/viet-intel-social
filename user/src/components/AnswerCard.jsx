@@ -20,7 +20,7 @@ export default function AnswerCard(props) {
             return
         }
         if (method === 'PUT') {
-            fetch(`http://localhost:8000/answer/${props.answer.id}/create-or-update-evaluation/${user.id}`, {
+            fetch(`http://localhost:8002/api/answers/${props.answer.id}/evaluation/${user.id}/create-update`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export default function AnswerCard(props) {
                 }])
             }
         } else {
-            fetch(`http://localhost:8000/answer/${props.answer.id}/delete-evaluation/${user.id}`, {
+            fetch(`http://localhost:8002/api/answers/${props.answer.id}/evaluation/${user.id}/delete`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -60,13 +60,13 @@ export default function AnswerCard(props) {
         <Card sx={{mb: 2}}>
             <CardHeader
                 avatar={
-                    <Avatar src={props.answer.avatar} aria-label="recipe"/>
+                    <Avatar src={props.answer.user.avatar} aria-label="recipe"/>
                 }
                 title={
                     <Link component="button" onClick={() => {
-                        navigate(`/profile/${props.answer.userID}`)
+                        navigate(`/profile/${props.answer.user.id}`)
                     }} underline="none"
-                          sx={{fontWeight: 'bold'}}>{props.answer.name}</Link>
+                          sx={{fontWeight: 'bold'}}>{props.answer.user.display_name}</Link>
                 }
                 subheader={props.answer.created_at}
             />

@@ -18,7 +18,7 @@ export default function CheckACTokenAndRFToken() {
             if (!refresh_token || refresh_token === 'undefined')
                 return null;
             else {
-                fetch('http://localhost:8000/auth/get-new-access-token', {
+                fetch('http://localhost:8000/api/users/get-new-access-token', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

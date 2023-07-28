@@ -7,10 +7,11 @@ import Grid from "@mui/material/Grid";
 export default function InformationCard(props) {
     const handleChange = (event) => {
         const {id, value} = event.target;
-        fetch('http://localhost:8000/auth/update/'+ props.user.id+'/', {
-            method: 'PUT',
+        fetch('http://localhost:8000/api/users/update-information', {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
             },
             body: JSON.stringify({
                 [id]: value,
@@ -19,7 +20,6 @@ export default function InformationCard(props) {
             (res) => {
                 res.json().then(
                     (r) => {
-                        localStorage.setItem('refresh_token', r.data.refresh_token);
                         localStorage.setItem('access_token', r.data.access_token);
                     }
                 )
@@ -66,7 +66,7 @@ export default function InformationCard(props) {
                             defaultValue={props.user.email}
                             label="Email"
                             variant="standard"
-                            onBlur={handleChange}
+                            disabled
                         />
                     </Grid>
 

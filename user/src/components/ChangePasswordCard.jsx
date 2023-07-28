@@ -17,10 +17,11 @@ export default function ChangePasswordCard(props) {
         }
         else {
             const oldPassword = document.getElementById('oldPassword').value;
-            fetch('http://localhost:8000/auth/change-password/' + props.id + '/', {
+            fetch('http://localhost:8000/users/change-password/' + props.id + '/', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
                 },
                 body: JSON.stringify({
                     old_password: oldPassword,
@@ -32,7 +33,7 @@ export default function ChangePasswordCard(props) {
         }
     }
 
-    const handleClose = (event, reason) => {
+    const handleClose = () => {
         setOpen(false);
     }
 

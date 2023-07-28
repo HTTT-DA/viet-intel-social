@@ -37,7 +37,7 @@ export default function SignUp() {
         const fullName = data.get('fullName');
         const displayName = data.get('displayName');
 
-        fetch('http://localhost:8000/auth/sign-up', {
+        fetch('http://localhost:8000/api/users/sign-up', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -13,7 +13,7 @@ export default function Leaderboard() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('http://localhost:8000/user/leaderboard', {
+        fetch('http://localhost:8000/api/users/get-user-points-of-month', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

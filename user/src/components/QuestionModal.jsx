@@ -15,7 +15,6 @@ import {
 import Button from "@mui/material/Button";
 import {useEffect} from "react";
 import Grid from "@mui/material/Grid";
-import TextField from "@mui/material/TextField";
 import {useNavigate} from "react-router-dom";
 
 const style = {
@@ -43,7 +42,7 @@ export default function QuestionModal(props) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch("http://localhost:8000/category/get-available-categories", {
+        fetch("http://localhost:8003/api/categories/available", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -58,7 +57,7 @@ export default function QuestionModal(props) {
             }
         )
 
-        fetch("http://localhost:8000/question/get-list-tag", {
+        fetch("http://localhost:8001/api/tags", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -97,29 +96,8 @@ export default function QuestionModal(props) {
         let tagId = event.target.value;
         setTagChosen(tagChosen.filter((item) => item.id !== parseInt(tagId)))
     }
-    const handleAddNewTag = (event) => {
-        if (event.target.value === "" || event.target.value === undefined) return;
-
-        fetch("http://localhost:8000/question/create-tag", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                "name": event.target.value
-            })
-        }).then(
-            (res) => {
-                res.json().then(
-                    (r) => {
-                        setTagChosen([...tagChosen, {id: r.data[0].id, name: r.data[0].name}]);
-                    }
-                )
-            }
-        )
-    }
     const handleCreateQuestion = () => {
-        fetch("http://localhost:8000/question/create-question", {
+        fetch("http://localhost:8001/api/questions/create", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -231,13 +209,6 @@ export default function QuestionModal(props) {
                                     ))}
                                 </Select>
                             </FormControl>
-                            <TextField
-                                sx={{mt: 1}}
-                                label="Add New Tag"
-                                variant="outlined"
-                                onBlur={handleAddNewTag}
-                            />
-
                         </Grid>
                     </Grid>
                     <Button

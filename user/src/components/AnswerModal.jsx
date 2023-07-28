@@ -45,7 +45,7 @@ export default function AnswerModal(props) {
 
 
     const handleOpen = () => {
-        fetch("http://localhost:8000/answer/get-answers-by-id/" + props.id, {
+        fetch("http://localhost:8002/api/answers/get-by-question-id?questionID=" + props.id, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -76,8 +76,14 @@ export default function AnswerModal(props) {
             return;
         }
 
-        await UploadFileToCloudinary(selectedFile).then((res) => {
-            fetch("http://localhost:8000/answer/create-answer", {
+        if(content==='') {
+            alert('You need to enter content');
+            setPostLoading(false);
+            return;
+        }
+
+        if (!selectedFile) {
+            await fetch("http://localhost:8002/api/answers", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -86,7 +92,7 @@ export default function AnswerModal(props) {
                     "content": content,
                     "question_id": props.id,
                     "reference": referenceLink,
-                    "image": res.url,
+                    "image": '',
                     'user_id': user.id
                 })
             }).then((res) => res.json().then((r) => {
@@ -96,7 +102,30 @@ export default function AnswerModal(props) {
                     alert(r.message);
                 }
             }));
-        })
+        } else {
+            await UploadFileToCloudinary(selectedFile).then((res) => {
+                fetch("http://localhost:8002/api/answers", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        "content": content,
+                        "question_id": props.id,
+                        "reference": referenceLink,
+                        "image": res.url,
+                        'user_id': user.id
+                    })
+                }).then((res) => res.json().then((r) => {
+                    if (r.status === 200) {
+                        alert('Answered successfully, wait for admin to approve');
+                    } else {
+                        alert(r.message);
+                    }
+                }));
+            })
+        }
+
         setPostLoading(false);
     }
 

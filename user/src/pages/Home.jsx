@@ -23,7 +23,7 @@ function Home() {
 
     const handleChangeCategory = (event) => {
         setLoading(true);
-        fetch('http://localhost:8000/question/get-questions-by-category?categoryID=' + event.target.value + '&offset=0', {
+        fetch('http://localhost:8001/api/questions/find-by-category-id?categoryID=' + event.target.value + '&offset=0', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ function Home() {
 
     const handleChangeTime = (event) => {
         setLoading(true);
-        fetch('http://localhost:8000/question/get-questions-by-time?time=' + event.target.value  + '&offset=0', {
+        fetch('http://localhost:8001/api/questions/order-by-time?time=' + event.target.value  + '&offset=0', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ function Home() {
 
     const handleChangeRating = (event) => {
         setLoading(true);
-        fetch('http://localhost:8000/question/get-questions-by-rating?rating=' + event.target.value  + '&offset=0', {
+        fetch('http://localhost:8001/api/questions/order-by-rating?rating=' + event.target.value  + '&offset=0', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ function Home() {
 
     const handleChangeLike = (event) => {
         setLoading(true);
-        fetch('http://localhost:8000/question/get-questions-by-like?like=' + event.target.value  + '&offset=0', {
+        fetch('http://localhost:8001/api/questions/order-by-like?like=' + event.target.value  + '&offset=0', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ function Home() {
         setLoading(true);
 
         if (category !== '')
-            fetch('http://localhost:8000/question/get-questions-by-category?categoryID=' + category + '&offset=' + offset, {
+            fetch('http://localhost:8001/api/questions/find-by-category-id?categoryID=' + category + '&offset=' + offset, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ function Home() {
                 }
             );
         else if (time !== '')
-            fetch('http://localhost:8000/question/get-questions-by-time?time=' + time + '&offset=' + offset, {
+            fetch('http://localhost:8001/api/questions/order-by-time?time=' + time + '&offset=' + offset, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ function Home() {
                 }
             );
         else if (rating !== '')
-            fetch('http://localhost:8000/question/get-questions-by-rating?rating=' + rating + '&offset=' + offset, {
+            fetch('http://localhost:8001/api/questions/order-by-rating?rating=' + rating + '&offset=' + offset, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ function Home() {
                 }
             );
         else if (like !== '')
-            fetch('http://localhost:8000/question/get-questions-by-like?like=' + like + '&offset=' + offset, {
+            fetch('http://localhost:8001/api/questions/order-by-like?like=' + like + '&offset=' + offset, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -185,7 +185,7 @@ function Home() {
                 }
             );
         else
-            fetch('http://localhost:8000/question/get-questions?search=' + searchInput + '&offset=' + offset, {
+            fetch('http://localhost:8001/api/questions?search=' + searchInput + '&offset=' + offset, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -212,7 +212,7 @@ function Home() {
 
     useEffect(() => {
         setLoading(true);
-        fetch('http://localhost:8000/question/get-questions?search=' + searchInput + '&offset=0', {
+        fetch('http://localhost:8001/api/questions?search=' + searchInput + '&offset=0', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -236,7 +236,7 @@ function Home() {
     }, [searchInput]);
 
     useEffect(() => {
-        fetch("http://localhost:8000/category/get-available-categories", {
+        fetch("http://localhost:8003/api/categories/available", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

@@ -28,7 +28,7 @@ export default function QuestionCard(props) {
 
     const handleRating = (questionID, value) => {
         if (user) {
-            fetch('http://localhost:8000/question/rating', {
+            fetch('http://localhost:8001/api/questions/rating', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -39,14 +39,19 @@ export default function QuestionCard(props) {
                     "rating": Number(value)
                 })
             }).then();
+
+            question.ratings = question.ratings.filter((rating) => rating.user_id !== user.id);
+
             question.ratings.push({
                 "user_id": user.id,
                 "star_number": Number(value)
             });
+
             setQuestion({
                 ...question,
                 ratings: question.ratings
             });
+
         } else {
             alert('Please login to rate this question!');
         }
@@ -55,7 +60,7 @@ export default function QuestionCard(props) {
 
     const handleEvaluation = (questionID, evaluation) => {
         if (user) {
-            fetch('http://localhost:8000/question/evaluate', {
+            fetch('http://localhost:8001/api/questions/evaluate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,7 +80,7 @@ export default function QuestionCard(props) {
 
     const handleLike = () => {
         if (user) {
-            fetch('http://localhost:8000/question/like', {
+            fetch('http://localhost:8001/api/questions/like', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,7 +102,7 @@ export default function QuestionCard(props) {
 
     const handleCancelLike = () => {
         if (user) {
-            fetch('http://localhost:8000/question/like', {
+            fetch('http://localhost:8001/api/questions/like', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -121,7 +126,7 @@ export default function QuestionCard(props) {
         <Card sx={{maxWidth: 600, backgroundColor: '#151515'}}>
             <CardHeader
                 avatar={
-                    <Avatar src={question.user.avatar}
+                    <Avatar src={question.owner.avatar}
                             aria-label="recipe"/>
                 }
                 action={
@@ -174,16 +179,16 @@ export default function QuestionCard(props) {
                 }
                 title={
                     <Link component="button" onClick={() => {
-                        navigate(`/profile/${question.user.id}`)
+                        navigate(`/profile/${question.owner.id}`)
                     }} underline="none"
-                          sx={{fontWeight: 'bold'}}>{question.user.name}</Link>
+                          sx={{fontWeight: 'bold'}}>{question.owner.display_name}</Link>
                 }
 
                 subheader={
                     <>
                         <span>{question.created_at} | </span>
                         <Link component="button" underline="none"
-                              sx={{fontWeight: 'bold'}}>@{question.category.name}</Link>
+                              sx={{fontWeight: 'bold'}}>@{question.category.name} </Link>
                     </>
                 }
 
