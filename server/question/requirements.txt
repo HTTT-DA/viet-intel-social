@@ -1,0 +1,6 @@
+Django==4.2.3
+python-decouple==3.8
+mysqlclient
+djangorestframework~=3.14.0
+django-cors-headers~=4.2.0
+requests~=2.31.0
