@@ -4,6 +4,10 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 // import Login from "./pages/login/index.jsx";
 import Category from "./pages/category";
 import NotFound from "./pages/notFound";
+import Setting from "./pages/setting";
+import Import from "./pages/import";
+import Export from "./pages/export";
+
 import MainLayout from "./layouts/MainLayout";
 import "./styles.scss";
 import ContentCensorShip from "./pages/contentCensorship/index.jsx";
@@ -20,6 +24,18 @@ const router = createBrowserRouter([
       {
         path: "/content-censorship",
         element: <ContentCensorShip />,
+      },
+      {
+        path: "/setting",
+        element: <Setting />,
+      },
+      {
+        path: "/import",
+        element: <Import />,
+      },
+      {
+        path: "/export",
+        element: <Export />,
       },
     ],
   },

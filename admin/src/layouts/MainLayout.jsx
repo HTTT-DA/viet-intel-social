@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+// import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import styles from "./styles.module.scss";
 import Logo from "@/assets/logo.svg";
@@ -16,7 +16,7 @@ import Switch from "@mui/material/Switch";
 const label = { inputProps: { "aria-label": "Switch demo" } };
 
 function MainLayout() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   // useEffect(() => {
   //   if (
