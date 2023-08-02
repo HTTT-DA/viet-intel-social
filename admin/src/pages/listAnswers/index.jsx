@@ -1,26 +1,22 @@
-import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Pagination from "@mui/material/Pagination";
-import Stack from "@mui/material/Stack";
-import TableQuestion from "./components/TableQuestion";
-import { getListQuestions } from "../../api-services";
+import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
+import Pagination from "@mui/material/Pagination";
 import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import debounce from "lodash/debounce";
+import { useEffect, useState } from "react";
+import { getListAnswers } from "../../api-services";
+import TableAnswer from "./components/TableAnswer";
 
-function ContentCensorShip() {
-  const [questions, setQuestions] = useState([
+function ListAnswers() {
+  const [answers, setAnswers] = useState([
     {
       id: 1,
       user: {
         username: "user1",
-      },
-      category: {
-        name: "category1",
       },
       status: "pending",
     },
@@ -28,9 +24,6 @@ function ContentCensorShip() {
       id: 2,
       user: {
         username: "user2",
-      },
-      category: {
-        name: "category2",
       },
       status: "accepted",
     },
@@ -44,9 +37,9 @@ function ContentCensorShip() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getListQuestions();
+        const response = await getListAnswers();
         if (response.status === 200) {
-          setQuestions(response.data);
+          setAnswers(response.data);
         }
       } catch (error) {
         console.error(error);
@@ -98,16 +91,8 @@ function ContentCensorShip() {
               </Select>
             </FormControl>
           </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            // onClick={handleAutoCheck}
-          >
-            AUTOMATIC CHECK
-          </Button>
         </Box>
-        <TableQuestion questions={questions} />
+        <TableAnswer answers={answers} />
         <Box
           display="flex"
           justifyContent="center"
@@ -123,4 +108,4 @@ function ContentCensorShip() {
   );
 }
 
-export default ContentCensorShip;
+export default ListAnswers;

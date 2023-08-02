@@ -11,7 +11,6 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import HomeIcon from "@mui/icons-material/Home";
 import Link from "@mui/material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import Switch from "@mui/material/Switch";
 
 const label = { inputProps: { "aria-label": "Switch demo" } };
 
@@ -105,7 +104,6 @@ function MainLayout() {
               <SettingsIcon />
               <AccountCircleIcon />
               <NotificationsIcon />
-              <Switch {...label} defaultChecked />
             </div>
           </div>
           <Outlet />

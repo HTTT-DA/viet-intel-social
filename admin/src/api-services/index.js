@@ -34,3 +34,27 @@ export async function deleteCategory(id) {
     return false;
   }
 }
+
+export async function getListQuestions() {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/question/get-questions`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
+
+export async function getListAnswers() {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/question/get-answers`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}

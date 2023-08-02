@@ -11,7 +11,7 @@ const Setting = () => {
 
     return (
         <Box sx={{ flexGrow: 1, m: 3 }}>
-            <Typography variant="h4">Turn of notification</Typography>
+            <Typography variant="h4">Settings</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
                 <Typography variant="body1" sx={{ mr: 2 }}>Email notification</Typography>
                 <Switch
