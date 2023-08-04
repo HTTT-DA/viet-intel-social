@@ -5,10 +5,11 @@ from core.models import Category
 
 
 class CategorySerializer(ModelSerializer):
+    isDeleted = serializers.BooleanField(source='is_deleted')
 
     class Meta:
         model = Category
-        fields = "__all__"
+        fields = ['id', 'name', 'isDeleted']
 
 
 class CategoryIdNameSerializer(ModelSerializer):

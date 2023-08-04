@@ -1,5 +1,11 @@
-import { getListCategories } from "@/api-services/index";
+import {
+  addNewCategory,
+  checkIsExisted,
+  countCategories,
+  getListCategories,
+} from "@/api-services/category";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -8,6 +14,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Pagination from "@mui/material/Pagination";
+import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
@@ -17,12 +24,19 @@ const Category = () => {
   const [categories, setCategories] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [isAddSuccess, setIsAddSuccess] = useState(false);
   const [nameError, setNameError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getListCategories();
+        const countResponse = await countCategories();
+        setTotalPages(Math.ceil(countResponse.data / 6));
+
+        const response = await getListCategories(currentPage);
         setCategories(response.data);
       } catch (error) {
         console.error(error);
@@ -30,7 +44,11 @@ const Category = () => {
     };
 
     fetchData();
-  }, []);
+  }, [currentPage]);
+
+  const handlePageChange = (event, page) => {
+    setCurrentPage(page);
+  };
 
   const handleAddButton = () => {
     setOpenDialog(true);
@@ -41,8 +59,10 @@ const Category = () => {
     setNameError(""); // Clear the nameError when closing the dialog
   };
 
-  const handleSaveCategory = () => {
+  const handleSaveCategory = async () => {
     // Validate the input
+    const categoryExist = await checkIsExisted(newCategoryName);
+
     if (newCategoryName.length === 0) {
       setNameError("Category name is required");
     } else if (newCategoryName.length > 30) {
@@ -57,14 +77,40 @@ const Category = () => {
       setNameError(
         "Category name cannot contain numbers, special characters, or Vietnamese diacritics"
       );
+    } else if (categoryExist.isExisted) {
+      setNameError("Category name is already existed");
     } else {
       // Perform the add category action here, e.g., call API to add the category to the database
-      
+      const data = {
+        categoryName: newCategoryName.trim(),
+      };
+
+      try {
+        // Call the handleAddCategory function to add the new category
+        const newCategory = await addNewCategory(data);
+
+        if (newCategory) {
+          // Nếu add thành công
+          setIsAddSuccess(true);
+          setOpenSnackbar(true);
+        } else {
+          // Nếu add không thành công
+          setIsAddSuccess(false);
+          setOpenSnackbar(true);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+
       // Clear the input field and error message
       setNewCategoryName("");
       setNameError("");
       setOpenDialog(false);
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
@@ -96,7 +142,16 @@ const Category = () => {
           marginTop={5}
         >
           <Stack spacing={2}>
-            <Pagination count={10} shape="rounded" color="primary" />
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              shape="rounded"
+              color="primary"
+              onChange={handlePageChange}
+              boundaryCount={2} // Số lượng trang hiển thị ở hai đầu
+              showFirstButton
+              showLastButton
+            />
           </Stack>
         </Box>
       </Box>
@@ -132,6 +187,20 @@ const Category = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          severity={isAddSuccess ? "success" : "error"}
+          sx={{ width: "100%" }}
+        >
+          {isAddSuccess
+            ? "Add successfully !"
+            : "Something went wrong ! Add failed !"}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

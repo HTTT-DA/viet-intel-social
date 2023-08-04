@@ -1,18 +1,18 @@
+import { deleteCategory } from "@/api-services/category";
+import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
 import { useState } from "react";
-import { deleteCategory } from "@/api-services/index";
 
 import PropTypes from "prop-types";
 
@@ -28,16 +28,17 @@ const CategoryList = ({ categories, setCategories }) => {
       const result = await deleteCategory(id);
       if (result) {
         setIsDeleteSuccess(true);
+        setOpenSnackbar(true);
+        // Cập nhật lại danh sách categories trong CategoryList
+        setCategories((prevCategories) =>
+          prevCategories.map((category) =>
+            category.id === id ? { ...category, isDeleted: true } : category
+          )
+        );
       } else {
         setIsDeleteSuccess(false);
+        setOpenSnackbar(true);
       }
-      setOpenSnackbar(true);
-      // Cập nhật lại danh sách categories trong CategoryList
-      setCategories((prevCategories) =>
-        prevCategories.map((category) =>
-          category.id === id ? { ...category, isDeleted: true } : category
-        )
-      );
     } catch (error) {
       console.error(error);
     }
