@@ -112,16 +112,15 @@ class QuestionLike(models.Model):
     class Meta:
         db_table = 'QuestionLike'
 
-    question_id = models.IntegerField()
-    user_id = models.IntegerField()
-
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class QuestionEvaluation(models.Model):
     class Meta:
         db_table = 'QuestionEvaluation'
 
-    question_id = models.IntegerField()
-    user_id = models.IntegerField()
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     evaluation_type = models.CharField(max_length=50)
 
 
@@ -129,8 +128,8 @@ class QuestionRating(models.Model):
     class Meta:
         db_table = 'QuestionRating'
 
-    question_id = models.IntegerField()
-    user_id = models.IntegerField()
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     star_number = models.IntegerField()
 
     def __str__(self):
@@ -156,6 +155,6 @@ class AnswerEvaluation(models.Model):
         unique_together = ('answer', 'user_id',)
 
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
-    user_id = models.IntegerField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     evaluation_type = models.CharField(max_length=50)
 

@@ -12,11 +12,12 @@ from datetime import datetime
 from django.views.decorators.http import require_http_methods
 from email_validator import validate_email, EmailNotValidError
 
-from core.models import User, Question, Category, Answer, QuestionTag, Tag, AnswerEvaluation
+from core.models import User, Question, Category, Answer, QuestionTag, Tag, AnswerEvaluation, QuestionLike, QuestionRating
 from dateutil.relativedelta import relativedelta
 import calendar
 from django.utils import timezone
 from django.db import connection
+from django.db.models import Prefetch
 
 
 import csv, codecs
@@ -69,10 +70,11 @@ class ExportController(ViewSet):
     @csrf_exempt
     def exportQuestionWithEvaluation(self, time_period="this_year"):
         fields = [f.name for f in Question._meta.fields if (f.name not in ['category', 'user'])]
-        header = fields + ['category_name', 'question_user_ask', 'tags', 'question_evaluation_types', 'question_evaluator_user_names']
+        header = fields + ['category_name', 'question_asker', 'tags', 'question_evaluator_user_names',\
+                            'question_evaluation_types', 'user_like', 'user_rate', 'star_numbers', 'total_star_numbers']
 
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f"attachment; filename={Question.__name__}.csv"
+        response["Content-Disposition"] = f"attachment; filename=QuestionWithEvaluation.csv"
         
         writer = csv.DictWriter(response, fieldnames=header)
         writer.writeheader()
@@ -88,42 +90,44 @@ class ExportController(ViewSet):
             row = {field: getattr(question, field) for field in fields}
 
             row['category_name'] = question.category.name if question.category else ''
-            row['rating'] = row['rating'] or 0
-            row['like_count'] = row['like_count'] or 0
-
+            row['rating'] = row['rating']
+            row['like_count'] = row['like_count']
 
             try:
-                row['question_user_ask'] = question.user.display_name
+                row['question_asker'] = question.user.display_name
             except User.DoesNotExist:
-                row['question_user_ask'] = 'UNKNOWN'
+                row['question_asker'] = ''
 
             tag_ids = question.questiontag_set.all().values_list('tag', flat=True)
-            tags = ', '.join(Tag.objects.filter(id__in=tag_ids).values_list('name', flat=True))
-            row['tags'] = tags or 'NONE'
+            row['tags'] = ', '.join(Tag.objects.filter(id__in=tag_ids).values_list('name', flat=True))
 
-            with connection.cursor() as cursor:
-                cursor.execute('SELECT * FROM QuestionEvaluation WHERE question_id = %s', [question.id])
-                evaluations = cursor.fetchall()
-                
+            user_id_like = question.questionlike_set.all().values_list('user_id', flat=True)
+            row['user_like'] = ', '.join(User.objects.filter(id__in=user_id_like).values_list('display_name', flat=True))
 
-            evaluation_types = [e[2] for e in evaluations] 
+            user_id_rating = question.questionlike_set.all().values_list('user_id', flat=True)
+            row['user_rate'] = ', '.join(User.objects.filter(id__in=user_id_rating).values_list('display_name', flat=True))
+
+            star_numbers = question.questionrating_set.all().values_list('star_number', flat=True)
+            row['star_numbers'] = ', '.join(map(str, star_numbers))
+            row['total_star_numbers'] = sum(star_numbers)
+
+            evaluation_types = question.questionevaluation_set.all().values_list('evaluation_type', flat=True)
             row['question_evaluation_types'] = ', '.join(evaluation_types)
 
-            evaluator_user_names = [User.objects.get(id=e[1]).display_name if User.objects.filter(id=e[1]).exists() else 'UNKNOWN' for e in evaluations]  # Update this based on your table structure
+            evaluator_user_names = question.questionevaluation_set.all().values_list('user__display_name', flat=True)
             row['question_evaluator_user_names'] = ', '.join(evaluator_user_names)
 
             writer.writerow(row)
 
         return response
 
-
     @csrf_exempt
     def exportAnswerWithEvaluation(self, time_period="this_year"):
-        answer_fields = [f.name for f in Answer._meta.fields if (f.name not in ['question'])]
-        header = answer_fields + ['question_content', 'answer_user_name', 'evaluation_types', 'evaluator_user_names']
+        answer_fields = [f.name for f in Answer._meta.fields if (f.name not in ['question', 'user_id'])]
+        header = answer_fields + ['question_content', 'answerer_name', 'evaluation_types', 'evaluator_user_names']
 
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f"attachment; filename={Answer.__name__}_Evaluation.csv"
+        response["Content-Disposition"] = f"attachment; filename=AnswerWithEvaluation.csv"
 
         writer = csv.DictWriter(response, fieldnames=header)
         writer.writeheader()
@@ -138,18 +142,14 @@ class ExportController(ViewSet):
         for answer in answers:
             row = {field: getattr(answer, field) for field in answer_fields}
 
-            row['question_content'] = answer.question.content if answer.question else 'UNKNOWN'
+            row['question_content'] = answer.question.content
 
-            row['answer_user_name'] = User.objects.get(id=answer.user_id).display_name if User.objects.filter(id=answer.user_id).exists() else 'UNKNOWN'
+            row['answerer_name'] = User.objects.get(id=answer.user_id).display_name
 
-            with connection.cursor() as cursor:
-                cursor.execute('SELECT * FROM AnswerEvaluation WHERE answer_id = %s', [answer.id])
-                evaluations = cursor.fetchall()
-
-            evaluation_types = [e[2] for e in evaluations] 
+            evaluation_types = answer.answerevaluation_set.all().values_list('evaluation_type', flat=True)
             row['evaluation_types'] = ', '.join(evaluation_types)
 
-            evaluator_user_names = [User.objects.get(id=e[1]).display_name if User.objects.filter(id=e[1]).exists() else 'UNKNOWN' for e in evaluations]
+            evaluator_user_names = answer.answerevaluation_set.all().values_list('user__display_name', flat=True)
             row['evaluator_user_names'] = ', '.join(evaluator_user_names)
 
             writer.writerow(row)
