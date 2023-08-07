@@ -10,28 +10,30 @@ const Setting = () => {
     };
 
     return (
-        <Box sx={{ flexGrow: 1, m: 3 }}>
-            <Typography variant="h4">Settings</Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                <Typography variant="body1" sx={{ mr: 2 }}>Email notification</Typography>
-                <Switch
-                    checked={notify}
-                    onChange={handleToggle}
-                />
+        <div>
+            <h1 style={{ color: "#243c64" }}>Setting</h1>
+            <Box bgcolor="#ffffff" padding={2} borderRadius={8} boxShadow={1}>
+                <Box sx={{ display: 'flex', alignItems: 'center', m: 2 }}>
+                    <Typography variant="body1" sx={{ mr: 2 }}>Turn on mail notification</Typography>
+                    <Switch
+                        checked={notify}
+                        onChange={handleToggle}
+                    />
+                </Box>
+                {notify && (
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                        <AlertTitle>Info</AlertTitle>
+                        Notification turned on
+                    </Alert>
+                )}
+                {!notify && (
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                        <AlertTitle>Info</AlertTitle>
+                        Notification turned off
+                    </Alert>
+                )}
             </Box>
-            {notify && (
-                <Alert severity="info" sx={{ mt: 2 }}>
-                    <AlertTitle>Info</AlertTitle>
-                    Notification turned on
-                </Alert>
-            )}
-            {!notify && (
-                <Alert severity="info" sx={{ mt: 2 }}>
-                    <AlertTitle>Info</AlertTitle>
-                    Notification turned off
-                </Alert>
-            )}
-        </Box>
+        </div>
     );
 };
 
