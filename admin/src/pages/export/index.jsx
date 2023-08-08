@@ -78,7 +78,7 @@ const Export = () => {
             }
         }).then((res) => {
             if (res.status === 200) {
-                return res.blob(); // Parse the response as a blob
+                return res.blob();
             } else {
                 throw new Error('Error while fetching data');
             }
@@ -86,7 +86,7 @@ const Export = () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = downloadFileName; // Or whatever filename you want
+            a.download = downloadFileName;
             a.style.display = 'none';
 
             document.body.appendChild(a);
@@ -153,7 +153,7 @@ const Export = () => {
                         justifyContent="flex-end"
                         >
                             <Button variant="contained" color="primary" onClick={handleExport}>
-                                Export user
+                                Export
                             </Button>
                         </Box>
                     </Grid>

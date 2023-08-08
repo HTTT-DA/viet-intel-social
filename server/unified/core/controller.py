@@ -11,35 +11,23 @@ from django.http import HttpResponse
 from datetime import datetime
 from django.views.decorators.http import require_http_methods
 from email_validator import validate_email, EmailNotValidError
+import json
 
 from core.models import User, Question, Category, Answer, QuestionTag, Tag, AnswerEvaluation, QuestionLike, QuestionRating
 from dateutil.relativedelta import relativedelta
-import calendar
+from django.core.exceptions import ObjectDoesNotExist
+
 from django.utils import timezone
-from django.db import connection
-from django.db.models import Prefetch
+
 
 
 import csv, codecs
 
-
-def export(model, fields):
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f"attachment; filename={model.__name__}.csv"
-    writer = csv.writer(response)
-
-    writer.writerow(fields)
-
-    for row in model.objects.values(*fields):
-        writer.writerow([row[field] for field in fields])
-
-    return response
-
 def get_start_date(time_period):
     now = timezone.now()
 
-    if time_period == "last_30_days":
-        return now - relativedelta(days=30)
+    if time_period == "last_7_days":
+        return now - relativedelta(days=7)
     
     elif time_period == "this_month":
         return now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -315,3 +303,43 @@ class ImportController(ViewSet):
         except Exception as e:
             return responseData(data=failed_ids, message=str(e), status=500)
             
+#Notiifcation
+
+class NotificationController(ViewSet):
+    @require_http_methods(['GET'])
+    def getNotificationById(request, userId=2):
+        try:
+            user = User.objects.get(id=userId)
+            notification_type = user.get_notification_type()
+            return responseData(message='Success', status=200, data=notification_type)
+        
+
+        except ObjectDoesNotExist:
+            return responseData(message='User does not exist', status=404)
+        
+        except Exception as e:
+            return responseData(message=str(e), status=500, data={})
+        
+    @csrf_exempt
+    @require_http_methods(['POST'])
+    def updateNotification(request):
+        try:
+            data = json.loads(request.body)
+            print(data)
+            user_id = data.get('user_id', None)
+            notification_type = data.get('notification_type', None)
+            
+            if user_id and notification_type is not None:
+                user = User.objects.get(id=user_id)
+                user.get_notification = notification_type
+                user.save()
+            else:
+                return responseData(message='Body is invalid', status=400, data={})
+            return responseData(message='Success', status=200)
+
+        except ObjectDoesNotExist:
+            return responseData(message='User does not exist', status=404)
+    
+        except Exception as e:
+            return responseData(message=str(e), status=500, data={})
+    
