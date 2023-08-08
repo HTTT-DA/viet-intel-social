@@ -26,16 +26,16 @@ import csv, codecs
 def get_start_date(time_period):
     now = timezone.now()
 
-    if time_period == "last_7_days":
+    if time_period == "last-7-days":
         return now - relativedelta(days=7)
     
-    elif time_period == "this_month":
+    elif time_period == "this-month":
         return now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     
-    elif time_period == "this_quarter":
+    elif time_period == "this-quarter":
         quarter_month = (now.month - 1) // 3 * 3 + 1
         return now.replace(month=quarter_month, day=1, hour=0, minute=0, second=0, microsecond=0)
-    elif time_period == "this_year":
+    elif time_period == "this-year":
         return now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
     
     return None
@@ -56,7 +56,9 @@ class ExportController(ViewSet):
         return response
 
     @csrf_exempt
-    def exportQuestionWithEvaluation(self, time_period="this_year"):
+    @require_http_methods(['GET'])
+    def exportQuestionWithEvaluation(request):
+        time_period = request.GET.get('date')
         fields = [f.name for f in Question._meta.fields if (f.name not in ['category', 'user'])]
         header = fields + ['category_name', 'question_asker', 'tags', 'question_evaluator_user_names',\
                             'question_evaluation_types', 'user_like', 'user_rate', 'star_numbers', 'total_star_numbers']
@@ -110,7 +112,9 @@ class ExportController(ViewSet):
         return response
 
     @csrf_exempt
-    def exportAnswerWithEvaluation(self, time_period="this_year"):
+    @require_http_methods(['GET'])
+    def exportAnswerWithEvaluation(request):
+        time_period = request.GET.get('date')
         answer_fields = [f.name for f in Answer._meta.fields if (f.name not in ['question', 'user_id'])]
         header = answer_fields + ['question_content', 'answerer_name', 'evaluation_types', 'evaluator_user_names']
 

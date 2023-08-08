@@ -1,97 +1,39 @@
 import React, { useRef, useState } from 'react';
 import { Button, Box, Grid, FormControl,InputLabel, Select, MenuItem }  from '@mui/material/';
+import { exportUser, exportQuestion, exportAnswer } from '@/api-services/unified';
 
 const Export = () => {
-    const handleUserExport = () => {
-        fetch("http://localhost:8004/core/export-user/", {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then((res) => {
-            if (res.status === 200) {
-                return res.blob(); // Parse the response as a blob
-            } else {
-                throw new Error('Error while fetching data');
-            }
-        }).then((blob) => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'users.csv'; // Or whatever filename you want
-            a.style.display = 'none';
-
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }).catch((error) => {
-            console.error('Failed to export data: ', error);
-        });
-    };
-
-    const handleQuestionExport = () => {
-        fetch("http://localhost:8004/core/export-question/", {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then((res) => {
-            if (res.status === 200) {
-                return res.blob(); // Parse the response as a blob
-            } else {
-                throw new Error('Error while fetching data');
-            }
-        }).then((blob) => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'questions.csv'; // Or whatever filename you want
-            a.style.display = 'none';
-
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }).catch((error) => {
-            console.error('Failed to export data: ', error);
-        });
-    };
 
     const handleExport = () => {
-        let exportUrl = "";
+        let exportFunction = null;
         let downloadFileName = "";
         
         if (selectedField === "user") {
-            exportUrl = "http://localhost:8004/core/export-user/";
-            downloadFileName = "users.csv";
+            exportFunction = exportUser;
+            downloadFileName = "users";
         } else if (selectedField === "question") {
-            exportUrl = "http://localhost:8004/core/export-question/";
-            downloadFileName = "questions.csv";
+            exportFunction = exportQuestion;
+            downloadFileName = "questions_";
+        } else if (selectedField === "answer") {
+            exportFunction = exportAnswer;
+            downloadFileName = "answers_";
         } else {
             console.error('Please select a field for export');
             return;
         }
-
-        fetch(`${exportUrl}?date=${selectedDate}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
+    
+        downloadFileName += `${selectedDate}.csv`;
+    
+        exportFunction(selectedDate).then((res) => {
+            if (res) {
+                const url = window.URL.createObjectURL(new Blob([res]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', downloadFileName);
+                document.body.appendChild(link);
+                link.click();
+                link.parentNode.removeChild(link);
             }
-        }).then((res) => {
-            if (res.status === 200) {
-                return res.blob();
-            } else {
-                throw new Error('Error while fetching data');
-            }
-        }).then((blob) => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = downloadFileName;
-            a.style.display = 'none';
-
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
         }).catch((error) => {
             console.error('Failed to export data: ', error);
         });
@@ -103,6 +45,9 @@ const Export = () => {
 
     const handleFieldChange = (event) => {
         setSelectedField(event.target.value);
+        if(event.target.value === "user") {
+            setSelectedDate("");
+        }
     };
 
     const handleDateChange = (event) => {
@@ -115,7 +60,8 @@ const Export = () => {
             
             <Box bgcolor="#ffffff" padding={2} borderRadius={8} boxShadow={1}>
                 <Grid container spacing={3} p={1} m={0.5}>
-                    <Grid item xs={4} sm={4}>
+                    <Grid item xs={2} sm={2 }></Grid>
+                    <Grid item xs={3} sm={3}>
                         <FormControl fullWidth>
                             <InputLabel id="field-select-label">Choose field</InputLabel>
                                 <Select
@@ -126,10 +72,12 @@ const Export = () => {
                                 >
                                     <MenuItem value={"user"}>User</MenuItem>
                                     <MenuItem value={"question"}>Question</MenuItem>
+                                    <MenuItem value={"answer"}>Answer</MenuItem>
                                 </Select>
                         </FormControl>             
                     </Grid>
-                    <Grid item xs={4} sm={4}>
+                    {selectedField === 'question' || selectedField === 'answer' ? (
+                    <Grid item xs={3} sm={3}>
                         <FormControl fullWidth>
                             <InputLabel id="date-select-label">Select date</InputLabel>
                             <Select
@@ -146,8 +94,9 @@ const Export = () => {
                             </Select>
                         </FormControl>           
                     </Grid>
+                    ) : <Grid item xs={3} sm={3}></Grid> }
 
-                    <Grid item xs={4} sm={4} display={'flex'}>
+                    <Grid item xs={3} sm={3} display={'flex'}>
                         <Box
                         display="flex"
                         justifyContent="flex-end"
