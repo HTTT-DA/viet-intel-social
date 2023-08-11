@@ -1,6 +1,7 @@
 # controller.py
 from django.core.mail import send_mail
 from django.db import transaction
+from django.db.models import Max
 
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.viewsets import ViewSet
@@ -11,17 +12,14 @@ from django.http import HttpResponse
 from datetime import datetime
 from django.views.decorators.http import require_http_methods
 from email_validator import validate_email, EmailNotValidError
-import json
 
-from core.models import User, Question, Category, Answer, QuestionTag, Tag, AnswerEvaluation, QuestionLike, QuestionRating
+from core.models import User, Question, Category, Answer, QuestionTag, Tag, AnswerEvaluation, QuestionLike, QuestionRating, UserPoint
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ObjectDoesNotExist
 
 from django.utils import timezone
 
-
-
-import csv, codecs
+import csv, codecs, json
 
 def get_start_date(time_period):
     now = timezone.now()
@@ -40,8 +38,10 @@ def get_start_date(time_period):
     
     return None
 
+#Export
 class ExportController(ViewSet):
     @csrf_exempt
+    @require_http_methods(['GET'])
     def exportUser(self):
         fields = [f.name for f in User._meta.fields]
         response = HttpResponse(content_type="text/csv")
@@ -52,6 +52,23 @@ class ExportController(ViewSet):
 
         for row in User.objects.values(*fields):
             writer.writerow([row[field] for field in fields])
+            
+
+        return response
+    
+    @csrf_exempt
+    @require_http_methods(['GET'])
+    def exportUserWithPoints(self):
+        fields = [f.name for f in UserPoint._meta.fields]
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename={UserPoint.__name__}.csv"
+        writer = csv.writer(response)
+
+        writer.writerow(fields)
+
+        for row in UserPoint.objects.values(*fields):
+            writer.writerow([row[field] for field in fields])
+            
 
         return response
 
@@ -148,8 +165,6 @@ class ExportController(ViewSet):
 
         return response
 
-
-
 # Mail
 class MailController(ViewSet):
     @csrf_exempt
@@ -196,6 +211,7 @@ class ImportController(ViewSet):
         current_date = datetime.now().strftime('%Y-%m-%d')
         status = 'WAITING'
         questions = []
+        last_id = Question.objects.all().aggregate(Max('id')).get('id__max') or 0
 
         failed_ids = []
         
@@ -229,7 +245,10 @@ class ImportController(ViewSet):
                 failed_ids.append({'id': question_id, 'reason': f'No user with id {user_id}'})
                 continue
 
+            last_id += 1
+
             questions.append(Question(
+                id = last_id,
                 content=content, 
                 category_id=category_id,
                 user_id=user_id, 
@@ -246,9 +265,10 @@ class ImportController(ViewSet):
         except Exception as e:
             return responseData(data=failed_ids, message=str(e), status=500)
         
-
+    @require_http_methods(['POST'])
     def importUser(request):
-        csv_file = request.FILES.get("files")
+        csv_file = request.FILES["files"]
+        
         required_headers = {'id', 'email', 'password', 'name', 'display_name', 'role', 'gender'}
         data, error = process_csv_file(csv_file, required_headers)
         
@@ -257,15 +277,17 @@ class ImportController(ViewSet):
 
         users = []
         failed_ids = []
+        last_id = User.objects.all().aggregate(Max('id')).get('id__max') or 0
+
         
         for row in data:  
             email = row.get('email')
             password = row.get('password')
             name = row.get('name')
             display_name = row.get('display_name')
-            role = row.get('role').upper() if not None else 'USER'
+            role = row.get('role').upper() if row.get('role') else 'USER'
             user_id = row.get('id')
-            gender = row.get('gender').upper() if not None else 'MALE'
+            gender = row.get('gender').upper() if row.get('gender') else 'MALE'
             
             if not email:
                 failed_ids.append({'id': user_id, 'reason': 'Invalid email'})
@@ -279,7 +301,11 @@ class ImportController(ViewSet):
                 failed_ids.append({'id': user_id, 'reason': str(e)})
                 continue
 
+            last_id += 1
+
+
             users.append(User(
+                id=last_id,
                 email=email, 
                 password=password,
                 name=name, 
@@ -306,9 +332,77 @@ class ImportController(ViewSet):
         
         except Exception as e:
             return responseData(data=failed_ids, message=str(e), status=500)
+        
+
+    @require_http_methods(['POST'])
+    def importAnswer(request):
+        csv_file = request.FILES.get("files")
+        required_headers = {'id', 'content', 'reference', 'image', 'user_id', 'question_id'}
+        data, error = process_csv_file(csv_file, required_headers)
+        
+        if error:
+            return responseData(data=data, status=500, message=error)
+
+        current_date = datetime.now().strftime('%Y-%m-%d')
+        status = 'WAITING'
+        answers = []
+        last_id = Answer.objects.all().aggregate(Max('id')).get('id__max') or 0
+
+        failed_ids = []
+        
+        for row in data:  
+            content = row.get('content')
+            question_id = row.get('question_id')
+            user_id = row.get('user_id')
+            answer_id = row.get('id')
+            reference = row.get('reference')
+            image = row.get('image')
+            
+            if not content or len(content) > 500:
+                failed_ids.append({'id': answer_id, 'reason': 'Invalid content'})
+                continue
+                
+            try:
+                answer_id = int(answer_id)
+            except (TypeError, ValueError):
+                failed_ids.append({'id': answer_id, 'reason': 'Invalid answer_id'})
+                continue
+
+            if not Question.objects.filter(id=answer_id).exists():
+                failed_ids.append({'id': answer_id, 'reason': f'No category with id {answer_id}'})
+                continue
+
+            try:
+                user_id = int(user_id)
+            except (TypeError, ValueError):
+                failed_ids.append({'id': question_id, 'reason': 'Invalid user_id'})
+                continue
+
+            if not User.objects.filter(id=user_id).exists():
+                failed_ids.append({'id': question_id, 'reason': f'No user with id {user_id}'})
+                continue
+
+            last_id += 1
+
+            answers.append(Question(
+                id = last_id,
+                content=content, 
+                question_id=question_id,
+                user_id=user_id, 
+                created_at=current_date, 
+                status=status
+            ))
+        
+        try:
+            with transaction.atomic():
+                Question.objects.bulk_create(answers)
+            
+            return responseData(data=failed_ids, message='Success creating answers. Failed answers:', status=200)
+        
+        except Exception as e:
+            return responseData(data=failed_ids, message=str(e), status=500)
             
 #Notiifcation
-
 class NotificationController(ViewSet):
     @require_http_methods(['GET'])
     def getNotificationById(request, userId=2):
@@ -329,7 +423,6 @@ class NotificationController(ViewSet):
     def updateNotification(request):
         try:
             data = json.loads(request.body)
-            print(data)
             user_id = data.get('user_id', None)
             notification_type = data.get('notification_type', None)
             

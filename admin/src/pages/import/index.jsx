@@ -1,6 +1,8 @@
 import { Grid, Typography, Button, Box, FormControl, Select, InputLabel, MenuItem } from '@mui/material';
 import Papa from 'papaparse';
 import React, { useRef, useState } from 'react';
+import axios from 'axios';
+import { importUser, importQuestion } from '@/api-services/unified';
 
 
 
@@ -8,34 +10,14 @@ function CsvImport() {
     const fileInputRef = useRef();
     const [csvFile, setCsvFile] = useState();
     const [fileName, setFileName] = useState();
+    const [uploading, setUploading] = useState(false);
+    const [uploadResult, setUploadResult] = useState(null);
 
-
-    const processCSV = (str, delim = ',') => {
-        const headers = str.slice(0, str.indexOf('\n')).split(delim);
-        const rows = str.slice(str.indexOf('\n') + 1).split('\n');
-
-        const jsonObj = rows.map(row => {
-            const values = row.split(delim);
-            const eachObj = {};
-            headers.forEach((header, i) => {
-                eachObj[header] = values[i];
-            });
-            return eachObj;
-        });
-
-        return jsonObj;
-    };
-
-    const handleFileRead = (e) => {
-        const content = e.target.result;
-        console.log(processCSV(content)); // the CSV data in JSON format
-    };
 
     const handleFileChosen = (file) => {
         setCsvFile(file);
         setFileName(file.name);
         const fileReader = new FileReader();
-        fileReader.onloadend = handleFileRead;
         fileReader.readAsText(file);
     };
 
@@ -59,9 +41,48 @@ function CsvImport() {
     const fieldRequirements = {
         user: ['id', 'email', 'password', 'name', 'display_name', 'role', 'gender'],
         question: ['id', 'content', 'category_id', 'user_id'],
+        answer: ['id', 'content', 'reference', 'image', 'user_id', 'question_id'],
     };
 
     const requiredFields = fieldRequirements[selectedField] || [];
+
+    const handleImport = async () => {
+        if (!csvFile) {
+            alert("No file selected");
+            return;
+        }
+    
+        if (!selectedField) {
+            alert("No field selected");
+            return;
+        }
+    
+        setUploading(true);
+    
+        let response;
+        switch (selectedField) {
+            case 'user':
+                response = await importUser(csvFile);
+                break;
+            case 'question':
+                response = await importQuestion(csvFile);
+                break;
+            default:
+                alert("Invalid field selected");
+                setUploading(false);
+                return;
+        }
+    
+        setUploading(false);
+    
+        if (response && response.status == 200) {
+            alert("Successfully uploaded");
+            setUploadResult("Successfully uploaded!");
+        } else {
+            alert("Error uploading");
+        }
+    };
+    
 
 
     return (
@@ -82,6 +103,7 @@ function CsvImport() {
                                     >
                                         <MenuItem value={"user"}>User</MenuItem>
                                         <MenuItem value={"question"}>Question</MenuItem>
+                                        <MenuItem value={"question"}>Answer</MenuItem>
                                     </Select>
                                 </FormControl>   
                             </Grid> 
@@ -132,7 +154,7 @@ function CsvImport() {
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => console.log('Import button clicked!')}
+                                onClick={handleImport}
                             >
                                 Import
                             </Button>

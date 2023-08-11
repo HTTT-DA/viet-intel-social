@@ -15,7 +15,7 @@ export async function getNotificationType(userID) {
 export async function updateNotificationType(user_id, notification_type) {
     try {
         const response = await axios.post(
-            `http://127.0.0.1:8004/core/update-notification-type`,
+            `http://127.0.0.1:8004/core/update-notification-type/`,
             {
                 user_id: user_id,
                 notification_type: notification_type
@@ -62,6 +62,69 @@ export async function exportAnswer(date) {
 
         );
         return response.data;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+
+export async function importUser(csv_file) {
+    try {
+        const formData = new FormData();
+        formData.append('files', csv_file);
+
+        const response = await axios.post(
+            `http://127.0.0.1:8004/core/import-user/`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+        return response;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+
+export async function importQuestion(csv_file) {
+    try {
+        const formData = new FormData();
+        formData.append('files', csv_file);
+
+        const response = await axios.post(
+            `http://127.0.0.1:8004/core/import-question/`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+        return response;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+
+export async function importAnswer(csv_file) {
+    try {
+        const formData = new FormData();
+        formData.append('files', csv_file);
+
+        const response = await axios.post(
+            `http://127.0.0.1:8004/core/import-answer/`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+        return response;
     } catch (error) {
         console.error(error);
         return false;

@@ -8,19 +8,24 @@ const Export = () => {
         let exportFunction = null;
         let downloadFileName = "";
         
-        if (selectedField === "user") {
-            exportFunction = exportUser;
-            downloadFileName = "users";
-        } else if (selectedField === "question") {
-            exportFunction = exportQuestion;
-            downloadFileName = "questions_";
-        } else if (selectedField === "answer") {
-            exportFunction = exportAnswer;
-            downloadFileName = "answers_";
-        } else {
-            console.error('Please select a field for export');
-            return;
+        switch (selectedField) {
+            case 'user':
+                exportFunction = exportUser;
+                downloadFileName = 'users';
+                break;
+            case 'question':
+                exportFunction = exportQuestion;
+                downloadFileName = 'questions_';
+                break;
+            case 'answer':
+                exportFunction = exportAnswer;
+                downloadFileName = 'answers_';
+                break;
+            default:
+                console.error('Please select a field for export');
+                return;
         }
+        
     
         downloadFileName += `${selectedDate}.csv`;
     
