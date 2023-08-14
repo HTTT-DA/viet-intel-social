@@ -2,6 +2,7 @@ import json
 
 from django.db import IntegrityError
 from django.views.decorators.http import require_http_methods
+from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.viewsets import ViewSet
 
@@ -16,11 +17,11 @@ class CategoryController(ViewSet):
     @require_http_methods(['GET'])
     def getAllCategories(request):
         try:
-            page_number = int(request.GET.get('page', 1))
+            pageNumber = int(request.GET.get('page', 1))
             totalRecords = Category.objects.count()
 
             page_size = 6
-            offset = (page_number - 1) * page_size
+            offset = (pageNumber - 1) * page_size
             limit = offset + page_size if offset + page_size <= totalRecords else totalRecords
             
             category = Category.objects.all()[offset:limit]
@@ -29,16 +30,6 @@ class CategoryController(ViewSet):
         except IntegrityError as e:
             print(e)
             return responseData(None, status=500, message="Error when get all categories")
-
-    @staticmethod
-    @require_http_methods(['GET'])
-    def getAvailableCategories(request):
-        try:
-            queryset = Category.objects.filter(is_deleted=False)
-            return responseData(data=CategorySerializer(queryset, many=True).data)
-        except IntegrityError as e:
-            print(e)
-            return responseData(None, status=500, message="Error when get available categories")
 
     @staticmethod
     @require_http_methods(['GET'])
@@ -120,4 +111,17 @@ class CategoryController(ViewSet):
         except IntegrityError as e:
             print(e)
             return responseData(None, status=500,message="Error when find category in Category-Services")
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getCategoryByIdForAdmin(request, categoryId):
+        try:
+            category = Category.objects.get(id=categoryId)
+            return responseData(data=CategoryIdNameSerializer(category).data, message='Success', status=200)
+        except ObjectDoesNotExist:
+            return responseData(None, status=404, message='User not found in DB in User-Service')
+        except Exception as e:
+            print(e)
+            return responseData(None, status=500, message="Error when get user by ID for Admin in User-Service")
+
 

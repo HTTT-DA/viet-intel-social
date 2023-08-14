@@ -47,3 +47,9 @@ class UserPointSerializer(ModelSerializer):
     class Meta:
         model = UserPoint
         fields = ('point', 'user')
+
+
+class UserAdminSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'display_name')

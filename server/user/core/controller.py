@@ -4,11 +4,12 @@ from datetime import datetime
 import jwt
 from decouple import config
 from django.views.decorators.http import require_http_methods
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.viewsets import ViewSet
 
 from core.authentication import MyTokenObtainPairSerializer
 from core.models import User, UserPoint
-from core.serializer import UserPointSerializer, OtherUserSerializer, QuestionOwnerSerializer
+from core.serializer import UserPointSerializer, OtherUserSerializer, QuestionOwnerSerializer, UserAdminSerializer
 from utils.response import responseData
 
 
@@ -209,3 +210,15 @@ class UserController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(message='Error', status=500, data={})
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getUserByIdForAdmin(request, userId):
+        try:
+            user = User.objects.get(id=userId)
+            return responseData(data=UserAdminSerializer(user).data, message='Success', status=200)
+        except ObjectDoesNotExist:
+            return responseData(None, status=404, message='User not found in DB in User-Service')
+        except Exception as e:
+            print(e)
+            return responseData(None, status=500, message="Error when get user by ID for Admin in User-Service")

@@ -135,3 +135,25 @@ class QuestionService:
                 user_id=data['user_id'],
                 star_number=data['rating']
             )
+
+    # For Admin
+    @staticmethod
+    def getAllQuestionOrderByNewest(pageNumber):
+        totalRecords = Question.objects.count()
+
+        page_size = 6
+        offset = (pageNumber - 1) * page_size
+        limit = offset + page_size if offset + page_size <= totalRecords else totalRecords
+
+        questions = Question.objects.all().order_by('-created_at', '-status')[offset:limit]
+
+        return questions
+
+    @staticmethod
+    def getDetailQuestionById(questionId):
+        question = Question.objects.filter(id=questionId)
+        return question
+
+    @staticmethod
+    def countQuestions():
+        return Question.objects.count()

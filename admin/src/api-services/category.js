@@ -66,3 +66,17 @@ export async function checkIsExisted(name) {
     return false;
   }
 }
+
+export async function getCategoryByID(categoryId) {
+  try {
+    const response = await axios.get(
+      `${
+        import.meta.env.VITE_API_URL_CATEGORY
+      }/api/categories/get-category/${categoryId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}

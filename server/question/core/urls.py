@@ -4,19 +4,22 @@ from core.controller import QuestionController
 
 urlpatterns = [
     # Read
-    path('/questions', QuestionController.getAllQuestionOrderByNewestTime),
-    path('/questions/find-by-category-id', QuestionController.getAllQuestionByCategory),
-    path('/questions/order-by-time', QuestionController.getQuestionOrderByTime),
-    path('/questions/order-by-like', QuestionController.getQuestionOrderByLike),
-    path('/questions/order-by-rating', QuestionController.getQuestionOrderByRating),
+    path('questions', QuestionController.getAllQuestionOrderByNewestTime),
+    path('questions/find-by-category-id', QuestionController.getAllQuestionByCategory),
+    path('questions/order-by-time', QuestionController.getQuestionOrderByTime),
+    path('questions/order-by-like', QuestionController.getQuestionOrderByLike),
+    path('questions/order-by-rating', QuestionController.getQuestionOrderByRating),
+    path('questions/get-detail-admin/<int:questionId>', QuestionController.getDetailQuestionForAdmin),
+    path('questions/get-all-admin', QuestionController.getAllQuestionsForAdmin),
+    path('questions/count', QuestionController.getCountQuestions),
 
     # Create - Update - Delete
-    path('/questions/like', QuestionController.likeQuestion),
-    path('/questions/create', QuestionController.createQuestion),
-    path('/questions/evaluate', QuestionController.evaluateQuestion),
-    path('/questions/rating', QuestionController.ratingQuestion),
+    path('questions/like', QuestionController.likeQuestion),
+    path('questions/create', QuestionController.createQuestion),
+    path('questions/evaluate', QuestionController.evaluateQuestion),
+    path('questions/rating', QuestionController.ratingQuestion),
 
     # Tag
-    path('/tags', QuestionController.getListTag),
-    path('/tags', QuestionController.createTag),
+    path('tags', QuestionController.getListTag),
+    path('tags', QuestionController.createTag),
 ]

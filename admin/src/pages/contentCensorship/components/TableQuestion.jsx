@@ -22,7 +22,7 @@ function TableQuestion({ questions }) {
             <TableCell style={{ paddingLeft: "60px" }}>
               <b>Category</b>
             </TableCell>
-            <TableCell style={{ paddingLeft: "60px" }}>
+            <TableCell style={{ paddingLeft: "75px" }}>
               <b>Status</b>
             </TableCell>
             <TableCell style={{ paddingLeft: "60px" }} />
@@ -35,32 +35,34 @@ function TableQuestion({ questions }) {
             <TableRow key={question.id}>
               <TableCell>{question.id}</TableCell>
               <TableCell style={{ paddingLeft: "200px" }}>
-                {question.user.username}
+                {question.user.email}
               </TableCell>
               <TableCell style={{ paddingLeft: "60px" }}>
                 {question.category.name}
               </TableCell>
               <TableCell style={{ paddingLeft: "60px" }}>
-                {question.status === "pending" ? (
-                  <Chip color="error" label="PENDING" />
+                {question.status === "ACCEPTED" ? (
+                  <Chip color="success" label={<b>ACCEPTED</b>} />
                 ) : (
-                  <Chip color="success" label="ACCEPTED" />
-                )}
+                  <Chip color="error" label={<b>PENDING</b>} />
+                ) }
               </TableCell>
               <TableCell style={{ paddingLeft: "60px" }}>
                 <Button
                   href={`/content-censorship/question/${question.id}`}
                   variant="plain"
+                  sx={{ color: "blue" }}
                 >
-                  DETAILS
+                  <b>DETAILS</b>
                 </Button>
               </TableCell>
               <TableCell style={{ paddingLeft: "60px" }}>
                 <Button
                   href={`/content-censorship/list-answers/${question.id}`}
                   variant="plain"
+                  sx={{ color: "green" }}
                 >
-                  LIST ANSWERS
+                  <b>LIST ANSWERS</b>
                 </Button>
               </TableCell>
             </TableRow>

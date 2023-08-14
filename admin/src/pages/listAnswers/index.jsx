@@ -8,7 +8,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import debounce from "lodash/debounce";
 import { useEffect, useState } from "react";
-import { getListAnswers } from "../../api-services";
+import { getListAnswers } from "../../api-services/answer";
 import TableAnswer from "./components/TableAnswer";
 
 function ListAnswers() {

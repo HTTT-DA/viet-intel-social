@@ -4,7 +4,7 @@ from django.views.decorators.http import require_http_methods
 from rest_framework.viewsets import ViewSet
 
 from core.models import Tag
-from core.serializer import QuestionSerializer, TagSerializer
+from core.serializer import QuestionSerializer, TagSerializer, QuestionAdminSerializer
 from core.service import QuestionService
 from utils.response import responseData
 
@@ -165,3 +165,40 @@ class QuestionController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(data=False)
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getCountQuestions(request):
+        try:
+            data = {
+                "numberQuestions": QuestionService.countQuestions()
+            }
+            return responseData(data=data)
+        except Exception as e:
+            print(e)
+            return responseData(None, status=4, message="Error when get count questions A in Questions Service")
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getAllQuestionsForAdmin(request):
+        try:
+            # status = request.GET.get('status')  # Lấy giá trị của query parameter 'status'
+            # userEmail = request.GET.get('userEmail')  # Lấy giá trị của query parameter 'user_email'
+            pageNumber = int(request.GET.get('page', 1))
+            questions = QuestionService.getAllQuestionOrderByNewest(pageNumber)
+            serializer = QuestionAdminSerializer(questions, many=True, context={'detail_mode': False})
+            return responseData(data=serializer.data)
+        except Exception as e:
+            print(e)
+            return responseData(None, status=4, message="Error when get all questions A in Questions Service")
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getDetailQuestionForAdmin(request, questionId):
+        try:
+            question = QuestionService.getDetailQuestionById(questionId)
+            serializer = QuestionAdminSerializer(question, many=True, context={'detail_mode': True})
+            return responseData(data=serializer.data)
+        except Exception as e:
+            print(e)
+            return responseData(None, status=4, message="Error when get detail question A in Questions Service")

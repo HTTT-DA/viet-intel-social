@@ -31,3 +31,18 @@ class QuestionLikeSerializer(ModelSerializer):
     class Meta:
         model = Question
         fields = ('user', 'question')
+
+
+class QuestionAdminSerializer(ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ('id', 'content', 'status', 'created_at', 'user_id', 'category_id')
+
+    def to_representation(self, instance):
+        detail_mode = self.context.get('detail_mode', True)
+        if not detail_mode:
+            # Nếu không ở chế độ chi tiết, loại bỏ các trường không cần thiết
+            ret = super().to_representation(instance)
+            ret.pop('content', None)
+            return ret
+        return super().to_representation(instance)
