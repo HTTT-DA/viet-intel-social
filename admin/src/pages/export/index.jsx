@@ -1,8 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { Button, Box, Grid, FormControl,InputLabel, Select, MenuItem }  from '@mui/material/';
 import { exportUser, exportQuestion, exportAnswer } from '@/api-services/unified';
+import CustomAlert from '../../components/alert'
 
 const Export = () => {
+    const [alertState, setAlertState] = useState({ open: false, message: '', severity: 'success' });
 
     const handleExport = () => {
         let exportFunction = null;
@@ -22,7 +24,7 @@ const Export = () => {
                 downloadFileName = 'answers_';
                 break;
             default:
-                console.error('Please select a field for export');
+                setAlertState({ open: true, message: 'Please select a field for export', severity: 'warning' });
                 return;
         }
         
@@ -37,10 +39,13 @@ const Export = () => {
                 link.setAttribute('download', downloadFileName);
                 document.body.appendChild(link);
                 link.click();
+                setTimeout(() => {
+                    setAlertState({ open: true, message: 'Export successful!', severity: 'success' });
+                }, 500);
                 link.parentNode.removeChild(link);
             }
         }).catch((error) => {
-            console.error('Failed to export data: ', error);
+            setAlertState({ open: true, message: error || 'Failed to export data', severity: 'error' });
         });
     };
     
@@ -62,6 +67,13 @@ const Export = () => {
     return (
         <div>
             <h1 style={{ color: "#243c64" }}>Export</h1>
+            {alertState.open && (
+                <CustomAlert 
+                    message={alertState.message} 
+                    severity={alertState.severity} 
+                    onClose={() => setAlertState({ open: false, message: '', severity: 'success' })}
+                />
+            )}
             
             <Box bgcolor="#ffffff" padding={2} borderRadius={8} boxShadow={1}>
                 <Grid container spacing={3} p={1} m={0.5}>

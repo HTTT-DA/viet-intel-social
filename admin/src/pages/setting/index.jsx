@@ -1,12 +1,13 @@
 import React, { useState, useEffect  } from "react";
 import { Switch, Typography, Box } from "@mui/material";
-import { Alert, AlertTitle } from "@mui/material";
 import { getNotificationType, updateNotificationType } from '@/api-services/unified';
-
+import CustomAlert from '../../components/alert'
 
 const Setting = () => {
-    const userID = 3
+    const userID = 1
     const [notify, setNotify] = useState(false);
+    const [alertState, setAlertState] = useState({ open: false, message: '' });
+
 
     useEffect(() => {
         const fetchNotificationType = async () => {
@@ -19,13 +20,21 @@ const Setting = () => {
     }, [userID]);
 
     const handleToggle = () => {
-        setNotify(!notify);
-        updateNotificationType(userID, !notify)
+        const newNotifyValue = !notify;
+        setNotify(newNotifyValue);
+
+        updateNotificationType(userID, newNotifyValue)
         .then(response => {
-            alert(response.message);
+            if (response.status == 200){
+                const successMessage = newNotifyValue ? "Turn on notification successfully" : "Turn off notification successfully";
+                setAlertState({ open: true, message: successMessage, severity: "success" });
+            }
+            else if (response.status == 404){
+                setAlertState({ open: true, message: response.message, severity: "error" });
+            }
         })
         .catch(error => {
-            console.log(error);
+            setAlertState({ open: true, message: error.message, severity: "error" || "An error occurred" });
         });
     };
 
@@ -40,18 +49,15 @@ const Setting = () => {
                         onChange={handleToggle}
                     />
                 </Box>
-                {notify && (
-                    <Alert severity="info" sx={{ mt: 2 }}>
-                        <AlertTitle>Info</AlertTitle>
-                        Notification turned on
-                    </Alert>
+                {alertState.open && (
+                    <CustomAlert 
+                        message={alertState.message} 
+                        severity={alertState.severity} 
+                        onClose={() => setAlertState({ open: false, message: '', severity: 'success' })}
+                    />
                 )}
-                {!notify && (
-                    <Alert severity="info" sx={{ mt: 2 }}>
-                        <AlertTitle>Info</AlertTitle>
-                        Notification turned off
-                    </Alert>
-                )}
+
+
             </Box>
         </div>
     );

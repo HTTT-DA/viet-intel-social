@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 import React, { useRef, useState } from 'react';
 import axios from 'axios';
 import { importUser, importQuestion } from '@/api-services/unified';
+import CustomAlert from '../../components/alert'
 
 
 
@@ -11,8 +12,16 @@ function CsvImport() {
     const [csvFile, setCsvFile] = useState();
     const [fileName, setFileName] = useState();
     const [uploading, setUploading] = useState(false);
-    const [uploadResult, setUploadResult] = useState(null);
+    const [alertState, setAlertState] = useState({ open: false, message: '' });
+    const [selectedField, setSelectedField] = useState("");
 
+    const fieldRequirements = {
+        user: ['id', 'email', 'password', 'name', 'display_name', 'role', 'gender'],
+        question: ['id', 'content', 'category_id', 'user_id'],
+        answer: ['id', 'content', 'reference', 'image', 'user_id', 'question_id'],
+    };
+
+    const requiredFields = fieldRequirements[selectedField] || [];
 
     const handleFileChosen = (file) => {
         setCsvFile(file);
@@ -36,51 +45,45 @@ function CsvImport() {
         setSelectedField(event.target.value);
     };
 
-    const [selectedField, setSelectedField] = useState("");
-
-    const fieldRequirements = {
-        user: ['id', 'email', 'password', 'name', 'display_name', 'role', 'gender'],
-        question: ['id', 'content', 'category_id', 'user_id'],
-        answer: ['id', 'content', 'reference', 'image', 'user_id', 'question_id'],
-    };
-
-    const requiredFields = fieldRequirements[selectedField] || [];
-
     const handleImport = async () => {
         if (!csvFile) {
-            alert("No file selected");
+            setAlertState({ open: true, message: "No file selected", severity: "warning" });
             return;
         }
     
         if (!selectedField) {
-            alert("No field selected");
+            setAlertState({ open: true, message: "No field selected", severity: "warning" });
             return;
         }
     
         setUploading(true);
     
         let response;
-        switch (selectedField) {
-            case 'user':
-                response = await importUser(csvFile);
-                break;
-            case 'question':
-                response = await importQuestion(csvFile);
-                break;
-            default:
-                alert("Invalid field selected");
-                setUploading(false);
-                return;
-        }
+        try {
+            switch (selectedField) {
+                case 'user':
+                    response = await importUser(csvFile);
+                    break;
+                case 'question':
+                    response = await importQuestion(csvFile);
+                    break;
+                default:
+                    setAlertState({ open: true, message: "Invalid field selected", severity: "error" });
+                    setUploading(false);
+                    return;
+            }
     
+            if (response && response.status === 200) {
+                setAlertState({ open: true, message: "Successfully uploaded", severity: "success" });
+            } else {
+                setAlertState({ open: true, message: "Error uploading", severity: "error" });
+            }
+        } catch (error) {
+            setAlertState({ open: true, message: "An error occurred", severity: "error" });
+        }
+
         setUploading(false);
-    
-        if (response && response.status == 200) {
-            alert("Successfully uploaded");
-            setUploadResult("Successfully uploaded!");
-        } else {
-            alert("Error uploading");
-        }
+
     };
     
 
@@ -88,6 +91,13 @@ function CsvImport() {
     return (
         <div>
             <h1 style={{ color: "#243c64" }}>Import</h1>
+            {alertState.open && (
+                <CustomAlert
+                    message={alertState.message}
+                    severity={alertState.severity}
+                    onClose={() => setAlertState({ open: false, message: '', severity: 'success' })}
+                />
+            )}
             <Box bgcolor="#ffffff" padding={2} borderRadius={8} boxShadow={1}>
                 <Grid container spacing={1}>
                     <Grid item xs={6} sm={6}>

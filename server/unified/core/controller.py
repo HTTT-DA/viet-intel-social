@@ -405,15 +405,14 @@ class ImportController(ViewSet):
 #Notiifcation
 class NotificationController(ViewSet):
     @require_http_methods(['GET'])
-    def getNotificationById(request, userId=2):
+    def getNotificationById(request, userId):
         try:
             user = User.objects.get(id=userId)
             notification_type = user.get_notification_type()
             return responseData(message='Success', status=200, data=notification_type)
         
-
         except ObjectDoesNotExist:
-            return responseData(message='User does not exist', status=404)
+            return responseData(message=f'User ID does not exist: {userId}', status=404)
         
         except Exception as e:
             return responseData(message=str(e), status=500, data={})
