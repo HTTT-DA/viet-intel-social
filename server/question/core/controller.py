@@ -1,10 +1,12 @@
 import json
 
 from django.views.decorators.http import require_http_methods
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.viewsets import ViewSet
+from django.db import IntegrityError
 
 from core.models import Tag
-from core.serializer import QuestionSerializer, TagSerializer, QuestionAdminSerializer
+from core.serializer import QuestionSerializer, TagSerializer, QuestionAdminSerializer, QuestionAnswerSerializer
 from core.service import QuestionService
 from utils.response import responseData
 
@@ -168,12 +170,10 @@ class QuestionController(ViewSet):
 
     @staticmethod
     @require_http_methods(['GET'])
-    def getCountQuestions(request):
+    def countAllQuestions(request):
         try:
-            data = {
-                "numberQuestions": QuestionService.countQuestions()
-            }
-            return responseData(data=data)
+            totalRecords = QuestionService.countQuestions()
+            return responseData(data=totalRecords)
         except Exception as e:
             print(e)
             return responseData(None, status=4, message="Error when get count questions A in Questions Service")
@@ -197,8 +197,44 @@ class QuestionController(ViewSet):
     def getDetailQuestionForAdmin(request, questionId):
         try:
             question = QuestionService.getDetailQuestionById(questionId)
-            serializer = QuestionAdminSerializer(question, many=True, context={'detail_mode': True})
+            serializer = QuestionAdminSerializer(question, context={'detail_mode': True})
             return responseData(data=serializer.data)
+        except ObjectDoesNotExist:
+            return responseData(None, status=404, message='Question not found in DB in Question-Service')
         except Exception as e:
             print(e)
             return responseData(None, status=4, message="Error when get detail question A in Questions Service")
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getContentForAnswer(request, questionId):
+        try:
+            question = QuestionService.getDetailQuestionById(questionId)
+            serializer = QuestionAnswerSerializer(question)
+            return responseData(data=serializer.data)
+        except ObjectDoesNotExist:
+            return responseData(None, status=404, message='Question not found in DB in Question-Service')
+        except Exception as e:
+            print(e)
+            return responseData(None, status=4, message="Error when get content for answer in Questions Service")
+
+    @staticmethod
+    @require_http_methods(['DELETE'])
+    def declinePendingQuestion(request, questionId):
+        try:
+            question = QuestionService.deleteQuestionForever(questionId)
+            return responseData(data=question, message="Delete question successfully from Question-Services")
+        except IntegrityError as e:
+            print(e)
+            return responseData(None, status=500, message="Error when delete question from DB in Question-Services")
+
+    @staticmethod
+    @require_http_methods(['PATCH'])
+    def acceptPendingQuestion(request, questionId):
+        try:
+            question = QuestionService.updateQuestionStatus(questionId)
+            return responseData(data=question, message="Update status of question successfully from Question-Services")
+        except IntegrityError as e:
+            print(e)
+            return responseData(None, status=500, message="Error when update status of question from DB in "
+                                                          "Question-Services")

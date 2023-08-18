@@ -6,8 +6,9 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import PropTypes from "prop-types";
 import Chip from "@mui/material/Chip";
+import { Link } from "react-router-dom";
 
-function TableAnswer({ answers }) {
+function TableAnswer({ answers, questionId }) {
   return (
     <div>
       <Table>
@@ -16,36 +17,50 @@ function TableAnswer({ answers }) {
             <TableCell>
               <b>ID</b>
             </TableCell>
-            <TableCell style={{ paddingLeft: "200px" }}>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell style={{ paddingLeft: "300px" }}>
               <b>User</b>
             </TableCell>
-            <TableCell style={{ paddingLeft: "60px" }}>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell style={{ paddingLeft: "200px" }}>
               <b>Status</b>
             </TableCell>
-            <TableCell style={{ paddingLeft: "60px" }} />
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell style={{ paddingLeft: "100px" }} />
           </TableRow>
         </TableHead>
         <TableBody>
           {answers.map((answer) => (
             <TableRow key={answer.id}>
               <TableCell>{answer.id}</TableCell>
-              <TableCell style={{ paddingLeft: "200px" }}>
-                {answer.user.username}
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell style={{ paddingLeft: "300px" }}>
+                {answer.user.email}
               </TableCell>
-              <TableCell style={{ paddingLeft: "60px" }}>
-                {answer.status === "pending" ? (
-                  <Chip color="error" label="PENDING" />
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell style={{ paddingLeft: "200px" }}>
+                {answer.status === "WAITING" ? (
+                  <Chip color="error" label={<b>PENDING</b>} />
                 ) : (
-                  <Chip color="success" label="ACCEPTED" />
+                  <Chip color="success" label={<b>ACCEPTED</b>} />
                 )}
               </TableCell>
-              <TableCell style={{ paddingLeft: "60px" }}>
-                <Button
-                  href={`/content-censorship/answer/${answer.id}`}
-                  variant="plain"
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+              <TableCell style={{ paddingLeft: "100px" }}>
+                <Link
+                  to={`/content-censorship/answer/${answer.id}?questionId=${questionId}`}
+                  style={{ textDecoration: "none" }}
                 >
-                  DETAILS
-                </Button>
+                  <Button variant="plain" sx={{ color: "blue" }}>
+                    <b>DETAILS</b>
+                  </Button>
+                </Link>
               </TableCell>
             </TableRow>
           ))}
@@ -57,6 +72,7 @@ function TableAnswer({ answers }) {
 
 TableAnswer.propTypes = {
   answers: PropTypes.array,
+  questionId: PropTypes.string.isRequired,
 };
 
 TableAnswer.defaultProps = {

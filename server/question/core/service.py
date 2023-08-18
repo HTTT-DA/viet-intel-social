@@ -151,9 +151,17 @@ class QuestionService:
 
     @staticmethod
     def getDetailQuestionById(questionId):
-        question = Question.objects.filter(id=questionId)
+        question = Question.objects.get(id=questionId)
         return question
 
     @staticmethod
     def countQuestions():
         return Question.objects.count()
+
+    @staticmethod
+    def deleteQuestionForever(questionId):
+        Question.objects.filter(id=questionId, status="WAITING").delete()
+
+    @staticmethod
+    def updateQuestionStatus(questionId):
+        Question.objects.filter(id=questionId, status="WAITING").update(status="ACCEPTED")

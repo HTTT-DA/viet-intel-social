@@ -46,3 +46,9 @@ class QuestionAdminSerializer(ModelSerializer):
             ret.pop('content', None)
             return ret
         return super().to_representation(instance)
+
+
+class QuestionAnswerSerializer(ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ('id', 'content')

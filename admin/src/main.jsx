@@ -33,15 +33,15 @@ const router = createBrowserRouter([
             element: <ContentCensorShip />,
           },
           {
-            path: "question/:id",
+            path: "question/:questionId",
             element: <DetailQuestion />,
           },
           {
-            path: "list-answers/:id",
+            path: "list-answers/:questionId",
             element: <ListAnswers />,
           },
           {
-            path: "answer/:id",
+            path: "answer/:answerId",
             element: <DetailAnswer />,
           },
         ],

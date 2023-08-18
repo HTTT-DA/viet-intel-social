@@ -51,3 +51,32 @@ class AnswerService:
         else:
             AnswerEvaluation.objects.create(answer_id=answerId, user_id=userId, evaluation_type=evaluationType)
             return 'Create success'
+
+    @staticmethod
+    def getAnswersOfQuestionOrderByNewest(questionId, pageNumber):
+        totalRecords = Answer.objects.filter(question_id=questionId).count()
+
+        page_size = 6
+        offset = (pageNumber - 1) * page_size
+        limit = offset + page_size if offset + page_size <= totalRecords else totalRecords
+
+        answers = Answer.objects.filter(question_id=questionId).order_by('-created_at', '-status')[offset:limit]
+
+        return answers
+
+    @staticmethod
+    def getDetailAnswerById(answerId):
+        answer = Answer.objects.get(id=answerId)
+        return answer
+
+    @staticmethod
+    def countAnswersOfQuestion(questionId):
+        return Answer.objects.filter(question_id=questionId).count()
+
+    @staticmethod
+    def deleteAnswerForever(answerId):
+        Answer.objects.filter(id=answerId, status="WAITING").delete()
+
+    @staticmethod
+    def updateAnswerStatus(answerId):
+        Answer.objects.filter(id=answerId, status="WAITING").update(status="ACCEPTED")

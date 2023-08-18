@@ -35,7 +35,7 @@ const Category = () => {
       try {
         const countResponse = await countCategories();
         setTotalPages(Math.ceil(countResponse.data / 6));
-
+        
         const response = await getListCategories(currentPage);
         setCategories(response.data);
       } catch (error) {
