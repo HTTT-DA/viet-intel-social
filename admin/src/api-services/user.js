@@ -13,3 +13,14 @@ export async function getUserByID(userId) {
     return false;
   }
 }
+
+export async function requestLogin(data) {
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL_USER}/api/users/sign-in-admin`, data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}

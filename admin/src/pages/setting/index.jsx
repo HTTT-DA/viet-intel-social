@@ -56,8 +56,6 @@ const Setting = () => {
                         onClose={() => setAlertState({ open: false, message: '', severity: 'success' })}
                     />
                 )}
-
-
             </Box>
         </div>
     );

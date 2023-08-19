@@ -222,3 +222,36 @@ class UserController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(None, status=500, message="Error when get user by ID for Admin in User-Service")
+
+    @staticmethod
+    @require_http_methods(['POST'])
+    def adminLogin(request):
+        try:
+            try:
+                data = json.loads(request.body)
+                email = data.get('email')
+                password = data.get('password').strip()
+            except json.decoder.JSONDecodeError:
+                return responseData(message='Data is invalid', status=401, data={})
+            try:
+                user = User.objects.get(email=email, role='ADMIN')
+            except User.DoesNotExist:
+                return responseData(message='User does not exist', status=401, data={})
+
+            if user.password != password:
+                return responseData(message='Password is incorrect', status=401, data={})
+
+            access_token, refresh_token = MyTokenObtainPairSerializer().get_token_for_user(user)
+
+            data = {
+                'id': user.id,
+                'display_name': user.display_name,
+                'email': user.email,
+                'access_token': str(access_token),
+                'refresh_token': str(refresh_token)
+            }
+
+            return responseData(message='Success', status=200, data=data)
+        except Exception as e:
+            print(e)
+            return responseData(message='Error', status=500, data={})
