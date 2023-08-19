@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {useNavigate} from "react-router-dom";
-import ReCAPTCHA from "react-google-recaptcha";
+import {useEffect} from "react";
 
 const defaultTheme = createTheme();
 
@@ -32,6 +32,18 @@ export default function SignIn() {
     const [verify, setVerify] = React.useState(false);
     const navigate = useNavigate();
 
+    const onSubmit = () => {
+        setVerify(true);
+    }
+
+    useEffect(() => {
+        // Add reCaptcha
+        const script = document.createElement("script")
+        script.src = "https://www.google.com/recaptcha/api.js"
+        window.onSubmit = onSubmit;
+        document.body.appendChild(script)
+    }, [])
+
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -51,7 +63,7 @@ export default function SignIn() {
             (res) => {
                 res.json().then(
                     (r) => {
-                        switch (r.status){
+                        switch (r.status) {
                             case 200:
                                 localStorage.setItem('refresh_token', r.data.refresh_token);
                                 localStorage.setItem('access_token', r.data.access_token);
@@ -106,13 +118,11 @@ export default function SignIn() {
                             id="password"
                             autoComplete="current-password"
                         />
-                        {!verify ?
-                            (<ReCAPTCHA
-                                sitekey="6LeFtDcnAAAAAGvENlR6WLFh0t92i2uGTZV_dLG6"
-                                onChange={() => {setVerify(true)}}
-                            />)
-                            : <></>
-                        }
+                        <div
+                            className="g-recaptcha"
+                            data-sitekey="6LeFtDcnAAAAAGvENlR6WLFh0t92i2uGTZV_dLG6"
+                            data-callback="onSubmit"
+                        ></div>
                         <Button
                             type="submit"
                             fullWidth
@@ -129,12 +139,16 @@ export default function SignIn() {
                         </Button>
                         <Grid container>
                             <Grid item xs>
-                                <Link onClick={()=>{navigate('/')}} variant="body2">
+                                <Link onClick={() => {
+                                    navigate('/')
+                                }} variant="body2">
                                     Back to Home
                                 </Link>
                             </Grid>
                             <Grid item>
-                                <Link onClick={()=>{navigate('/sign-up')}} variant="body2">
+                                <Link onClick={() => {
+                                    navigate('/sign-up')
+                                }} variant="body2">
                                     Don't have an account? Sign Up
                                 </Link>
                             </Grid>
