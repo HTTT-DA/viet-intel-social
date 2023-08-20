@@ -58,7 +58,7 @@ export default function Login() {
     
     try {
       const response = await requestLogin(newData);
-      console.log(response)
+      
       if (response.status === 200) {
         window.localStorage.setItem("userId", response.data.id);
         window.localStorage.setItem("email", response.data.email);

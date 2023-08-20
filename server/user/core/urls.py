@@ -10,6 +10,10 @@ urlpatterns = [
     path('/get-user-for-admin/<int:userId>', UserController.getUserByIdForAdmin),
     path('/update-avatar', UserController.updateAvatar),
     path('/<int:userId>/owner-info', UserController.getInfoForQuestion),
+    path('/add-user-request', UserController.addRequestAccess),
+    path('/get-user-request', UserController.getRequestAccessAPI),
+    path('/decline-user-request/<int:requestId>', UserController.declinePendingRequest),
+    path('/accept-user-request/<int:requestId>', UserController.acceptPendingRequest),
 
     # auth
     path('/sign-in', UserController.signIn),
