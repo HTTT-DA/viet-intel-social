@@ -12,6 +12,7 @@ import Import from "./pages/import";
 import ListAnswers from "./pages/listAnswers";
 import NotFound from "./pages/notFound";
 import Setting from "./pages/setting";
+import UsersRequest from "./pages/UsersRequest";
 
 import MainLayout from "./layouts/MainLayout";
 import "./styles.scss";
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
       {
         path: "/export",
         element: <Export />,
+      },
+      {
+        path: "/api-access",
+        element: <UsersRequest />,
       },
     ],
   },

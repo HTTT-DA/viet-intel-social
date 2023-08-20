@@ -5,6 +5,7 @@ import jwt
 from decouple import config
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 from rest_framework.viewsets import ViewSet
 
 from core.authentication import MyTokenObtainPairSerializer
@@ -281,7 +282,7 @@ class UserController(ViewSet):
     @require_http_methods(['GET'])
     def getRequestAccessAPI(request):
         try:
-            userRequests = UserAPIAccess.objects.all()
+            userRequests = UserAPIAccess.objects.all().order_by('-requested_at', '-status')
             return responseData(data=UserAPIAccessSerializer(userRequests, many=True).data)
         except Exception as e:
             print(e)
@@ -301,7 +302,9 @@ class UserController(ViewSet):
     @require_http_methods(['PATCH'])
     def acceptPendingRequest(request, requestId):
         try:
-            request = UserAPIAccess.objects.filter(id=requestId, status="PENDING").update(status="ACCEPTED")
+            request = UserAPIAccess.objects.filter(id=requestId)
+            if request.exists():
+                request.update(status="ACCEPTED", approved_at=timezone.localtime())
             return responseData(data=request, message="Accept request successfully from Question-Services")
         except Exception as e:
             print(e)

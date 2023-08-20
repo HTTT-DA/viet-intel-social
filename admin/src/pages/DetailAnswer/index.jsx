@@ -26,7 +26,6 @@ function DetailAnswer() {
   const { answerId } = useParams();
   const queryParams = queryString.parse(location.search);
   const questionId = queryParams.questionId;
-  console.log(answerId, questionId)
 
   const handleDecline = async () => {
     try {

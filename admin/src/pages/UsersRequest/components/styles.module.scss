@@ -1,0 +1,10 @@
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  src: local("Inter"), url(@/assets/fonts/Inter-Regular.ttf) format("truetype");
+}
+
+.reason-cell {
+  white-space: 'normal';
+  word-wrap: 'break-word';
+}
