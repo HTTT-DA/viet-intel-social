@@ -8,8 +8,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.viewsets import ViewSet
 
 from core.authentication import MyTokenObtainPairSerializer
-from core.models import User, UserPoint
-from core.serializer import UserPointSerializer, OtherUserSerializer, QuestionOwnerSerializer, UserAdminSerializer
+from core.models import User, UserPoint, UserAPIAccess
+from core.serializer import UserPointSerializer, OtherUserSerializer, QuestionOwnerSerializer, UserAdminSerializer, UserAPIAccessSerializer
 from utils.response import responseData
 
 
@@ -241,7 +241,7 @@ class UserController(ViewSet):
             if user.password != password:
                 return responseData(message='Password is incorrect', status=401, data={})
 
-            access_token, refresh_token = MyTokenObtainPairSerializer().get_token_for_user(user)
+            access_token, refresh_token = MyTokenObtainPairSerializer().get_token_for_admin(user)
 
             data = {
                 'id': user.id,
@@ -255,3 +255,54 @@ class UserController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(message='Error', status=500, data={})
+
+    @staticmethod
+    @require_http_methods(['POST'])
+    def addRequestAccess(request):
+        try:
+            try:
+                data = json.loads(request.body)
+                email = data.get('email')
+                reason = data.get('reason')
+            except json.JSONDecodeError:
+                return responseData(data=None, status=404, message="Invalid JSON format")
+
+            if UserAPIAccess.objects.filter(user_email=email).exists():
+                return responseData(None, status=400, message="User email already exists")
+
+            UserAPIAccess.objects.create(user_email=email, reason=reason, status='PENDING')
+
+            return responseData(message="Add UserAPIAccess successfully from User-Services")
+        except Exception as e:
+            print(e)
+            return responseData(None, status=500,message="Error when add UserAPIAccess into DB in User-Services")
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getRequestAccessAPI(request):
+        try:
+            userRequests = UserAPIAccess.objects.all()
+            return responseData(data=UserAPIAccessSerializer(userRequests, many=True).data)
+        except Exception as e:
+            print(e)
+            return responseData(None, status=500,message="Error when get UserAPIAccess in User-Services")
+
+    @staticmethod
+    @require_http_methods(['DELETE'])
+    def declinePendingRequest(request, requestId):
+        try:
+            request = UserAPIAccess.objects.filter(id=requestId, status="PENDING").delete()
+            return responseData(data=request, message="Delete request successfully from User-Services")
+        except Exception as e:
+            print(e)
+            return responseData(None, status=500, message="Error when delete request from DB in User-Services")
+
+    @staticmethod
+    @require_http_methods(['PATCH'])
+    def acceptPendingRequest(request, requestId):
+        try:
+            request = UserAPIAccess.objects.filter(id=requestId, status="PENDING").update(status="ACCEPTED")
+            return responseData(data=request, message="Accept request successfully from Question-Services")
+        except Exception as e:
+            print(e)
+            return responseData(None, status=500, message="Error when accept request from DB in Question-Services")

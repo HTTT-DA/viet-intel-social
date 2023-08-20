@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from core.models import User, UserPoint
+from core.models import User, UserPoint, UserAPIAccess
 from rest_framework import serializers
 
 
@@ -53,3 +53,9 @@ class UserAdminSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'email', 'display_name')
+
+
+class UserAPIAccessSerializer(ModelSerializer):
+    class Meta:
+        model = UserAPIAccess
+        fields = '__all__'

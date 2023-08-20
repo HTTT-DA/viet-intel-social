@@ -67,3 +67,20 @@ class UserPoint(models.Model):
     class Meta:
         unique_together = (('year', 'month', 'user'),)
         db_table = 'UserPoint'
+
+
+class UserAPIAccess(models.Model):
+    STATUS_CHOICES = (
+        ('ACCEPTED', 'Accepted'),
+        ('DECLINED', 'Declined'),
+        ('PENDING', 'Pending'),
+    )
+
+    user_email = models.EmailField()
+    reason = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    requested_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(null=True, blank=True, default=None)
+
+    class Meta:
+        db_table = 'user_api_access'
