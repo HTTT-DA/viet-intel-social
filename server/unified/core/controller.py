@@ -18,8 +18,12 @@ from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ObjectDoesNotExist
 
 from django.utils import timezone
-
+from sklearn.metrics.pairwise import linear_kernel
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 import csv, codecs, json
+from elasticsearch_dsl.query import MultiMatch
+from elasticsearch_dsl import Search
 
 def get_start_date(time_period):
     now = timezone.now()
@@ -402,7 +406,7 @@ class ImportController(ViewSet):
         except Exception as e:
             return responseData(data=failed_ids, message=str(e), status=500)
             
-#Notiifcation
+#Notiifcation -> USER
 class NotificationController(ViewSet):
     @require_http_methods(['GET'])
     def getNotificationById(request, userId):
@@ -434,8 +438,47 @@ class NotificationController(ViewSet):
             return responseData(message='Success', status=200)
 
         except ObjectDoesNotExist:
-            return responseData(message='User does not exist', status=404)
+            return responseData(message=f'User ID does not exist: {user_id}', status=404)
     
         except Exception as e:
             return responseData(message=str(e), status=500, data={})
     
+class APIQAController(ViewSet):
+    @staticmethod
+    def getAllQuestionWithID():
+        questions = Question.objects.all().values('id', 'content')
+        questions_dict = {item['id']: item['content'] for item in questions}
+        return questions_dict
+
+    @staticmethod
+    def getAnswerFromID(questionId):
+        try:
+            answer_instance = Answer.objects.get(question_id=questionId)
+            return answer_instance.answer_content
+        except Answer.DoesNotExist:
+            return None
+
+    @staticmethod
+    def get_highest_similarity_score(new_question_content):
+        search = Search(index="questions")
+        search = search.query("match", content=new_question_content)
+        response = search.execute()
+
+        if response.hits:
+            most_similar_question = response.hits[0]
+            return most_similar_question.meta.id, most_similar_question.meta.score
+        return None, None
+    
+    @require_http_methods(['GET'])
+    def getAnswerBasedFromQuestion(request):
+        question_content = request.GET.get('question_content')
+        best_question_id, point = APIQAController.get_highest_similarity_score(question_content)
+        print(best_question_id)
+        print(point)
+        if(best_question_id):
+            answer = APIQAController.getAnswerFromID(best_question_id)
+            if (answer):
+                return responseData(message='Success', status=200, data=answer)
+            else: return responseData(message='Failed finding answer', status=404)
+        else: return responseData(message='Question does not exist in the system database', status=404)
+

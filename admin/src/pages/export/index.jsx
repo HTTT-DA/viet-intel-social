@@ -16,10 +16,18 @@ const Export = () => {
                 downloadFileName = 'users';
                 break;
             case 'question':
+                if(!selectedDate) {
+                    setAlertState({ open: true, message: 'Please select a time period', severity: 'warning' });
+                    break;
+                }
                 exportFunction = exportQuestion;
                 downloadFileName = 'questions_';
                 break;
             case 'answer':
+                if(!selectedDate) {
+                    setAlertState({ open: true, message: 'Please select a time period', severity: 'warning' });
+                    break;
+                }
                 exportFunction = exportAnswer;
                 downloadFileName = 'answers_';
                 break;
