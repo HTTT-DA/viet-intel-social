@@ -308,7 +308,6 @@ class UserController(ViewSet):
             return responseData(data=None, status=200, message="Accept request successfully from Question-Services")
         except Exception as e:
             print(e)
-<<<<<<< Updated upstream
             return responseData(None, status=500, message="Error when accept request from DB in Question-Services")
     
     @staticmethod
@@ -346,6 +345,3 @@ class UserController(ViewSet):
     
         except Exception as e:
             return responseData(message=str(e), status=500, data={})
-=======
-            return responseData(data=None, status=500, message="Error when accept request from DB in Question-Services")
->>>>>>> Stashed changes
