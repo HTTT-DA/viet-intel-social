@@ -58,7 +58,6 @@ export default function Login() {
     
     try {
       const response = await requestLogin(newData);
-      
       if (response.status === 200) {
         window.localStorage.setItem("userId", response.data.id);
         window.localStorage.setItem("email", response.data.email);
@@ -139,7 +138,7 @@ export default function Login() {
         sx={{ mt: 8, mb: 4 }}
       >
         {"Copyright © "}
-        <Link color="inherit" href="https://mui.com/">
+        <Link color="inherit" href="">
           VietIntel Social
         </Link>{" "}
         {new Date().getFullYear()}

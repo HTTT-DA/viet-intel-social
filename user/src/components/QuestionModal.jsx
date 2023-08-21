@@ -113,6 +113,16 @@ export default function QuestionModal(props) {
                 res.json().then(
                     (r) => {
                         if(r.status===200){
+                            fetch("http://127.0.0.1:8004/core/send-notification-email/", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                "content": document.getElementById("content").value
+                            })
+                        })
+                        .then(response => response.json())
                             navigate('/')
                             alert("Create question successfully!");
                         }

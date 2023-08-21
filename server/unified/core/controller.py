@@ -18,13 +18,13 @@ from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ObjectDoesNotExist
 
 from django.utils import timezone
-from sklearn.metrics.pairwise import linear_kernel
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
 import csv, codecs, json
 from elasticsearch_dsl.query import MultiMatch
 from elasticsearch_dsl import Search
 
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.contrib.sites.shortcuts import get_current_site
 def get_start_date(time_period):
     now = timezone.now()
 
@@ -171,17 +171,35 @@ class ExportController(ViewSet):
 
 # Mail
 class MailController(ViewSet):
+    @require_http_methods(['POST'])
     @csrf_exempt
-    def sendNotificationEmail(self):
+    def sendNotificationEmail(request):
+        try:
+            data = json.loads(request.body)
+            content = data.get('content')
+
+        except json.JSONDecodeError:
+            return responseData(data=None, status=404, message="Invalid JSON format")
+        
         admin_emails = list(User.objects.filter(role='admin', get_notification=True).values_list('email', flat=True))
+
+        email_body = render_to_string('email_template.html', {
+            'content': content,
+        })
+        
         default_subject = 'Notification'
         default_message = 'A user has posted a question'
         try:
-            send_mail(default_subject, default_message, settings.EMAIL_HOST_USER, admin_emails, fail_silently=False)
-            return responseData(message='Success', status=200, data={'admin_emails': admin_emails})
+            send_mail(default_subject, 
+                      default_message, 
+                      settings.EMAIL_HOST_USER, 
+                      admin_emails, 
+                      fail_silently=False, 
+                      html_message=email_body)
+            
+            return responseData(message='Success', status=200, data={})
         except Exception as e:
-            print(e)
-            return responseData(message='Error', status=500, data={'admin_emails': admin_emails})
+            return responseData(message='Error', status=500, data={})
 
 def process_csv_file(csv_file, required_headers):
     if not csv_file or not csv_file.name.endswith('.csv'):
@@ -405,43 +423,6 @@ class ImportController(ViewSet):
         
         except Exception as e:
             return responseData(data=failed_ids, message=str(e), status=500)
-            
-#Notiifcation -> USER
-class NotificationController(ViewSet):
-    @require_http_methods(['GET'])
-    def getNotificationById(request, userId):
-        try:
-            user = User.objects.get(id=userId)
-            notification_type = user.get_notification_type()
-            return responseData(message='Success', status=200, data=notification_type)
-        
-        except ObjectDoesNotExist:
-            return responseData(message=f'User ID does not exist: {userId}', status=404)
-        
-        except Exception as e:
-            return responseData(message=str(e), status=500, data={})
-        
-    @csrf_exempt
-    @require_http_methods(['POST'])
-    def updateNotification(request):
-        try:
-            data = json.loads(request.body)
-            user_id = data.get('user_id', None)
-            notification_type = data.get('notification_type', None)
-            
-            if user_id and notification_type is not None:
-                user = User.objects.get(id=user_id)
-                user.get_notification = notification_type
-                user.save()
-            else:
-                return responseData(message='Body is invalid', status=400, data={})
-            return responseData(message='Success', status=200)
-
-        except ObjectDoesNotExist:
-            return responseData(message=f'User ID does not exist: {user_id}', status=404)
-    
-        except Exception as e:
-            return responseData(message=str(e), status=500, data={})
     
 class APIQAController(ViewSet):
     @staticmethod

@@ -56,6 +56,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+    def get_notification_type(self):
+        return self.get_notification
 
 
 class UserPoint(models.Model):

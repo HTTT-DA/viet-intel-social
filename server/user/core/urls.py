@@ -14,6 +14,8 @@ urlpatterns = [
     path('/get-user-request', UserController.getRequestAccessAPI),
     path('/decline-user-request/<int:requestId>', UserController.declinePendingRequest),
     path('/accept-user-request/<int:requestId>', UserController.acceptPendingRequest),
+    path('/get-notification-type/<int:userId>', UserController.getNotificationById),
+    path('/update-notification-type/', UserController.updateNotification),
 
     # auth
     path('/sign-in', UserController.signIn),

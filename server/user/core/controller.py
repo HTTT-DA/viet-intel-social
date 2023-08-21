@@ -309,3 +309,39 @@ class UserController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(None, status=500, message="Error when accept request from DB in Question-Services")
+    
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getNotificationById(request, userId):
+        try:
+            user = User.objects.get(id=userId)
+            notification_type = user.get_notification_type()
+            return responseData(message='Success', status=200, data=notification_type)
+        
+        except ObjectDoesNotExist:
+            return responseData(message=f'User ID does not exist: {userId}', status=404)
+        
+        except Exception as e:
+            return responseData(message=str(e), status=500, data={})
+        
+    @staticmethod
+    @require_http_methods(['POST'])
+    def updateNotification(request):
+        try:
+            data = json.loads(request.body)
+            user_id = data.get('user_id', None)
+            notification_type = data.get('notification_type', None)
+            
+            if user_id and notification_type is not None:
+                user = User.objects.get(id=user_id)
+                user.get_notification = notification_type
+                user.save()
+            else:
+                return responseData(message='Body is invalid', status=400, data={})
+            return responseData(message='Success', status=200)
+
+        except ObjectDoesNotExist:
+            return responseData(message=f'User ID does not exist: {user_id}', status=404)
+    
+        except Exception as e:
+            return responseData(message=str(e), status=500, data={})
