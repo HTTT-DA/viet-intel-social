@@ -9,7 +9,7 @@ import Snackbar from "@mui/material/Snackbar";
 import TextField from "@mui/material/TextField";
 import debounce from "lodash/debounce";
 import { useEffect, useState } from "react";
-import { getRequestAccess, acceptRequestAccess, declineRequestAccess } from "../../api-services/user";
+import { getRequestAccess } from "../../api-services/user";
 import TableRequest from "./components/TableRequest";
 
 function UsersRequest() {
@@ -46,38 +46,6 @@ function UsersRequest() {
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
-
-  const handleAccept = async (requestId) => {
-    try {
-      const response = await acceptRequestAccess(requestId);
-      console.log(response)
-      if (response.status === 200) {
-        const updatedRequests = requests.map((request) => {
-          if (request.id === requestId) {
-            return { ...request, status: "ACCEPTED" };
-          }
-          return request;
-        });
-        setRequests(updatedRequests);
-      } 
-    } catch (error) {
-      setOpenSnackbar(true);
-      console.error("Error fetching answers:", error);
-    }
-  }
-
-  const handleDecline = async (requestId) => {
-    try {
-      const response = await declineRequestAccess(requestId);
-      if (response.status === 200) {
-        const updatedRequests = requests.filter((request) => request.id !== requestId);
-        setRequests(updatedRequests);
-      } 
-    } catch (error) {
-      setOpenSnackbar(true);
-      console.error("Error fetching answers:", error);
-    }
-  }
   
   return (
     <div>
@@ -136,8 +104,7 @@ function UsersRequest() {
           ) : (
             <TableRequest
               requests={requests}
-              onAccept={handleAccept}
-              onDecline={handleDecline}
+              setRequests={setRequests}
             />
           )}
         </div>

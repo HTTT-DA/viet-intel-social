@@ -255,7 +255,7 @@ class UserController(ViewSet):
             return responseData(message='Success', status=200, data=data)
         except Exception as e:
             print(e)
-            return responseData(message='Error', status=500, data={})
+            return responseData(message='Error', status=500, data=None)
 
     @staticmethod
     @require_http_methods(['POST'])
@@ -269,14 +269,14 @@ class UserController(ViewSet):
                 return responseData(data=None, status=404, message="Invalid JSON format")
 
             if UserAPIAccess.objects.filter(user_email=email).exists():
-                return responseData(None, status=400, message="User email already exists")
+                return responseData(data=None, status=400, message="User email already exists")
 
             UserAPIAccess.objects.create(user_email=email, reason=reason, status='PENDING')
 
-            return responseData(message="Add UserAPIAccess successfully from User-Services")
+            return responseData(data=None, status=200, message="Add UserAPIAccess successfully from User-Services")
         except Exception as e:
             print(e)
-            return responseData(None, status=500,message="Error when add UserAPIAccess into DB in User-Services")
+            return responseData(data=None, status=500,message="Error when add UserAPIAccess into DB in User-Services")
 
     @staticmethod
     @require_http_methods(['GET'])
@@ -286,17 +286,17 @@ class UserController(ViewSet):
             return responseData(data=UserAPIAccessSerializer(userRequests, many=True).data)
         except Exception as e:
             print(e)
-            return responseData(None, status=500,message="Error when get UserAPIAccess in User-Services")
+            return responseData(data=None, status=500, message="Error when get UserAPIAccess in User-Services")
 
     @staticmethod
     @require_http_methods(['DELETE'])
     def declinePendingRequest(request, requestId):
         try:
             request = UserAPIAccess.objects.filter(id=requestId, status="PENDING").delete()
-            return responseData(data=request, message="Delete request successfully from User-Services")
+            return responseData(message="Delete request successfully from User-Services")
         except Exception as e:
             print(e)
-            return responseData(None, status=500, message="Error when delete request from DB in User-Services")
+            return responseData(data=None, status=200, message="Error when delete request from DB in User-Services")
 
     @staticmethod
     @require_http_methods(['PATCH'])
@@ -305,9 +305,10 @@ class UserController(ViewSet):
             request = UserAPIAccess.objects.filter(id=requestId)
             if request.exists():
                 request.update(status="ACCEPTED", approved_at=timezone.localtime())
-            return responseData(data=request, message="Accept request successfully from Question-Services")
+            return responseData(data=None, status=200, message="Accept request successfully from Question-Services")
         except Exception as e:
             print(e)
+<<<<<<< Updated upstream
             return responseData(None, status=500, message="Error when accept request from DB in Question-Services")
     
     @staticmethod
@@ -345,3 +346,6 @@ class UserController(ViewSet):
     
         except Exception as e:
             return responseData(message=str(e), status=500, data={})
+=======
+            return responseData(data=None, status=500, message="Error when accept request from DB in Question-Services")
+>>>>>>> Stashed changes

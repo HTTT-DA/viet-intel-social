@@ -162,8 +162,8 @@ export default function RegisterUseAPI() {
           sx={{ width: "100%" }}
         >
           {sendSuccess
-            ? "Add successfully !"
-            : "Something went wrong ! Add failed !"}
+            ? "Send request successfully !"
+            : "Something went wrong ! Sent request failed !"}
         </Alert>
       </Snackbar>
     </>
