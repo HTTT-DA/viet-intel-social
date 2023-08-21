@@ -4,6 +4,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import PublishIcon from '@mui/icons-material/Publish';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import BeenhereIcon from "@mui/icons-material/Beenhere";
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 
 export const menu = [
   {
@@ -35,5 +36,10 @@ export const menu = [
     title: "API Access",
     icon: <BeenhereIcon />,
     path: "/api-access",
+  },
+  {
+    title: "QnA",
+    icon: <QuestionAnswerIcon />,
+    path: "/qna",
   },
 ];

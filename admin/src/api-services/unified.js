@@ -28,6 +28,21 @@ export async function updateNotificationType(user_id, notification_type) {
     }
 }
 
+export async function getAnswerFromQuesion(question_content) {
+    try {
+        const response = await axios.post(
+            `http://127.0.0.1:8004/core/get-answer/`,
+            {
+                question_content: question_content,
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+
 
 export async function exportUser() {
     try {

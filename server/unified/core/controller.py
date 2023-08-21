@@ -432,10 +432,10 @@ class APIQAController(ViewSet):
         return questions_dict
 
     @staticmethod
-    def getAnswerFromID(questionId):
+    def getAnswersFromID(questionId):
         try:
-            answer_instance = Answer.objects.get(question_id=questionId)
-            return answer_instance.answer_content
+            answer_instances = Answer.objects.filter(question_id=questionId)
+            return [instance.answer_content for instance in answer_instances]
         except Answer.DoesNotExist:
             return None
 
@@ -447,17 +447,23 @@ class APIQAController(ViewSet):
 
         if response.hits:
             most_similar_question = response.hits[0]
-            return most_similar_question.meta.id, most_similar_question.meta.score
+            return most_similar_question.meta.id
         return None, None
     
-    @require_http_methods(['GET'])
+    @require_http_methods(['POST'])
     def getAnswerBasedFromQuestion(request):
-        question_content = request.GET.get('question_content')
-        best_question_id, point = APIQAController.get_highest_similarity_score(question_content)
-        print(best_question_id)
-        print(point)
+        try:
+            data = json.loads(request.body)
+            question_content = data.get('question_content')
+        except json.JSONDecodeError:
+            return responseData(data=None, status=404, message="Invalid JSON format")
+        
+        if not data:
+            return responseData(data=None, status=404, message="Can't find question")
+        
+        best_question_id = APIQAController.get_highest_similarity_score(question_content)
         if(best_question_id):
-            answer = APIQAController.getAnswerFromID(best_question_id)
+            answer = APIQAController.getAnswersFromID(best_question_id)
             if (answer):
                 return responseData(message='Success', status=200, data=answer)
             else: return responseData(message='Failed finding answer', status=404)

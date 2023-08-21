@@ -6,9 +6,18 @@ import PropTypes from 'prop-types';
 const CustomAlert = ({ message, severity, duration = 6000, onClose }) => {
     const [open, setOpen] = useState(true);
 
-    const handleClose = () => {
-        onClose();
-      };
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+
+        // Call onClose if provided
+        if (onClose && typeof onClose === "function") {
+            onClose(event, reason);
+        }
+    };
 
     return (
         <Snackbar
@@ -29,6 +38,11 @@ CustomAlert.propTypes = {
     severity: PropTypes.oneOf(['error', 'info', 'warning', 'success']).isRequired,
     duration: PropTypes.number,
     onClose: PropTypes.func,
-  };
+};
+
+CustomAlert.defaultProps = {
+    duration: 6000,
+    onClose: null
+};
 
 export default CustomAlert;
