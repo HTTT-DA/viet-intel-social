@@ -7,10 +7,10 @@ urlpatterns = [
     path('export-user/', ExportController.exportUser),
     path('export-question/', ExportController.exportQuestionWithEvaluation),
     path('export-answer/', ExportController.exportAnswerWithEvaluation),
-    path('export-userpoint/', ExportController.exportUserWithPoints),
     
     path('import-question/', ImportController.importQuestion),
     path('import-user/', ImportController.importUser),
+    path('import-answer/', ImportController.importAnswer),
 
     path('get-answer/', APIQAController.getAnswerBasedFromQuestion),
 ]

@@ -2,8 +2,7 @@ from datetime import date
 import requests
 
 from core.models import Answer, AnswerEvaluation
-from utils.covertDate import convertDate
-
+from utils.convertDate import convertDate
 
 class AnswerService:
     @staticmethod

@@ -16,9 +16,9 @@ function CsvImport() {
     const [selectedField, setSelectedField] = useState("");
 
     const fieldRequirements = {
-        user: ['id', 'email', 'password', 'name', 'display_name', 'role', 'gender'],
-        question: ['id', 'content', 'category_id', 'user_id'],
-        answer: ['id', 'content', 'reference', 'image', 'user_id', 'question_id'],
+        user: ['line_number', 'email', 'password', 'name', 'display_name', 'role', 'gender'],
+        question: ['line_number', 'content', 'category_id', 'user_id'],
+        answer: ['line_number', 'content', 'user_id', 'question_id'],
     };
 
     const requiredFields = fieldRequirements[selectedField] || [];

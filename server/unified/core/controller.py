@@ -13,40 +13,21 @@ from datetime import datetime
 from django.views.decorators.http import require_http_methods
 from email_validator import validate_email, EmailNotValidError
 
-from core.models import User, Question, Category, Answer, QuestionTag, Tag, AnswerEvaluation, QuestionLike, QuestionRating, UserPoint
-from dateutil.relativedelta import relativedelta
-from django.core.exceptions import ObjectDoesNotExist
+from core.models import User, Question, Category, Answer, Tag
 
-from django.utils import timezone
-import csv, codecs, json
-from elasticsearch_dsl.query import MultiMatch
+import csv, json
 from elasticsearch_dsl import Search
 
 from django.template.loader import render_to_string
-from django.urls import reverse
-from django.contrib.sites.shortcuts import get_current_site
-def get_start_date(time_period):
-    now = timezone.now()
+from django.db.models import Count, F
+import bcrypt
 
-    if time_period == "last-7-days":
-        return now - relativedelta(days=7)
-    
-    elif time_period == "this-month":
-        return now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    
-    elif time_period == "this-quarter":
-        quarter_month = (now.month - 1) // 3 * 3 + 1
-        return now.replace(month=quarter_month, day=1, hour=0, minute=0, second=0, microsecond=0)
-    elif time_period == "this-year":
-        return now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-    
-    return None
-
+from utils.getStartDate import get_start_date
+from utils.processCSVFile import process_csv_file
 #Export
 class ExportController(ViewSet):
-    @csrf_exempt
     @require_http_methods(['GET'])
-    def exportUser(self):
+    def exportUser(request):
         fields = [f.name for f in User._meta.fields]
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = f"attachment; filename={User.__name__}.csv"
@@ -59,24 +40,7 @@ class ExportController(ViewSet):
             
 
         return response
-    
-    @csrf_exempt
-    @require_http_methods(['GET'])
-    def exportUserWithPoints(self):
-        fields = [f.name for f in UserPoint._meta.fields]
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f"attachment; filename={UserPoint.__name__}.csv"
-        writer = csv.writer(response)
 
-        writer.writerow(fields)
-
-        for row in UserPoint.objects.values(*fields):
-            writer.writerow([row[field] for field in fields])
-            
-
-        return response
-
-    @csrf_exempt
     @require_http_methods(['GET'])
     def exportQuestionWithEvaluation(request):
         time_period = request.GET.get('date')
@@ -132,7 +96,6 @@ class ExportController(ViewSet):
 
         return response
 
-    @csrf_exempt
     @require_http_methods(['GET'])
     def exportAnswerWithEvaluation(request):
         time_period = request.GET.get('date')
@@ -171,8 +134,8 @@ class ExportController(ViewSet):
 
 # Mail
 class MailController(ViewSet):
-    @require_http_methods(['POST'])
     @csrf_exempt
+    @require_http_methods(['POST'])
     def sendNotificationEmail(request):
         try:
             data = json.loads(request.body)
@@ -201,30 +164,13 @@ class MailController(ViewSet):
         except Exception as e:
             return responseData(message='Error', status=500, data={})
 
-def process_csv_file(csv_file, required_headers):
-    if not csv_file or not csv_file.name.endswith('.csv'):
-        return None, 'Failed, not a CSV file'
-
-    try:
-        reader = csv.DictReader(codecs.iterdecode(csv_file, 'utf-8'), delimiter=',')
-        data = list(reader)
-    except Exception as e:
-        return None, 'Failed, error reading CSV'
-    
-    if not data: 
-        return None, 'Failed, data is empty'
-
-    if not required_headers.issubset(set(reader.fieldnames)):
-        return None, 'Failed, headers are incorrect'
-    
-    return data, None
-
 #Import
-class ImportController(ViewSet):   
+class ImportController(ViewSet):  
+    @csrf_exempt 
     @require_http_methods(['POST'])
     def importQuestion(request):
         csv_file = request.FILES.get("files")
-        required_headers = {'id', 'content', 'category_id', 'user_id'}
+        required_headers = {'line_number', 'content', 'category_id', 'user_id'}
         data, error = process_csv_file(csv_file, required_headers)
         
         if error:
@@ -241,30 +187,30 @@ class ImportController(ViewSet):
             content = row.get('content')
             category_id = row.get('category_id')
             user_id = row.get('user_id')
-            question_id = row.get('id')
+            line_number = row.get('line_number')
             
             if not content or len(content) > 500:
-                failed_ids.append({'id': question_id, 'reason': 'Invalid content'})
+                failed_ids.append({'line_number': line_number, 'reason': 'Invalid content'})
                 continue
                 
             try:
                 category_id = int(category_id)
             except (TypeError, ValueError):
-                failed_ids.append({'id': question_id, 'reason': 'Invalid category_id'})
+                failed_ids.append({'line_number': line_number, 'reason': 'Invalid category_id'})
                 continue
 
             if not Category.objects.filter(id=category_id).exists():
-                failed_ids.append({'id': question_id, 'reason': f'No category with id {category_id}'})
+                failed_ids.append({'line_number': line_number, 'reason': f'No category with id {category_id}'})
                 continue
 
             try:
                 user_id = int(user_id)
             except (TypeError, ValueError):
-                failed_ids.append({'id': question_id, 'reason': 'Invalid user_id'})
+                failed_ids.append({'line_number': line_number, 'reason': 'Invalid user_id'})
                 continue
 
             if not User.objects.filter(id=user_id).exists():
-                failed_ids.append({'id': question_id, 'reason': f'No user with id {user_id}'})
+                failed_ids.append({'line_number': line_number, 'reason': f'No user with id {user_id}'})
                 continue
 
             last_id += 1
@@ -287,11 +233,12 @@ class ImportController(ViewSet):
         except Exception as e:
             return responseData(data=failed_ids, message=str(e), status=500)
         
+    @csrf_exempt
     @require_http_methods(['POST'])
     def importUser(request):
         csv_file = request.FILES["files"]
         
-        required_headers = {'id', 'email', 'password', 'name', 'display_name', 'role', 'gender'}
+        required_headers = {'line_number', 'email', 'password', 'name', 'display_name', 'role', 'gender'}
         data, error = process_csv_file(csv_file, required_headers)
         
         if error:
@@ -308,11 +255,11 @@ class ImportController(ViewSet):
             name = row.get('name')
             display_name = row.get('display_name')
             role = row.get('role').upper() if row.get('role') else 'USER'
-            user_id = row.get('id')
+            line_number = row.get('line_number')
             gender = row.get('gender').upper() if row.get('gender') else 'MALE'
             
             if not email:
-                failed_ids.append({'id': user_id, 'reason': 'Invalid email'})
+                failed_ids.append({'line_number': line_number, 'reason': 'Invalid email'})
                 continue
 
             try:
@@ -320,16 +267,23 @@ class ImportController(ViewSet):
                 email = v["email"]
             
             except EmailNotValidError as e:
-                failed_ids.append({'id': user_id, 'reason': str(e)})
+                failed_ids.append({'line_number': line_number, 'reason': str(e)})
+                continue
+
+            if User.objects.filter(email=email).exists():
+                failed_ids.append({'line_number': line_number, 'reason': 'Email already exists'})
                 continue
 
             last_id += 1
+
+            salt = b"$2a$10$SYxZJIAtGW0.wS06D.hPJe"
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
 
 
             users.append(User(
                 id=last_id,
                 email=email, 
-                password=password,
+                password=hashed_password,
                 name=name, 
                 display_name=display_name, 
                 role=role, 
@@ -355,11 +309,11 @@ class ImportController(ViewSet):
         except Exception as e:
             return responseData(data=failed_ids, message=str(e), status=500)
         
-
+    @csrf_exempt
     @require_http_methods(['POST'])
     def importAnswer(request):
         csv_file = request.FILES.get("files")
-        required_headers = {'id', 'content', 'reference', 'image', 'user_id', 'question_id'}
+        required_headers = {'line_number', 'content', 'user_id', 'question_id'}
         data, error = process_csv_file(csv_file, required_headers)
         
         if error:
@@ -376,37 +330,29 @@ class ImportController(ViewSet):
             content = row.get('content')
             question_id = row.get('question_id')
             user_id = row.get('user_id')
-            answer_id = row.get('id')
-            reference = row.get('reference')
-            image = row.get('image')
+            line_number = row.get('id')
             
             if not content or len(content) > 500:
-                failed_ids.append({'id': answer_id, 'reason': 'Invalid content'})
-                continue
-                
-            try:
-                answer_id = int(answer_id)
-            except (TypeError, ValueError):
-                failed_ids.append({'id': answer_id, 'reason': 'Invalid answer_id'})
-                continue
-
-            if not Question.objects.filter(id=answer_id).exists():
-                failed_ids.append({'id': answer_id, 'reason': f'No category with id {answer_id}'})
+                failed_ids.append({'line_number': line_number, 'reason': 'Invalid content'})
                 continue
 
             try:
                 user_id = int(user_id)
             except (TypeError, ValueError):
-                failed_ids.append({'id': question_id, 'reason': 'Invalid user_id'})
+                failed_ids.append({'line_number': line_number, 'reason': 'Invalid user_id'})
                 continue
 
             if not User.objects.filter(id=user_id).exists():
-                failed_ids.append({'id': question_id, 'reason': f'No user with id {user_id}'})
+                failed_ids.append({'line_number': line_number, 'reason': f'No user with id {user_id}'})
+                continue
+
+            if not Question.objects.filter(id=question_id).exists():
+                failed_ids.append({'line_number': line_number, 'reason': f'No question with id {question_id}'})
                 continue
 
             last_id += 1
 
-            answers.append(Question(
+            answers.append(Answer(
                 id = last_id,
                 content=content, 
                 question_id=question_id,
@@ -426,21 +372,26 @@ class ImportController(ViewSet):
     
 class APIQAController(ViewSet):
     @staticmethod
-    def getAllQuestionWithID():
+    def getAllQuestionWithID(self):
         questions = Question.objects.all().values('id', 'content')
         questions_dict = {item['id']: item['content'] for item in questions}
         return questions_dict
 
     @staticmethod
-    def getAnswersFromID(questionId):
+    def getTop3AnswersFromID(self, questionId):
         try:
-            answer_instances = Answer.objects.filter(question_id=questionId)
-            return [instance.answer_content for instance in answer_instances]
+            answer_instances = (Answer.objects.filter(question_id=questionId)
+                                .annotate(good_count=Count('answerevaluation__id', filter=F('answerevaluation__evaluation_type') == 'GOOD'))
+                                .order_by('-good_count')
+                                .values('answer_content', 'good_count')[:3])
+            
+            return [instance['answer_content'] for instance in answer_instances]
+
         except Answer.DoesNotExist:
             return None
 
     @staticmethod
-    def get_highest_similarity_score(new_question_content):
+    def get_highest_similarity_score(self, new_question_content):
         search = Search(index="questions")
         search = search.query("match", content=new_question_content)
         response = search.execute()
@@ -448,8 +399,9 @@ class APIQAController(ViewSet):
         if response.hits:
             most_similar_question = response.hits[0]
             return most_similar_question.meta.id
-        return None, None
+        return None
     
+    @csrf_exempt
     @require_http_methods(['POST'])
     def getAnswerBasedFromQuestion(request):
         try:
