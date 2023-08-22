@@ -2,7 +2,7 @@ import { Grid, Typography, Button, Box, FormControl, Select, InputLabel, MenuIte
 import Papa from 'papaparse';
 import React, { useRef, useState } from 'react';
 import axios from 'axios';
-import { importUser, importQuestion } from '@/api-services/unified';
+import { importUser, importQuestion, importAnswer, exportErrorCSV } from '@/api-services/unified';
 import CustomAlert from '../../components/alert'
 
 
@@ -14,6 +14,10 @@ function CsvImport() {
     const [uploading, setUploading] = useState(false);
     const [alertState, setAlertState] = useState({ open: false, message: '' });
     const [selectedField, setSelectedField] = useState("");
+    const [failedImportLines, setFailedImportLines] = useState([]);
+
+
+
 
     const fieldRequirements = {
         user: ['line_number', 'email', 'password', 'name', 'display_name', 'role', 'gender'],
@@ -67,19 +71,37 @@ function CsvImport() {
                 case 'question':
                     response = await importQuestion(csvFile);
                     break;
+                case 'answer':
+                    response = await importAnswer(csvFile);
+                    break;
                 default:
                     setAlertState({ open: true, message: "Invalid field selected", severity: "error" });
                     setUploading(false);
                     return;
             }
-    
-            if (response && response.status === 200) {
-                setAlertState({ open: true, message: "Successfully uploaded", severity: "success" });
-            } else {
-                setAlertState({ open: true, message: "Error uploading", severity: "error" });
+            
+            if (response.status === 200) {
+                if (response.data.length > 0) {
+                    setFailedImportLines(response.data || []);
+                    const exportResponse = await exportErrorCSV(response.data);
+                    
+                    if (exportResponse) {
+                        const blob = new Blob([exportResponse], { type: 'text/csv' });
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = 'error_lines.csv';
+                        link.click();
+                    } 
+                    setAlertState({ open: true, message: "Successfully uploaded with errors", severity: "info" });
+
+                } else if (response.data.length === 0) {
+                    setAlertState({ open: true, message: "Successfully uploaded with no errors", severity: "success" });
+                }
+            } else if (response || response.status !== 200) {
+                setAlertState({ open: true, message: "Error: " + response.message, severity: "error" });
             }
         } catch (error) {
-            setAlertState({ open: true, message: "An error occurred", severity: "error" });
+            setAlertState({ open: true, message: "An error occurred: " + response.message, severity: "error" });
         }
 
         setUploading(false);
@@ -96,7 +118,13 @@ function CsvImport() {
                     message={alertState.message}
                     severity={alertState.severity}
                     onClose={() => setAlertState({ open: false, message: '', severity: 'success' })}
-                />
+                >
+                    {failedImportLines.length > 0 && (
+                        <Typography variant="subtitle2" style={{ marginTop: 10 }}>
+                            A CSV containing the error lines has been downloaded. Please review it for more details.
+                        </Typography>
+                    )}
+                </CustomAlert>
             )}
             <Box bgcolor="#ffffff" padding={2} borderRadius={8} boxShadow={1}>
                 <Grid container spacing={1}>
@@ -113,7 +141,7 @@ function CsvImport() {
                                     >
                                         <MenuItem value={"user"}>User</MenuItem>
                                         <MenuItem value={"question"}>Question</MenuItem>
-                                        <MenuItem value={"question"}>Answer</MenuItem>
+                                        <MenuItem value={"answer"}>Answer</MenuItem>
                                     </Select>
                                 </FormControl>   
                             </Grid> 

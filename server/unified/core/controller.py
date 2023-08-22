@@ -8,7 +8,7 @@ from rest_framework.viewsets import ViewSet
 from django.conf import settings
 from utils.response import responseData
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from datetime import datetime
 from django.views.decorators.http import require_http_methods
 from email_validator import validate_email, EmailNotValidError
@@ -26,6 +26,27 @@ from utils.getStartDate import get_start_date
 from utils.processCSVFile import process_csv_file
 #Export
 class ExportController(ViewSet):
+    @csrf_exempt
+    @require_http_methods(['POST'])
+    def exportFailedLines(request):
+        try:
+            body = json.loads(request.body.decode('utf-8'))
+            failed_lines_data = body.get('data', [])
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="failed_lines.csv"'
+
+            writer = csv.writer(response)
+            writer.writerow(['Line Number', 'Reason'])
+
+            for item in failed_lines_data:
+                writer.writerow([item['line_number'], item['reason']])
+
+            return response
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
     @require_http_methods(['GET'])
     def exportUser(request):
         fields = [f.name for f in User._meta.fields]
@@ -163,13 +184,14 @@ class MailController(ViewSet):
             return responseData(message='Success', status=200, data={})
         except Exception as e:
             return responseData(message='Error', status=500, data={})
-
+import codecs
 #Import
 class ImportController(ViewSet):  
     @csrf_exempt 
     @require_http_methods(['POST'])
     def importQuestion(request):
         csv_file = request.FILES.get("files")
+    
         required_headers = {'line_number', 'content', 'category_id', 'user_id'}
         data, error = process_csv_file(csv_file, required_headers)
         
@@ -181,36 +203,36 @@ class ImportController(ViewSet):
         questions = []
         last_id = Question.objects.all().aggregate(Max('id')).get('id__max') or 0
 
-        failed_ids = []
+        failed_lines = []
         
         for row in data:  
             content = row.get('content')
             category_id = row.get('category_id')
             user_id = row.get('user_id')
             line_number = row.get('line_number')
-            
+
             if not content or len(content) > 500:
-                failed_ids.append({'line_number': line_number, 'reason': 'Invalid content'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid content'})
                 continue
                 
             try:
                 category_id = int(category_id)
             except (TypeError, ValueError):
-                failed_ids.append({'line_number': line_number, 'reason': 'Invalid category_id'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid category_id'})
                 continue
 
             if not Category.objects.filter(id=category_id).exists():
-                failed_ids.append({'line_number': line_number, 'reason': f'No category with id {category_id}'})
+                failed_lines.append({'line_number': line_number, 'reason': f'No category with id {category_id}'})
                 continue
 
             try:
                 user_id = int(user_id)
             except (TypeError, ValueError):
-                failed_ids.append({'line_number': line_number, 'reason': 'Invalid user_id'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid user_id'})
                 continue
 
             if not User.objects.filter(id=user_id).exists():
-                failed_ids.append({'line_number': line_number, 'reason': f'No user with id {user_id}'})
+                failed_lines.append({'line_number': line_number, 'reason': f'No user with id {user_id}'})
                 continue
 
             last_id += 1
@@ -228,10 +250,10 @@ class ImportController(ViewSet):
             with transaction.atomic():
                 Question.objects.bulk_create(questions)
             
-            return responseData(data=failed_ids, message='Success creating questions. Failed question:', status=200)
+            return responseData(data=failed_lines, message='Success creating questions. Failed question:', status=200)
         
         except Exception as e:
-            return responseData(data=failed_ids, message=str(e), status=500)
+            return responseData(data=failed_lines, message=str(e), status=500)
         
     @csrf_exempt
     @require_http_methods(['POST'])
@@ -245,7 +267,7 @@ class ImportController(ViewSet):
             return responseData(data=data, status=500, message=error)
 
         users = []
-        failed_ids = []
+        failed_lines = []
         last_id = User.objects.all().aggregate(Max('id')).get('id__max') or 0
 
         
@@ -259,7 +281,7 @@ class ImportController(ViewSet):
             gender = row.get('gender').upper() if row.get('gender') else 'MALE'
             
             if not email:
-                failed_ids.append({'line_number': line_number, 'reason': 'Invalid email'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid email'})
                 continue
 
             try:
@@ -267,11 +289,11 @@ class ImportController(ViewSet):
                 email = v["email"]
             
             except EmailNotValidError as e:
-                failed_ids.append({'line_number': line_number, 'reason': str(e)})
+                failed_lines.append({'line_number': line_number, 'reason': str(e)})
                 continue
 
             if User.objects.filter(email=email).exists():
-                failed_ids.append({'line_number': line_number, 'reason': 'Email already exists'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Email already exists'})
                 continue
 
             last_id += 1
@@ -304,18 +326,19 @@ class ImportController(ViewSet):
             with transaction.atomic():
                 User.objects.bulk_create(users)
             
-            return responseData(data=failed_ids, message='Success creating users. Failed users:', status=200)
+            return responseData(data=failed_lines, message='Success creating users. Failed users:', status=200)
         
         except Exception as e:
-            return responseData(data=failed_ids, message=str(e), status=500)
+            return responseData(data=failed_lines, message=str(e), status=500)
         
     @csrf_exempt
     @require_http_methods(['POST'])
     def importAnswer(request):
         csv_file = request.FILES.get("files")
+
         required_headers = {'line_number', 'content', 'user_id', 'question_id'}
         data, error = process_csv_file(csv_file, required_headers)
-        
+
         if error:
             return responseData(data=data, status=500, message=error)
 
@@ -324,37 +347,37 @@ class ImportController(ViewSet):
         answers = []
         last_id = Answer.objects.all().aggregate(Max('id')).get('id__max') or 0
 
-        failed_ids = []
+        failed_lines = []
         
         for row in data:  
             content = row.get('content')
             question_id = row.get('question_id')
             user_id = row.get('user_id')
-            line_number = row.get('id')
+            line_number = row.get('line_number')
             
             if not content or len(content) > 500:
-                failed_ids.append({'line_number': line_number, 'reason': 'Invalid content'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid content'})
                 continue
 
             try:
                 user_id = int(user_id)
             except (TypeError, ValueError):
-                failed_ids.append({'line_number': line_number, 'reason': 'Invalid user_id'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid user_id'})
                 continue
 
             if not User.objects.filter(id=user_id).exists():
-                failed_ids.append({'line_number': line_number, 'reason': f'No user with id {user_id}'})
+                failed_lines.append({'line_number': line_number, 'reason': f'No user with id {user_id}'})
                 continue
 
             if not Question.objects.filter(id=question_id).exists():
-                failed_ids.append({'line_number': line_number, 'reason': f'No question with id {question_id}'})
+                failed_lines.append({'line_number': line_number, 'reason': f'No question with id {question_id}'})
                 continue
 
             last_id += 1
 
             answers.append(Answer(
                 id = last_id,
-                content=content, 
+                answer_content=content, 
                 question_id=question_id,
                 user_id=user_id, 
                 created_at=current_date, 
@@ -363,12 +386,14 @@ class ImportController(ViewSet):
         
         try:
             with transaction.atomic():
-                Question.objects.bulk_create(answers)
+                Answer.objects.bulk_create(answers)
             
-            return responseData(data=failed_ids, message='Success creating answers. Failed answers:', status=200)
+            print(failed_lines)
+            return responseData(data=failed_lines, message='Success creating answers. Failed answers:', status=200)
         
         except Exception as e:
-            return responseData(data=failed_ids, message=str(e), status=500)
+            return responseData(data=failed_lines, message=str(e), status=500)
+
     
 class APIQAController(ViewSet):
     @staticmethod

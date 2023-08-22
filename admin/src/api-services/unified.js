@@ -97,9 +97,8 @@ export async function importUser(csv_file) {
                 }
             }
         );
-        return response;
+        return response.data;
     } catch (error) {
-        console.error(error);
         return false;
     }
 }
@@ -118,9 +117,8 @@ export async function importQuestion(csv_file) {
                 }
             }
         );
-        return response;
+        return response.data;
     } catch (error) {
-        console.error(error);
         return false;
     }
 }
@@ -139,7 +137,23 @@ export async function importAnswer(csv_file) {
                 }
             }
         );
-        return response;
+        return response.data;
+    } catch (error) {
+        return false;
+    }
+}
+
+
+
+export async function exportErrorCSV(data) {
+    try {
+        const response = await axios.post(
+            `http://localhost:8004/core/export-fail-lines/`,
+            {
+                data: data
+            }
+        );
+        return response.data;
     } catch (error) {
         console.error(error);
         return false;
