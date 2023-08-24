@@ -73,3 +73,16 @@ export async function acceptRequestAccess(requestId) {
     return false;
   }
 }
+
+export async function createAccessToken(data) {
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL_USER}/api/users/create-access-token`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}

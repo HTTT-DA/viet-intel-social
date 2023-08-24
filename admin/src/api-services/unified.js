@@ -159,3 +159,19 @@ export async function exportErrorCSV(data) {
         return false;
     }
 }
+
+export async function sendAccessTokenMail(data) {
+  try {
+    const response = await axios.post(
+      `${
+        import.meta.env.VITE_API_URL_UNIFIED
+      }/core/send-notification-new-token/`,
+      data
+    );
+    console.log(response);
+    return response;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}

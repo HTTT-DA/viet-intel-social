@@ -13,6 +13,7 @@ urlpatterns = [
     path('questions/get-all-admin', QuestionController.getAllQuestionsForAdmin),
     path('questions/get-content/<int:questionId>', QuestionController.getContentForAnswer),
     path('questions/count', QuestionController.countAllQuestions),
+    path('questions/authenticated/get-all', QuestionController.getAllQuestionAuthenticated),
 
     # Create - Update - Delete
     path('questions/like', QuestionController.likeQuestion),

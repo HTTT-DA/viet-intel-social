@@ -6,3 +6,4 @@ django-cors-headers~=4.2.0
 djangorestframework_simplejwt==5.2.2
 pyjwt==2.8.0
 bcrypt==4.0.1
+pytz==2023.3

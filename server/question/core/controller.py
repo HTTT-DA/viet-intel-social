@@ -1,4 +1,6 @@
 import json
+import requests
+from django.http import JsonResponse
 
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ObjectDoesNotExist
@@ -6,7 +8,7 @@ from rest_framework.viewsets import ViewSet
 from django.db import IntegrityError
 
 from core.models import Tag
-from core.serializer import QuestionSerializer, TagSerializer, QuestionAdminSerializer, QuestionAnswerSerializer
+from core.serializer import QuestionSerializer, TagSerializer, QuestionAdminSerializer, QuestionAnswerSerializer, QuestionAuthenticatedUserSerializer
 from core.service import QuestionService
 from utils.response import responseData
 
@@ -223,7 +225,7 @@ class QuestionController(ViewSet):
     def declinePendingQuestion(request, questionId):
         try:
             question = QuestionService.deleteQuestionForever(questionId)
-            return responseData(data=question, message="Delete question successfully from Question-Services")
+            return responseData(data=None, message="Delete question successfully from Question-Services")
         except IntegrityError as e:
             print(e)
             return responseData(None, status=500, message="Error when delete question from DB in Question-Services")
@@ -233,8 +235,49 @@ class QuestionController(ViewSet):
     def acceptPendingQuestion(request, questionId):
         try:
             question = QuestionService.updateQuestionStatus(questionId)
-            return responseData(data=question, message="Update status of question successfully from Question-Services")
+            return responseData(data=None, message="Update status of question successfully from Question-Services")
         except IntegrityError as e:
             print(e)
             return responseData(None, status=500, message="Error when update status of question from DB in "
                                                           "Question-Services")
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getAllQuestionAuthenticated(request):
+        try:
+            if 'Authorization' in request.headers:
+                auth_header = request.headers['Authorization']
+                parts = auth_header.split(' ')
+                if len(parts) == 2 and parts[0] == 'Bearer':
+                    url = "http://localhost:8000/api/users/validate-access-token"
+                    access_token = parts[1]
+                    headers = {
+                        "Authorization": f"Bearer {access_token}"
+                    }
+                    response = requests.get(url, headers=headers)
+                    response_data = response.json()
+                    if response_data['status'] == 200:
+                        question = QuestionService.getAllQuestion()
+                        return responseData(data=QuestionAuthenticatedUserSerializer(question, many=True).data,
+                                            message="Get successfully from Question-Services")
+                    elif response_data['status'] == 500 and response_data['message'] == 'Expired':
+                        return responseData(data=None, status=500,
+                                            message="Your Access Token is EXPIRED ! Please register again !")
+                    else:
+                        return responseData(data=None, status=500,
+                                            message="Your Access Token is INVALID ! Please register before using our "
+                                                    "API !")
+                else:
+                    return responseData(None, status=500,
+                                        message="Not Authenticated ! Please check your Authorization Access Token")
+            else:
+                return responseData(None, status=500, message="Not Authenticated ! You must add your Access Token when "
+                                                              "call API")
+        except Exception as e:
+            return responseData(message=str(e), status=500, data={})
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def getDetailQuestionAuthenticated(request):
+        pass
+

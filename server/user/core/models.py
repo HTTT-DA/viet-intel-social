@@ -87,3 +87,13 @@ class UserAPIAccess(models.Model):
 
     class Meta:
         db_table = 'user_api_access'
+
+
+class AccessToken(models.Model):
+    user_email = models.CharField(max_length=255, null=False)
+    access_token = models.TextField(null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expiration_time = models.DateTimeField(null=False)
+
+    class Meta:
+        db_table = 'access_tokens'

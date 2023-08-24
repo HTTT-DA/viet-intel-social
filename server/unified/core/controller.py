@@ -16,6 +16,7 @@ from email_validator import validate_email, EmailNotValidError
 from core.models import User, Question, Category, Answer, Tag
 
 import csv, json
+import codecs
 from elasticsearch_dsl import Search
 
 from django.template.loader import render_to_string
@@ -184,7 +185,81 @@ class MailController(ViewSet):
             return responseData(message='Success', status=200, data={})
         except Exception as e:
             return responseData(message='Error', status=500, data={})
-import codecs
+
+    @require_http_methods(['POST'])
+    @csrf_exempt
+    def sendNotificationNewToken(request):
+        try:
+            data = json.loads(request.body)
+            email = data.get('user_email')
+            content = data.get('content')
+
+        except json.JSONDecodeError:
+            return responseData(data=None, status=404, message="Invalid JSON format")
+
+        email_body = render_to_string('email_template.html', {
+            'content': content,
+        })
+
+        default_subject = 'Notification from VietintelSocial Network'
+        default_message = 'Congratulations, Your registration has been approved !'
+        try:
+            send_mail(default_subject,
+                      default_message,
+                      settings.EMAIL_HOST_USER,
+                      email,
+                      fail_silently=False,
+                      html_message=email_body)
+            return responseData(message='Success', status=200, data={})
+        except Exception as e:
+            return responseData(message='Error', status=500, data={})
+
+    @require_http_methods(['POST'])
+    @csrf_exempt
+    def sendNotificationExpiredToken(request):
+        try:
+            data = json.loads(request.body)
+            email = data.get('user_email')
+            content = data.get('content')
+
+        except json.JSONDecodeError:
+            return responseData(data=None, status=404, message="Invalid JSON format")
+
+        email_body = render_to_string('email_template.html', {
+            'content': content,
+        })
+
+        default_subject = 'Notification from VietintelSocial Network'
+        default_message = 'Sorry, Your API access date has expired !'
+        try:
+            send_mail(default_subject,
+                      default_message,
+                      settings.EMAIL_HOST_USER,
+                      email,
+                      fail_silently=False,
+                      html_message=email_body)
+            return responseData(message='Success', status=200, data={})
+        except Exception as e:
+            return responseData(message='Error', status=500, data={})
+
+def process_csv_file(csv_file, required_headers):
+    if not csv_file or not csv_file.name.endswith('.csv'):
+        return None, 'Failed, not a CSV file'
+
+    try:
+        reader = csv.DictReader(codecs.iterdecode(csv_file, 'utf-8'), delimiter=',')
+        data = list(reader)
+    except Exception as e:
+        return None, 'Failed, error reading CSV'
+    
+    if not data: 
+        return None, 'Failed, data is empty'
+
+    if not required_headers.issubset(set(reader.fieldnames)):
+        return None, 'Failed, headers are incorrect'
+    
+    return data, None
+
 #Import
 class ImportController(ViewSet):  
     @csrf_exempt 

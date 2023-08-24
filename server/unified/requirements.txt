@@ -3,3 +3,6 @@ python-decouple==3.8
 mysqlclient
 djangorestframework~=3.14.0
 django-cors-headers~=4.2.0
+elasticsearch-dsl==7.4.1
+python-dateutil==2.8.2
+email-validator==2.0.0.post2

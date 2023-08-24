@@ -3,6 +3,8 @@ from core.controller import MailController, ExportController, ImportController, 
 
 urlpatterns = [
     path('send-notification-email/', MailController.sendNotificationEmail),
+    path('send-notification-new-token/', MailController.sendNotificationNewToken),
+    path('send-notification-expired-token/', MailController.sendNotificationExpiredToken),
     
     path('export-user/', ExportController.exportUser),
     path('export-question/', ExportController.exportQuestionWithEvaluation),

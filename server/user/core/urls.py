@@ -22,5 +22,6 @@ urlpatterns = [
     path('/sign-in-admin', UserController.adminLogin),
     path('/change-password', UserController.changePassword),
     path('/sign-up', UserController.signUp),
-    path('/get-new-access-token', UserController.getNewAccessToken),
+    path('/create-access-token', UserController.createAccessToken),
+    path('/validate-access-token', UserController.validateAccessToken)
 ]

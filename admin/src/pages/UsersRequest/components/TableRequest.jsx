@@ -15,7 +15,8 @@ import Alert from "@mui/material/Alert";
 import Chip from "@mui/material/Chip";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { declineRequestAccess, acceptRequestAccess } from "../../../api-services/user";
+import { declineRequestAccess, acceptRequestAccess, createAccessToken } from "../../../api-services/user";
+import { sendAccessTokenMail } from "../../../api-services/unified";
 
 const TableRequest = ({ requests, setRequests }) => {
   const [isSuccess, setIsSuccess] = useState(false);
@@ -50,24 +51,54 @@ const TableRequest = ({ requests, setRequests }) => {
     }
   };
 
-  const handleAccept = async (requestId) => {
+  const handleAccept = async (requestId, mail) => {
     try {
-      const response = await acceptRequestAccess(requestId);
-      console.log(response)
-      if (response.status === 200) {
-        setIsSuccess(true);
-        setSuccessMessage("Accepted successfully !");
-        setOpenSnackbar(true);
-        const updatedRequests = requests.map((request) => {
-          if (request.id === requestId) {
-            return { ...request, status: "ACCEPTED" };
+      // Step 1: Accept request
+      const requestResponse = await acceptRequestAccess(requestId);
+      if (requestResponse.status === 200) {
+        const dataForAccessToken = {
+          user_id: requestId,
+          user_email: mail,
+        };
+        // Step 2: Create access token
+        const tokenResponse = await createAccessToken(dataForAccessToken);
+        if (tokenResponse.status === 200) {
+          const accessToken = tokenResponse.data.access_token;
+          const dataForMail = {
+            user_email: mail,
+            content:
+              "This is your access token for your account: " +
+              accessToken +
+              "\n" +
+              "This access token is valid for 7 days !",
+          };
+          // Step 3: Send email with access token
+          const emailResponse = await sendAccessTokenMail(dataForMail);
+          console.log(emailResponse)
+          if (emailResponse.status === 200) {
+            setIsSuccess(true);
+            setSuccessMessage("Accepted successfully !");
+            setOpenSnackbar(true);
+            const updatedRequests = requests.map((request) => {
+              if (request.id === requestId) {
+                return { ...request, status: "ACCEPTED" };
+              }
+              return request;
+            });
+            setRequests(updatedRequests);
+          } else {
+            setIsSuccess(false);
+            setErrorMessage("Something went wrong ! Email sending failed !");
+            setOpenSnackbar(true);
           }
-          return request;
-        });
-        setRequests(updatedRequests);
+        } else {
+          setIsSuccess(false);
+          setErrorMessage("Something went wrong ! Token creation failed !");
+          setOpenSnackbar(true);
+        }
       } else {
         setIsSuccess(false);
-        setErrorMessage("Something went wrong ! Accepted Failed !");
+        setErrorMessage("Something went wrong ! Accepting request failed !");
         setOpenSnackbar(true);
       }
     } catch (error) {
@@ -76,7 +107,8 @@ const TableRequest = ({ requests, setRequests }) => {
       setOpenSnackbar(true);
       console.error("Error fetching answers:", error);
     }
-  }
+  };
+
 
   const handleDeclineButton = (id, mail) => {
     setIDRequest(id);
@@ -150,7 +182,7 @@ const TableRequest = ({ requests, setRequests }) => {
                   color="success"
                   disabled={request.status === "ACCEPTED"}
                   onClick={() => {
-                    handleAccept(request.id);
+                    handleAccept(request.id, request.user_email);
                   }}
                 >
                   <b>ACCEPT</b>
