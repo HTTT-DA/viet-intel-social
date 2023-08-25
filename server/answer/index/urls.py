@@ -18,5 +18,5 @@ from django.urls import path
 from django.conf.urls import include
 
 urlpatterns = [
-    path('api/answers', include("core.urls")),
+    path('api/answers/', include("core.urls")),
 ]

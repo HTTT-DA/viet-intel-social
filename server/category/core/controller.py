@@ -33,10 +33,20 @@ class CategoryController(ViewSet):
 
     @staticmethod
     @require_http_methods(['GET'])
+    def getAvailableCategories(request):
+        try:
+            queryset = Category.objects.filter(is_deleted=False)
+            return responseData(data=CategorySerializer(queryset, many=True).data)
+        except IntegrityError as e:
+            print(e)
+            return responseData(None, status=500, message="Error when get available categories")
+
+    @staticmethod
+    @require_http_methods(['GET'])
     def getCategoryById(request, categoryId):
         try:
-            queryset = Category.objects.filter(id=categoryId)
-            return responseData(data=CategoryIdNameSerializer(queryset, many=True).data)
+            queryset = Category.objects.filter(id=categoryId).first()
+            return responseData(data=CategoryIdNameSerializer(queryset).data)
         except IntegrityError as e:
             print(e)
             return responseData(None, status=500, message="Error when get category by id")
@@ -123,5 +133,3 @@ class CategoryController(ViewSet):
         except Exception as e:
             print(e)
             return responseData(None, status=500, message="Error when get user by ID for Admin in User-Service")
-
-

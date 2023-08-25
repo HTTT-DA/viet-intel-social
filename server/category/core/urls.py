@@ -2,6 +2,7 @@ from django.urls import path
 from core.controller import CategoryController
 
 urlpatterns = [
+    path('available', CategoryController.getAvailableCategories),
     path('all', CategoryController.getAllCategories),
     path('<int:categoryId>', CategoryController.getCategoryById),
     path('get-category/<int:categoryId>', CategoryController.getCategoryByIdForAdmin),

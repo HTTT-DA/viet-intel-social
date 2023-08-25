@@ -3,7 +3,7 @@ from datetime import datetime
 import requests
 
 from core.models import Question, QuestionRating, QuestionLike, QuestionTag, QuestionEvaluation, Tag
-from utils.covertDate import convertDate
+from utils.convertDate import convertDate
 
 
 def fetchMoreDataForQuestion(questions):

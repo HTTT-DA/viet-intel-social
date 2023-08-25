@@ -137,8 +137,8 @@ class UserController(ViewSet):
                 return responseData(message='User does not exist', status=404, data={})
 
             User.objects \
-                .create(email=email, password=password, name=data.get('full-name'),
-                        display_name=data.get('display-name'), role='USER',
+                .create(email=email, password=password, name=data.get('full name'),
+                        display_name=data.get('display name'), role='USER',
                         avatar='', city='', status='ACTIVED', get_notification=True,
                         answer_count=0, question_count=0, point=0, ranker='SILVER',
                         is_anonymous=False, is_authenticated=False, last_login=None,
