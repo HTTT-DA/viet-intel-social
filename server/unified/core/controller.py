@@ -165,7 +165,7 @@ class MailController(ViewSet):
     def sendNotificationEmail(request):
         try:
             data = json.loads(request.body)
-            content = data.get('content')
+            question_content = data.get('question_content')
 
         except json.JSONDecodeError:
             return responseData(data=None, status=404, message="Invalid JSON format")
@@ -173,7 +173,7 @@ class MailController(ViewSet):
         admin_emails = list(User.objects.filter(role='admin', get_notification=True).values_list('email', flat=True))
 
         email_body = render_to_string('email_template.html', {
-            'content': content,
+            'question_content': question_content,
         })
         
         default_subject = 'Notification'
