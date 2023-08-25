@@ -44,9 +44,16 @@ def fetchMoreDataForQuestion(questions):
 class QuestionService:
     @staticmethod
     def getAllQuestionOrderByNewestTime(search, offset):
-        questions = Question.objects \
-                        .filter(content__icontains=search, status='ACCEPTED') \
-                        .order_by('-created_at')[int(offset) * 10:int(offset) * 10 + 10]
+        questionsByContent = Question.objects \
+            .filter(content__icontains=search, status='ACCEPTED')
+
+        tags = Tag.objects.filter(name__icontains=search)
+        questionsByTag = QuestionTag.objects.filter(tag_id__in=tags).values('question_id')
+        questionsByTag = Question.objects.filter(id__in=questionsByTag, status='ACCEPTED')
+
+        questions = questionsByContent | questionsByTag
+        questions = sorted(questions, key=lambda question: question.created_at, reverse=True)
+        questions = questions[int(offset) * 10:int(offset) * 10 + 10]
 
         questions = fetchMoreDataForQuestion(questions)
         return questions
