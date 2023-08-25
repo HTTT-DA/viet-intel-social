@@ -298,7 +298,7 @@ class UserController(ViewSet):
     @require_http_methods(['DELETE'])
     def declinePendingRequest(request, requestId):
         try:
-            request = UserAPIAccess.objects.filter(id=requestId, status="PENDING").delete()
+            UserAPIAccess.objects.filter(id=requestId, status="PENDING").delete()
             return responseData(message="Delete request successfully from User-Services")
         except Exception as e:
             print(e)
