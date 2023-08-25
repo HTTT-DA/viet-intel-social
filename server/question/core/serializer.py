@@ -15,10 +15,12 @@ class QuestionSerializer(ModelSerializer):
     ratings = serializers.ListField()
     owner = serializers.JSONField()
     category = serializers.JSONField()
+    likes = serializers.ListField()
 
     class Meta:
         model = Question
-        fields = ('id', 'content', 'created_at', 'tags', 'ratings', 'owner', 'like_count', 'rating', 'category')
+        fields = ('id', 'content', 'created_at', 'tags', 'ratings',
+                  'owner', 'like_count', 'rating', 'category', 'likes')
 
 
 class TagSerializer(ModelSerializer):

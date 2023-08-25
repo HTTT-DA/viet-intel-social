@@ -14,6 +14,15 @@ def fetchMoreDataForQuestion(questions):
             .filter(question_id=question.id) \
             .values('user_id', 'star_number')
 
+        question.likes = QuestionLike.objects \
+            .filter(question_id=question.id) \
+            .values('user_id')
+
+        array = []
+        for like in question.likes:
+            array.append(like['user_id'])
+        question.likes = array
+
         question.tags = QuestionTag.objects \
             .filter(question_id=question.id) \
             .values('tag_id')
