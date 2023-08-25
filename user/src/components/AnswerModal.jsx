@@ -83,7 +83,7 @@ export default function AnswerModal(props) {
         }
 
         if (!selectedFile) {
-            await fetch("http://localhost:8002/api/answers", {
+            await fetch("http://localhost:8002/api/answers/create", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ export default function AnswerModal(props) {
             }));
         } else {
             await UploadFileToCloudinary(selectedFile).then((res) => {
-                fetch("http://localhost:8002/api/answers", {
+                fetch("http://localhost:8002/api/answers/create", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

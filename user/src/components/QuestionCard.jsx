@@ -205,7 +205,7 @@ export default function QuestionCard(props) {
                     }}
                 >
                     {question.tags.map((tag) => (
-                        '@' + tag.name + " "
+                        '@' + tag.tag_name + " "
                     ))}
                 </Typography>
             </CardContent>
