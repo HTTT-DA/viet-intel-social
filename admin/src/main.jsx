@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-// import Login from "./pages/login/index.jsx";
+import Login from "./pages/login/index.jsx";
+import RegisterUseAPI from "./pages/registerUseAPI/index.jsx";
 import Category from "./pages/category";
 import ContentCensorShip from "./pages/contentCensorship/index.jsx";
 import DetailAnswer from "./pages/DetailAnswer";
@@ -11,6 +12,8 @@ import Import from "./pages/import";
 import ListAnswers from "./pages/listAnswers";
 import NotFound from "./pages/notFound";
 import Setting from "./pages/setting";
+import UsersRequest from "./pages/UsersRequest";
+import QnA from "./pages/qna";
 
 import MainLayout from "./layouts/MainLayout";
 import "./styles.scss";
@@ -58,12 +61,24 @@ const router = createBrowserRouter([
         path: "/export",
         element: <Export />,
       },
+      {
+        path: "/api-access",
+        element: <UsersRequest />,
+      },
+      {
+        path: "/qna",
+        element: <QnA />,
+      },
     ],
   },
-  // {
-  //   path: "/login",
-  //   element: <Login />,
-  // },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register-use-api",
+    element: <RegisterUseAPI />,
+  },
   // 404 not found
   {
     path: "*",

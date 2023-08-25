@@ -155,6 +155,16 @@ class QuestionService:
         return question
 
     @staticmethod
+    def getAllQuestion():
+        question = Question.objects.all()
+        return question
+
+    @staticmethod
+    def getPendingQuestion():
+        question = Question.objects.filter(status="WAITING")
+        return question
+
+    @staticmethod
     def countQuestions():
         return Question.objects.count()
 

@@ -8,41 +8,48 @@ from rest_framework.viewsets import ViewSet
 from django.conf import settings
 from utils.response import responseData
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from datetime import datetime
 from django.views.decorators.http import require_http_methods
 from email_validator import validate_email, EmailNotValidError
 
-from core.models import User, Question, Category, Answer, QuestionTag, Tag, AnswerEvaluation, QuestionLike, QuestionRating, UserPoint
-from dateutil.relativedelta import relativedelta
-from django.core.exceptions import ObjectDoesNotExist
+from core.models import User, Question, Category, Answer, Tag
 
-from django.utils import timezone
+import csv, json
+import codecs
+from elasticsearch_dsl import Search
 
-import csv, codecs, json
+from django.template.loader import render_to_string
+from django.db.models import Count, F, Q
+import bcrypt
 
-def get_start_date(time_period):
-    now = timezone.now()
-
-    if time_period == "last-7-days":
-        return now - relativedelta(days=7)
-    
-    elif time_period == "this-month":
-        return now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    
-    elif time_period == "this-quarter":
-        quarter_month = (now.month - 1) // 3 * 3 + 1
-        return now.replace(month=quarter_month, day=1, hour=0, minute=0, second=0, microsecond=0)
-    elif time_period == "this-year":
-        return now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-    
-    return None
-
+from utils.getStartDate import get_start_date
+from utils.processCSVFile import process_csv_file
 #Export
 class ExportController(ViewSet):
     @csrf_exempt
+    @require_http_methods(['POST'])
+    def exportFailedLines(request):
+        try:
+            body = json.loads(request.body.decode('utf-8'))
+            failed_lines_data = body.get('data', [])
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="failed_lines.csv"'
+
+            writer = csv.writer(response)
+            writer.writerow(['Line Number', 'Reason'])
+
+            for item in failed_lines_data:
+                writer.writerow([item['line_number'], item['reason']])
+
+            return response
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
     @require_http_methods(['GET'])
-    def exportUser(self):
+    def exportUser(request):
         fields = [f.name for f in User._meta.fields]
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = f"attachment; filename={User.__name__}.csv"
@@ -55,24 +62,7 @@ class ExportController(ViewSet):
             
 
         return response
-    
-    @csrf_exempt
-    @require_http_methods(['GET'])
-    def exportUserWithPoints(self):
-        fields = [f.name for f in UserPoint._meta.fields]
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f"attachment; filename={UserPoint.__name__}.csv"
-        writer = csv.writer(response)
 
-        writer.writerow(fields)
-
-        for row in UserPoint.objects.values(*fields):
-            writer.writerow([row[field] for field in fields])
-            
-
-        return response
-
-    @csrf_exempt
     @require_http_methods(['GET'])
     def exportQuestionWithEvaluation(request):
         time_period = request.GET.get('date')
@@ -128,13 +118,12 @@ class ExportController(ViewSet):
 
         return response
 
-    @csrf_exempt
     @require_http_methods(['GET'])
     def exportAnswerWithEvaluation(request):
         time_period = request.GET.get('date')
         answer_fields = [f.name for f in Answer._meta.fields if (f.name not in ['question', 'user_id'])]
         header = answer_fields + ['question_content', 'answerer_name', 'evaluation_types', 'evaluator_user_names']
-
+        print(header)
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = f"attachment; filename=AnswerWithEvaluation.csv"
 
@@ -153,7 +142,11 @@ class ExportController(ViewSet):
 
             row['question_content'] = answer.question.content
 
-            row['answerer_name'] = User.objects.get(id=answer.user_id).display_name
+            try:
+                answerer = User.objects.get(id=answer.user_id)
+                row['answerer_name'] = answerer.display_name
+            except User.DoesNotExist:
+                row['answerer_name'] = 'Unknown User'
 
             evaluation_types = answer.answerevaluation_set.all().values_list('evaluation_type', flat=True)
             row['evaluation_types'] = ', '.join(evaluation_types)
@@ -168,16 +161,89 @@ class ExportController(ViewSet):
 # Mail
 class MailController(ViewSet):
     @csrf_exempt
-    def sendNotificationEmail(self):
+    @require_http_methods(['POST'])
+    def sendNotificationEmail(request):
+        try:
+            data = json.loads(request.body)
+            question_content = data.get('question_content')
+
+        except json.JSONDecodeError:
+            return responseData(data=None, status=404, message="Invalid JSON format")
+        
         admin_emails = list(User.objects.filter(role='admin', get_notification=True).values_list('email', flat=True))
+
+        email_body = render_to_string('email_template.html', {
+            'question_content': question_content,
+        })
+        
         default_subject = 'Notification'
         default_message = 'A user has posted a question'
         try:
-            send_mail(default_subject, default_message, settings.EMAIL_HOST_USER, admin_emails, fail_silently=False)
-            return responseData(message='Success', status=200, data={'admin_emails': admin_emails})
+            send_mail(default_subject, 
+                      default_message, 
+                      settings.EMAIL_HOST_USER, 
+                      admin_emails, 
+                      fail_silently=False, 
+                      html_message=email_body)
+            
+            return responseData(message='Success', status=200, data={})
         except Exception as e:
-            print(e)
-            return responseData(message='Error', status=500, data={'admin_emails': admin_emails})
+            return responseData(message='Error', status=500, data={})
+
+    @require_http_methods(['POST'])
+    @csrf_exempt
+    def sendNotificationNewToken(request):
+        try:
+            data = json.loads(request.body)
+            email = data.get('user_email')
+            content = data.get('content')
+        except json.JSONDecodeError:
+            return responseData(data=None, status=404, message="Invalid JSON format")
+
+        email_body = render_to_string('email_new_access_token_template.html', {
+            'content': content,
+        })
+
+        default_subject = 'Notification from VietintelSocial Network'
+        default_message = 'Congratulations, Your registration has been approved !'
+        try:
+            send_mail(default_subject,
+                      default_message,
+                      settings.EMAIL_HOST_USER,
+                      [email],
+                      fail_silently=False,
+                      html_message=email_body)
+            return responseData(message='Success', status=200, data={})
+        except Exception as e:
+            return responseData(message='Error', status=500, data={})
+
+    @require_http_methods(['POST'])
+    @csrf_exempt
+    def sendNotificationExpiredToken(request):
+        try:
+            data = json.loads(request.body)
+            email = data.get('user_email')
+            content = data.get('content')
+
+        except json.JSONDecodeError:
+            return responseData(data=None, status=404, message="Invalid JSON format")
+
+        email_body = render_to_string('email_expired_access_token_template.html', {
+            'content': content,
+        })
+
+        default_subject = 'Notification from VietintelSocial Network'
+        default_message = 'Sorry, Your API access date has expired !'
+        try:
+            send_mail(default_subject,
+                      default_message,
+                      settings.EMAIL_HOST_USER,
+                      email,
+                      fail_silently=False,
+                      html_message=email_body)
+            return responseData(message='Success', status=200, data={})
+        except Exception as e:
+            return responseData(message='Error', status=500, data={})
 
 def process_csv_file(csv_file, required_headers):
     if not csv_file or not csv_file.name.endswith('.csv'):
@@ -198,11 +264,13 @@ def process_csv_file(csv_file, required_headers):
     return data, None
 
 #Import
-class ImportController(ViewSet):   
+class ImportController(ViewSet):  
+    @csrf_exempt 
     @require_http_methods(['POST'])
     def importQuestion(request):
         csv_file = request.FILES.get("files")
-        required_headers = {'id', 'content', 'category_id', 'user_id'}
+    
+        required_headers = {'line_number', 'content', 'category_id', 'user_id'}
         data, error = process_csv_file(csv_file, required_headers)
         
         if error:
@@ -213,36 +281,36 @@ class ImportController(ViewSet):
         questions = []
         last_id = Question.objects.all().aggregate(Max('id')).get('id__max') or 0
 
-        failed_ids = []
+        failed_lines = []
         
         for row in data:  
             content = row.get('content')
             category_id = row.get('category_id')
             user_id = row.get('user_id')
-            question_id = row.get('id')
-            
+            line_number = row.get('line_number')
+
             if not content or len(content) > 500:
-                failed_ids.append({'id': question_id, 'reason': 'Invalid content'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid content'})
                 continue
                 
             try:
                 category_id = int(category_id)
             except (TypeError, ValueError):
-                failed_ids.append({'id': question_id, 'reason': 'Invalid category_id'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid category_id'})
                 continue
 
             if not Category.objects.filter(id=category_id).exists():
-                failed_ids.append({'id': question_id, 'reason': f'No category with id {category_id}'})
+                failed_lines.append({'line_number': line_number, 'reason': f'No category with id {category_id}'})
                 continue
 
             try:
                 user_id = int(user_id)
             except (TypeError, ValueError):
-                failed_ids.append({'id': question_id, 'reason': 'Invalid user_id'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid user_id'})
                 continue
 
             if not User.objects.filter(id=user_id).exists():
-                failed_ids.append({'id': question_id, 'reason': f'No user with id {user_id}'})
+                failed_lines.append({'line_number': line_number, 'reason': f'No user with id {user_id}'})
                 continue
 
             last_id += 1
@@ -260,23 +328,24 @@ class ImportController(ViewSet):
             with transaction.atomic():
                 Question.objects.bulk_create(questions)
             
-            return responseData(data=failed_ids, message='Success creating questions. Failed question:', status=200)
+            return responseData(data=failed_lines, message='Success creating questions. Failed question:', status=200)
         
         except Exception as e:
-            return responseData(data=failed_ids, message=str(e), status=500)
+            return responseData(data=failed_lines, message=str(e), status=500)
         
+    @csrf_exempt
     @require_http_methods(['POST'])
     def importUser(request):
         csv_file = request.FILES["files"]
         
-        required_headers = {'id', 'email', 'password', 'name', 'display_name', 'role', 'gender'}
+        required_headers = {'line_number', 'email', 'password', 'name', 'display_name', 'role', 'gender'}
         data, error = process_csv_file(csv_file, required_headers)
         
         if error:
             return responseData(data=data, status=500, message=error)
 
         users = []
-        failed_ids = []
+        failed_lines = []
         last_id = User.objects.all().aggregate(Max('id')).get('id__max') or 0
 
         
@@ -286,11 +355,11 @@ class ImportController(ViewSet):
             name = row.get('name')
             display_name = row.get('display_name')
             role = row.get('role').upper() if row.get('role') else 'USER'
-            user_id = row.get('id')
+            line_number = row.get('line_number')
             gender = row.get('gender').upper() if row.get('gender') else 'MALE'
             
             if not email:
-                failed_ids.append({'id': user_id, 'reason': 'Invalid email'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid email'})
                 continue
 
             try:
@@ -298,16 +367,23 @@ class ImportController(ViewSet):
                 email = v["email"]
             
             except EmailNotValidError as e:
-                failed_ids.append({'id': user_id, 'reason': str(e)})
+                failed_lines.append({'line_number': line_number, 'reason': str(e)})
+                continue
+
+            if User.objects.filter(email=email).exists():
+                failed_lines.append({'line_number': line_number, 'reason': 'Email already exists'})
                 continue
 
             last_id += 1
+
+            salt = b"$2a$10$SYxZJIAtGW0.wS06D.hPJe"
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
 
 
             users.append(User(
                 id=last_id,
                 email=email, 
-                password=password,
+                password=hashed_password,
                 name=name, 
                 display_name=display_name, 
                 role=role, 
@@ -328,18 +404,19 @@ class ImportController(ViewSet):
             with transaction.atomic():
                 User.objects.bulk_create(users)
             
-            return responseData(data=failed_ids, message='Success creating users. Failed users:', status=200)
+            return responseData(data=failed_lines, message='Success creating users. Failed users:', status=200)
         
         except Exception as e:
-            return responseData(data=failed_ids, message=str(e), status=500)
+            return responseData(data=failed_lines, message=str(e), status=500)
         
-
+    @csrf_exempt
     @require_http_methods(['POST'])
     def importAnswer(request):
         csv_file = request.FILES.get("files")
-        required_headers = {'id', 'content', 'reference', 'image', 'user_id', 'question_id'}
+
+        required_headers = {'line_number', 'content', 'user_id', 'question_id'}
         data, error = process_csv_file(csv_file, required_headers)
-        
+
         if error:
             return responseData(data=data, status=500, message=error)
 
@@ -348,45 +425,37 @@ class ImportController(ViewSet):
         answers = []
         last_id = Answer.objects.all().aggregate(Max('id')).get('id__max') or 0
 
-        failed_ids = []
+        failed_lines = []
         
         for row in data:  
             content = row.get('content')
             question_id = row.get('question_id')
             user_id = row.get('user_id')
-            answer_id = row.get('id')
-            reference = row.get('reference')
-            image = row.get('image')
+            line_number = row.get('line_number')
             
             if not content or len(content) > 500:
-                failed_ids.append({'id': answer_id, 'reason': 'Invalid content'})
-                continue
-                
-            try:
-                answer_id = int(answer_id)
-            except (TypeError, ValueError):
-                failed_ids.append({'id': answer_id, 'reason': 'Invalid answer_id'})
-                continue
-
-            if not Question.objects.filter(id=answer_id).exists():
-                failed_ids.append({'id': answer_id, 'reason': f'No category with id {answer_id}'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid content'})
                 continue
 
             try:
                 user_id = int(user_id)
             except (TypeError, ValueError):
-                failed_ids.append({'id': question_id, 'reason': 'Invalid user_id'})
+                failed_lines.append({'line_number': line_number, 'reason': 'Invalid user_id'})
                 continue
 
             if not User.objects.filter(id=user_id).exists():
-                failed_ids.append({'id': question_id, 'reason': f'No user with id {user_id}'})
+                failed_lines.append({'line_number': line_number, 'reason': f'No user with id {user_id}'})
+                continue
+
+            if not Question.objects.filter(id=question_id).exists():
+                failed_lines.append({'line_number': line_number, 'reason': f'No question with id {question_id}'})
                 continue
 
             last_id += 1
 
-            answers.append(Question(
+            answers.append(Answer(
                 id = last_id,
-                content=content, 
+                answer_content=content, 
                 question_id=question_id,
                 user_id=user_id, 
                 created_at=current_date, 
@@ -395,47 +464,67 @@ class ImportController(ViewSet):
         
         try:
             with transaction.atomic():
-                Question.objects.bulk_create(answers)
+                Answer.objects.bulk_create(answers)
             
-            return responseData(data=failed_ids, message='Success creating answers. Failed answers:', status=200)
+            print(failed_lines)
+            return responseData(data=failed_lines, message='Success creating answers. Failed answers:', status=200)
         
         except Exception as e:
-            return responseData(data=failed_ids, message=str(e), status=500)
-            
-#Notiifcation
-class NotificationController(ViewSet):
-    @require_http_methods(['GET'])
-    def getNotificationById(request, userId):
+            return responseData(data=failed_lines, message=str(e), status=500)
+
+    
+class APIQAController(ViewSet):
+    @staticmethod
+    def getAllQuestionWithID():
+        questions = Question.objects.all().values('id', 'content')
+        questions_dict = {item['id']: item['content'] for item in questions}
+        return questions_dict
+
+    @staticmethod
+    def getTop3AnswersFromID(questionId):
         try:
-            user = User.objects.get(id=userId)
-            notification_type = user.get_notification_type()
-            return responseData(message='Success', status=200, data=notification_type)
-        
-        except ObjectDoesNotExist:
-            return responseData(message=f'User ID does not exist: {userId}', status=404)
-        
-        except Exception as e:
-            return responseData(message=str(e), status=500, data={})
-        
+            answer_instances = (Answer.objects.filter(question_id=questionId)
+                                .annotate(
+                                    good_count=Count('answerevaluation__answer_id', filter=Q(answerevaluation__evaluation_type='GOOD')),
+                                    bad_count=Count('answerevaluation__answer_id', filter=Q(answerevaluation__evaluation_type='BAD'))
+                                )
+                                .filter(good_count__gt=F('bad_count'))
+                                .order_by('-good_count')
+                                .values('answer_content', 'good_count')[:3])
+
+            return [instance['answer_content'] for instance in answer_instances]
+
+        except Answer.DoesNotExist:
+            return None
+
+    @staticmethod
+    def get_highest_similarity_score(new_question_content):
+        search = Search(index="questions")
+        search = search.query("match", content=new_question_content)
+        response = search.execute()
+
+        if response.hits:
+            most_similar_question = response.hits[0]
+            return most_similar_question.meta.id
+        return None
+    
     @csrf_exempt
     @require_http_methods(['POST'])
-    def updateNotification(request):
+    def getAnswerBasedFromQuestion(request):
         try:
             data = json.loads(request.body)
-            user_id = data.get('user_id', None)
-            notification_type = data.get('notification_type', None)
-            
-            if user_id and notification_type is not None:
-                user = User.objects.get(id=user_id)
-                user.get_notification = notification_type
-                user.save()
-            else:
-                return responseData(message='Body is invalid', status=400, data={})
-            return responseData(message='Success', status=200)
+            question_content = data.get('question_content')
+        except json.JSONDecodeError:
+            return responseData(data=None, status=404, message="Invalid JSON format")
+        
+        if not data:
+            return responseData(data=None, status=404, message="Can't find question")
+        
+        best_question_id = APIQAController.get_highest_similarity_score(question_content)
+        if(best_question_id):
+            answer = APIQAController.getTop3AnswersFromID(best_question_id)
+            if (answer):
+                return responseData(message='Success', status=200, data=answer)
+            else: return responseData(message='Failed finding answer', status=404)
+        else: return responseData(message='Question does not exist in the system database', status=404)
 
-        except ObjectDoesNotExist:
-            return responseData(message='User does not exist', status=404)
-    
-        except Exception as e:
-            return responseData(message=str(e), status=500, data={})
-    

@@ -1,5 +1,5 @@
-// import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useNavigate} from "react-router-dom";
 import styles from "./styles.module.scss";
 import Logo from "@/assets/logo.svg";
 import Divider from "@mui/material/Divider";
@@ -11,21 +11,50 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import HomeIcon from "@mui/icons-material/Home";
 import Link from "@mui/material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import IconButton from "@mui/material/IconButton";
 
 const label = { inputProps: { "aria-label": "Switch demo" } };
 
 function MainLayout() {
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  // useEffect(() => {
-  //   if (
-  //     !window.localStorage.getItem("userId") ||
-  //     !window.localStorage.getItem("email") ||
-  //     !window.localStorage.getItem("accessToken")
-  //   ) {
-  //     navigate("/login");
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    if (
+      !window.localStorage.getItem("userId") ||
+      !window.localStorage.getItem("email") ||
+      !window.localStorage.getItem("accessToken")
+    ) {
+      setIsLoggedIn(false);
+      navigate("/login");
+    } else {
+      setUsername(window.localStorage.getItem("username"));
+      setIsLoggedIn(true);
+    }
+  }, [navigate]);
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    window.localStorage.removeItem("userId");
+    window.localStorage.removeItem("email");
+    window.localStorage.removeItem("accessToken");
+    window.localStorage.removeItem("username");
+    window.localStorage.removeItem("accessToken");
+    window.localStorage.removeItem("refreshToken");
+    setIsLoggedIn(false);
+    navigate("/login");
+  }
 
   const breadcrumbs = [
     <Link
@@ -101,8 +130,41 @@ function MainLayout() {
               {breadcrumbs}
             </Breadcrumbs>
             <div className={styles["header-menu"]}>
+              {isLoggedIn ? ( // Hiển thị dòng "Hi, username" nếu đăng nhập thành công
+                <span>Hi, {username}</span>
+              ) : null}
               <SettingsIcon />
-              <AccountCircleIcon />
+              {isLoggedIn && (
+                <>
+                  <IconButton
+                    size="large"
+                    aria-label="account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={handleMenuOpen}
+                    color="inherit"
+                  >
+                    <AccountCircleIcon />
+                  </IconButton>
+                  <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorEl}
+                    anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                  >
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                  </Menu>
+                </>
+              )}
               <NotificationsIcon />
             </div>
           </div>

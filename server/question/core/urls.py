@@ -13,6 +13,7 @@ urlpatterns = [
     path('questions/get-all-admin', QuestionController.getAllQuestionsForAdmin),
     path('questions/get-content/<int:questionId>', QuestionController.getContentForAnswer),
     path('questions/count', QuestionController.countAllQuestions),
+    path('questions/authenticated/get-all', QuestionController.getAllQuestionAuthenticated),
 
     # Create - Update - Delete
     path('questions/like', QuestionController.likeQuestion),
@@ -21,6 +22,7 @@ urlpatterns = [
     path('questions/rating', QuestionController.ratingQuestion),
     path('questions/decline/<int:questionId>', QuestionController.declinePendingQuestion),
     path('questions/accept/<int:questionId>', QuestionController.acceptPendingQuestion),
+    path('questions/automatic-censor', QuestionController.automaticCensorQuestions),
 
     # Tag
     path('tags', QuestionController.getListTag),

@@ -4,7 +4,7 @@ import { getNotificationType, updateNotificationType } from '@/api-services/unif
 import CustomAlert from '../../components/alert'
 
 const Setting = () => {
-    const userID = 1
+    const userID = window.localStorage.getItem("userId");
     const [notify, setNotify] = useState(false);
     const [alertState, setAlertState] = useState({ open: false, message: '' });
 
@@ -56,8 +56,6 @@ const Setting = () => {
                         onClose={() => setAlertState({ open: false, message: '', severity: 'success' })}
                     />
                 )}
-
-
             </Box>
         </div>
     );

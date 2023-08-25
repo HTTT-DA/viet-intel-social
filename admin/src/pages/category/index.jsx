@@ -18,7 +18,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
-import CategoryList from "./components/categoryList";
+import CategoryList from "./components/categoryList/categoryList";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);

@@ -32,7 +32,7 @@ class AnswerService:
             created_at=date.today()
         )
         answer.created_at = convertDate(answer.created_at)
-        answer.evaluations = AnswerEvaluation.objects\
+        answer.evaluations = AnswerEvaluation.objects \
             .filter(answer_id=answer.id) \
             .values('user_id', 'evaluation_type')
 
@@ -80,3 +80,13 @@ class AnswerService:
     @staticmethod
     def updateAnswerStatus(answerId):
         Answer.objects.filter(id=answerId, status="WAITING").update(status="ACCEPTED")
+
+    @staticmethod
+    def getAllAnswer():
+        answers = Answer.objects.all()
+        return answers
+
+    @staticmethod
+    def getPendingAnswer():
+        question = Answer.objects.filter(status="WAITING")
+        return question

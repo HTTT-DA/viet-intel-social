@@ -16,10 +16,18 @@ const Export = () => {
                 downloadFileName = 'users';
                 break;
             case 'question':
+                if(!selectedDate) {
+                    setAlertState({ open: true, message: 'Please select a time period', severity: 'warning' });
+                    break;
+                }
                 exportFunction = exportQuestion;
                 downloadFileName = 'questions_';
                 break;
             case 'answer':
+                if(!selectedDate) {
+                    setAlertState({ open: true, message: 'Please select a time period', severity: 'warning' });
+                    break;
+                }
                 exportFunction = exportAnswer;
                 downloadFileName = 'answers_';
                 break;
@@ -40,7 +48,7 @@ const Export = () => {
                 document.body.appendChild(link);
                 link.click();
                 setTimeout(() => {
-                    setAlertState({ open: true, message: 'Export successful!', severity: 'success' });
+                    setAlertState({ open: true, message: 'Export successfully!', severity: 'success' });
                 }, 500);
                 link.parentNode.removeChild(link);
             }

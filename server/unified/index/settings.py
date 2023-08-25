@@ -42,7 +42,18 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'core',
+
+    'django_elasticsearch_dsl',
 ]
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'localhost:9200',
+        'http_auth': (config('ELASTIC_USERNAME'), config('ELASTIC_PASSWORD')),
+    },
+}
+
+
     
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

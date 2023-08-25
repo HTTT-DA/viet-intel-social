@@ -81,3 +81,15 @@ export async function acceptQuestion(id) {
     return false;
   }
 }
+
+export async function automaticCensorQuestions() {
+  try {
+    const response = await axios.patch(
+      `${import.meta.env.VITE_API_URL_QUESTION}/api/questions/automatic-censor`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}

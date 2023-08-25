@@ -13,7 +13,8 @@ import TextField from "@mui/material/TextField";
 import debounce from "lodash/debounce";
 import { useEffect, useState } from "react";
 import { getCategoryByID } from "../../api-services/category";
-import { countQuestions, getListQuestions } from "../../api-services/question";
+import { countQuestions, getListQuestions, automaticCensorQuestions } from "../../api-services/question";
+import { automaticCensorAnswers } from "../../api-services/answer";
 import { getUserByID } from "../../api-services/user";
 import TableQuestion from "./components/TableQuestion";
 
@@ -79,6 +80,23 @@ function ContentCensorShip() {
     setStatus(event.target.value);
   };
   
+  const handleAutoCheck = async () => {
+    try {
+      const answerResponse = await automaticCensorAnswers();
+      const questionResponse = await automaticCensorQuestions();
+      console.log(answerResponse, questionResponse)
+      if (answerResponse.status === 500 || questionResponse.status === 500) {
+        setOpenSnackbar(true);
+      }
+      if (answerResponse.status === 200 && questionResponse.status === 200) {
+        window.location.href = "/content-censorship";
+      }
+    } catch (error) {
+      setOpenSnackbar(true);
+      console.error(error);
+    }
+}
+
   return (
     <div>
       <h1 style={{ color: "#243c64" }}>Content Censorship</h1>
@@ -126,7 +144,7 @@ function ContentCensorShip() {
             variant="contained"
             color="primary"
             size="large"
-            // onClick={handleAutoCheck}
+            onClick={handleAutoCheck}
           >
             <b>AUTOMATIC CHECK</b>
           </Button>

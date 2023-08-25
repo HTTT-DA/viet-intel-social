@@ -1,9 +1,11 @@
 import json
+import re
 
 from django.views.decorators.http import require_http_methods
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.viewsets import ViewSet
+from django.db import transaction
 
 from core.models import AnswerEvaluation
 from core.serializer import AnswerSerializer, AnswerAdminSerializer
@@ -112,3 +114,41 @@ class AnswerController(ViewSet):
             print(e)
             return responseData(None, status=500, message="Error when update status of answer from DB in "
                                                           "Answer-Services")
+
+    @staticmethod
+    @require_http_methods(['PATCH'])
+    @transaction.atomic
+    def automaticCensorAnswers(request):
+        try:
+            bannedWordList = ['arse', 'arsehead', 'arsehole', 'ass', 'asshole', 'bastard', 'bitch', 'bloody',
+                              'bollocks', 'brotherfucker',
+                              'bugger', 'bullshit', 'child-fucker', 'Christ on a bike', 'Christ on a cracker', 'cock',
+                              'cocksucker',
+                              'crap', 'cunt', 'damn', 'damn it', 'dick', 'dickhead', 'dyke', 'fatherfucker', 'frigger',
+                              'fuck', 'goddamn',
+                              'godsdamn', 'hell', 'holy shit', 'horseshit', 'in shit', 'Jesus Christ', 'Jesus fuck',
+                              'Jesus H. Christ', 'Jesus Harold Christ',
+                              'Jesus, Mary and Joseph', 'Jesus wept', 'kike', 'motherfucker', 'nigga', 'nigra',
+                              'pigfucker', 'piss', 'prick', 'pussy', 'shit', 'shit ass',
+                              'shite', 'sisterfucker', 'slut', 'son of a whore', 'son of a bitch', 'spastic',
+                              'sweet Jesus', 'turd', 'twat', 'wanker'
+                              ]
+            questions = AnswerService.getPendingAnswer()
+            listAnswers = AnswerAdminSerializer(questions, many=True).data
+
+            for answer in listAnswers:
+                text_lower = answer['content'].lower()
+                for word in bannedWordList:
+                    word_lower = word.lower()
+                    pattern = re.escape(word_lower)
+                    match = re.search(pattern, text_lower)
+
+                    if match:
+                        AnswerService.deleteAnswerForever(answer['id'])
+
+                AnswerService.updateAnswerStatus(answer['id'])
+
+            return responseData(data=None, message="Automatic censor answers successfully from Question-Services")
+
+        except Exception as e:
+            return responseData(message=str(e), status=500, data={})

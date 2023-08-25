@@ -56,6 +56,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+    def get_notification_type(self):
+        return self.get_notification
 
 
 class UserPoint(models.Model):
@@ -67,3 +70,30 @@ class UserPoint(models.Model):
     class Meta:
         unique_together = (('year', 'month', 'user'),)
         db_table = 'UserPoint'
+
+
+class UserAPIAccess(models.Model):
+    STATUS_CHOICES = (
+        ('ACCEPTED', 'Accepted'),
+        ('DECLINED', 'Declined'),
+        ('PENDING', 'Pending'),
+    )
+
+    user_email = models.EmailField()
+    reason = models.TextField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    requested_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(null=True, blank=True, default=None)
+
+    class Meta:
+        db_table = 'user_api_access'
+
+
+class AccessToken(models.Model):
+    user_email = models.CharField(max_length=255, null=False)
+    access_token = models.TextField(null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expiration_time = models.DateTimeField(null=False)
+
+    class Meta:
+        db_table = 'access_tokens'

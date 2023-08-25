@@ -52,3 +52,9 @@ class QuestionAnswerSerializer(ModelSerializer):
     class Meta:
         model = Question
         fields = ('id', 'content')
+
+
+class QuestionAuthenticatedUserSerializer(ModelSerializer):
+    class Meta:
+        model = Question
+        fields = "__all__"
