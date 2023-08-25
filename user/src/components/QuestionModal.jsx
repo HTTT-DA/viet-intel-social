@@ -119,7 +119,7 @@ export default function QuestionModal(props) {
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                                "content": document.getElementById("content").value
+                                "question_content": document.getElementById("content").value
                             })
                         })
                         .then(response => response.json())
