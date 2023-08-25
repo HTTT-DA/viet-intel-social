@@ -66,11 +66,7 @@ const TableRequest = ({ requests, setRequests }) => {
           const accessToken = tokenResponse.data.access_token;
           const dataForMail = {
             user_email: mail,
-            content:
-              "This is your access token for your account: " +
-              accessToken +
-              "\n" +
-              "This access token is valid for 7 days !",
+            content: accessToken 
           };
           // Step 3: Send email with access token
           const emailResponse = await sendAccessTokenMail(dataForMail);

@@ -193,7 +193,6 @@ class MailController(ViewSet):
             data = json.loads(request.body)
             email = data.get('user_email')
             content = data.get('content')
-
         except json.JSONDecodeError:
             return responseData(data=None, status=404, message="Invalid JSON format")
 
@@ -207,7 +206,7 @@ class MailController(ViewSet):
             send_mail(default_subject,
                       default_message,
                       settings.EMAIL_HOST_USER,
-                      email,
+                      [email],
                       fail_silently=False,
                       html_message=email_body)
             return responseData(message='Success', status=200, data={})
@@ -225,7 +224,7 @@ class MailController(ViewSet):
         except json.JSONDecodeError:
             return responseData(data=None, status=404, message="Invalid JSON format")
 
-        email_body = render_to_string('email_template.html', {
+        email_body = render_to_string('email_new_access_token_template.html', {
             'content': content,
         })
 
