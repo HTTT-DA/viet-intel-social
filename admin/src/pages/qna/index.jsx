@@ -136,7 +136,11 @@ function QnA() {
                         maxWidth: 1000,
                         backgroundImage: loading ? `url(${loadingGif})` : `url(${lensImage})`
                     }}
-                    onChange={(e) => updatePrompt(e.target.value)}
+                    onChange={(e) => {
+                        updatePrompt(e.target.value);
+                        setAnswer(undefined);
+                    }}
+                
                     onKeyDown={(e) => sendPrompt(e)}
                 />
                 <Box

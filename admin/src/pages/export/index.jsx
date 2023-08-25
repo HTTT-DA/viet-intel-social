@@ -48,7 +48,7 @@ const Export = () => {
                 document.body.appendChild(link);
                 link.click();
                 setTimeout(() => {
-                    setAlertState({ open: true, message: 'Export successful!', severity: 'success' });
+                    setAlertState({ open: true, message: 'Export successfully!', severity: 'success' });
                 }, 500);
                 link.parentNode.removeChild(link);
             }

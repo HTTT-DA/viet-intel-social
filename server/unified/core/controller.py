@@ -20,7 +20,7 @@ import codecs
 from elasticsearch_dsl import Search
 
 from django.template.loader import render_to_string
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 import bcrypt
 
 from utils.getStartDate import get_start_date
@@ -123,7 +123,7 @@ class ExportController(ViewSet):
         time_period = request.GET.get('date')
         answer_fields = [f.name for f in Answer._meta.fields if (f.name not in ['question', 'user_id'])]
         header = answer_fields + ['question_content', 'answerer_name', 'evaluation_types', 'evaluator_user_names']
-
+        print(header)
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = f"attachment; filename=AnswerWithEvaluation.csv"
 
@@ -142,7 +142,11 @@ class ExportController(ViewSet):
 
             row['question_content'] = answer.question.content
 
-            row['answerer_name'] = User.objects.get(id=answer.user_id).display_name
+            try:
+                answerer = User.objects.get(id=answer.user_id)
+                row['answerer_name'] = answerer.display_name
+            except User.DoesNotExist:
+                row['answerer_name'] = 'Unknown User'
 
             evaluation_types = answer.answerevaluation_set.all().values_list('evaluation_type', flat=True)
             row['evaluation_types'] = ', '.join(evaluation_types)
@@ -471,26 +475,30 @@ class ImportController(ViewSet):
     
 class APIQAController(ViewSet):
     @staticmethod
-    def getAllQuestionWithID(self):
+    def getAllQuestionWithID():
         questions = Question.objects.all().values('id', 'content')
         questions_dict = {item['id']: item['content'] for item in questions}
         return questions_dict
 
     @staticmethod
-    def getTop3AnswersFromID(self, questionId):
+    def getTop3AnswersFromID(questionId):
         try:
             answer_instances = (Answer.objects.filter(question_id=questionId)
-                                .annotate(good_count=Count('answerevaluation__id', filter=F('answerevaluation__evaluation_type') == 'GOOD'))
+                                .annotate(
+                                    good_count=Count('answerevaluation__answer_id', filter=Q(answerevaluation__evaluation_type='GOOD')),
+                                    bad_count=Count('answerevaluation__answer_id', filter=Q(answerevaluation__evaluation_type='BAD'))
+                                )
+                                .filter(good_count__gt=F('bad_count'))
                                 .order_by('-good_count')
                                 .values('answer_content', 'good_count')[:3])
-            
+
             return [instance['answer_content'] for instance in answer_instances]
 
         except Answer.DoesNotExist:
             return None
 
     @staticmethod
-    def get_highest_similarity_score(self, new_question_content):
+    def get_highest_similarity_score(new_question_content):
         search = Search(index="questions")
         search = search.query("match", content=new_question_content)
         response = search.execute()
@@ -514,7 +522,7 @@ class APIQAController(ViewSet):
         
         best_question_id = APIQAController.get_highest_similarity_score(question_content)
         if(best_question_id):
-            answer = APIQAController.getAnswersFromID(best_question_id)
+            answer = APIQAController.getTop3AnswersFromID(best_question_id)
             if (answer):
                 return responseData(message='Success', status=200, data=answer)
             else: return responseData(message='Failed finding answer', status=404)
