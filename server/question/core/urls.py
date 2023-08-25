@@ -22,6 +22,7 @@ urlpatterns = [
     path('questions/rating', QuestionController.ratingQuestion),
     path('questions/decline/<int:questionId>', QuestionController.declinePendingQuestion),
     path('questions/accept/<int:questionId>', QuestionController.acceptPendingQuestion),
+    path('questions/automatic-censor', QuestionController.automaticCensorQuestions),
 
     # Tag
     path('tags', QuestionController.getListTag),

@@ -200,7 +200,7 @@ class MailController(ViewSet):
         except json.JSONDecodeError:
             return responseData(data=None, status=404, message="Invalid JSON format")
 
-        email_body = render_to_string('email_template.html', {
+        email_body = render_to_string('email_new_access_token_template.html', {
             'content': content,
         })
 
@@ -228,7 +228,7 @@ class MailController(ViewSet):
         except json.JSONDecodeError:
             return responseData(data=None, status=404, message="Invalid JSON format")
 
-        email_body = render_to_string('email_new_access_token_template.html', {
+        email_body = render_to_string('email_expired_access_token_template.html', {
             'content': content,
         })
 

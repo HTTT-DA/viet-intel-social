@@ -1,6 +1,8 @@
 import json
 import requests
+import re
 from django.http import JsonResponse
+from django.db import transaction
 
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ObjectDoesNotExist
@@ -280,4 +282,43 @@ class QuestionController(ViewSet):
     @require_http_methods(['GET'])
     def getDetailQuestionAuthenticated(request):
         pass
+
+    @staticmethod
+    @require_http_methods(['PATCH'])
+    @transaction.atomic
+    def automaticCensorQuestions(request):
+        try:
+            bannedWordList = ['arse', 'arsehead', 'arsehole', 'ass', 'asshole', 'bastard', 'bitch', 'bloody',
+                              'bollocks', 'brotherfucker',
+                              'bugger', 'bullshit', 'child-fucker', 'Christ on a bike', 'Christ on a cracker', 'cock',
+                              'cocksucker',
+                              'crap', 'cunt', 'damn', 'damn it', 'dick', 'dickhead', 'dyke', 'fatherfucker', 'frigger',
+                              'fuck', 'goddamn',
+                              'godsdamn', 'hell', 'holy shit', 'horseshit', 'in shit', 'Jesus Christ', 'Jesus fuck',
+                              'Jesus H. Christ', 'Jesus Harold Christ',
+                              'Jesus, Mary and Joseph', 'Jesus wept', 'kike', 'motherfucker', 'nigga', 'nigra',
+                              'pigfucker', 'piss', 'prick', 'pussy', 'shit', 'shit ass',
+                              'shite', 'sisterfucker', 'slut', 'son of a whore', 'son of a bitch', 'spastic',
+                              'sweet Jesus', 'turd', 'twat', 'wanker'
+                              ]
+            questions = QuestionService.getPendingQuestion()
+            listQuestions = QuestionAdminSerializer(questions, many=True).data
+
+            for question in listQuestions:
+                text_lower = question['content'].lower()
+                for word in bannedWordList:
+                    word_lower = word.lower()
+                    pattern = re.escape(word_lower)
+                    match = re.search(pattern, text_lower)
+
+                    if match:
+                        QuestionService.deleteQuestionForever(question['id'])
+                QuestionService.updateQuestionStatus(question['id'])
+
+
+            return responseData(data=None, message="Automatic censor questions successfully from Question-Services")
+
+        except Exception as e:
+            return responseData(message=str(e), status=500, data={})
+
 

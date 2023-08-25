@@ -69,3 +69,17 @@ export async function acceptAnswer(answerId) {
     return false;
   }
 }
+
+export async function automaticCensorAnswers() {
+  try {
+    const response = await axios.patch(
+      `${
+        import.meta.env.VITE_API_URL_ANSWER
+      }/api/answers/automatic-censor`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}

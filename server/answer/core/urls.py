@@ -9,6 +9,7 @@ urlpatterns = [
     path('/count/<int:questionId>', AnswerController.countAllAnswersByQuestion),
     path('/decline/<int:answerId>', AnswerController.declinePendingAnswer),
     path('/accept/<int:answerId>', AnswerController.acceptPendingAnswer),
+    path('/automatic-censor', AnswerController.automaticCensorAnswers),
 
     path('/<int:answerId>/evaluation/<int:userId>/create-update', AnswerController.createOrUpdateEvaluation),
     path('/<int:answerId>/evaluation/<int:userId>/delete', AnswerController.deleteEvaluation),
