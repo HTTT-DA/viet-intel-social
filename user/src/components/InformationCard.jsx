@@ -3,10 +3,16 @@ import * as React from "react";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
+import bcrypt from "bcryptjs";
 
 export default function InformationCard(props) {
     const handleChange = (event) => {
         const {id, value} = event.target;
+        let newValue = value;
+
+        if(id === 'password') {
+            newValue  = bcrypt.hashSync(value, "$2a$10$SYxZJIAtGW0.wS06D.hPJe");
+        }
         fetch('http://localhost:8000/api/users/update-information', {
             method: 'POST',
             headers: {
@@ -14,7 +20,7 @@ export default function InformationCard(props) {
                 'Authorization': 'Bearer ' + localStorage.getItem('access_token')
             },
             body: JSON.stringify({
-                [id]: value,
+                [id]: newValue,
             })
         }).then(
             (res) => {

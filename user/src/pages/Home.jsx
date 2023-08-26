@@ -204,10 +204,10 @@ function Home() {
     };
 
     const handleScroll = () => {
-        if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || loading) {
-            return;
+        if (!loading && (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 10)) {
+            fetchMoreData();
         }
-        fetchMoreData();
+        return;
     };
 
     useEffect(() => {
