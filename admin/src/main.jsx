@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./pages/login/index.jsx";
 import RegisterUseAPI from "./pages/registerUseAPI/index.jsx";
 import Category from "./pages/category";
+import Tag from "./pages/tag";
 import ContentCensorShip from "./pages/contentCensorship/index.jsx";
 import DetailAnswer from "./pages/DetailAnswer";
 import DetailQuestion from "./pages/DetailQuestion";
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Category />,
+      },
+      {
+        path: "/tag",
+        element: <Tag />,
       },
       {
         path: "/content-censorship",

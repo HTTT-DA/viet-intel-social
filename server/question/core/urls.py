@@ -26,5 +26,7 @@ urlpatterns = [
 
     # Tag
     path('tags', QuestionController.getListTag),
-    path('tags', QuestionController.createTag),
+    path('tags/create', QuestionController.createTag),
+    path('tags/find/<str:tagName>', QuestionController.findTagByName),
+    path('tags/delete/<int:tagId>', QuestionController.deleteTag)
 ]

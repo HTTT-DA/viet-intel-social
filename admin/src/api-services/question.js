@@ -93,3 +93,51 @@ export async function automaticCensorQuestions() {
     return false;
   }
 }
+
+export async function getListTag() {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL_QUESTION}/api/tags`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
+
+export async function findTag(tagName) {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL_QUESTION}/api/tags/find/${tagName}`
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
+
+export async function deleteTag(tagID) {
+  try {
+    const response = await axios.delete(
+      `${import.meta.env.VITE_API_URL_QUESTION}/api/tags/delete/${tagID}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
+
+export async function createTag(data) {
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL_QUESTION}/api/tags/create`, data
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}

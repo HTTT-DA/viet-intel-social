@@ -5,12 +5,18 @@ import PublishIcon from '@mui/icons-material/Publish';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import BeenhereIcon from "@mui/icons-material/Beenhere";
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import NumbersIcon from "@mui/icons-material/Numbers";
 
 export const menu = [
   {
     title: "Categories",
     icon: <CategoryIcon />,
     path: "/",
+  },
+  {
+    title: "Tags",
+    icon: <NumbersIcon />,
+    path: "/tag",
   },
   {
     title: "Content Censorship",

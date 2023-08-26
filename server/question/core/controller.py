@@ -164,13 +164,48 @@ class QuestionController(ViewSet):
     @require_http_methods(['POST'])
     def createTag(request):
         try:
-            data = json.loads(request.body)
-            Tag.objects.create(name=data['name'])
-            TagResponse = Tag.objects.filter(name=data['name'])
-            return responseData(data=TagSerializer(TagResponse, many=True).data)
-        except Exception as e:
+            try:
+                data = json.loads(request.body)
+                tagName = data.get('tagName')
+            except json.JSONDecodeError:
+                return responseData(data=None, status=500, message="Invalid JSON format")
+
+            if Tag.objects.filter(name=tagName).exists():
+                return responseData(None, status=500, message="Tag already exists")
+
+            Tag.objects.create(name=tagName)
+            data = {
+                "isExisted": False,
+                "nameTag": tagName
+            }
+            return responseData(data=data, message="Add tag successfully from Questions-Services")
+
+        except IntegrityError as e:
             print(e)
-            return responseData(data=False)
+            return responseData(None, status=500, message="Error when add core into DB in Question-Services")
+
+    @staticmethod
+    @require_http_methods(['DELETE'])
+    def deleteTag(request, tagId):
+        try:
+            Tag.objects.filter(id=tagId).delete()
+            return responseData(None, message="Delete tag successfully from Question-Services")
+        except IntegrityError as e:
+            print(e)
+            return responseData(None, status=500, message="Error when delete tag from DB in Question-Services")
+
+    @staticmethod
+    @require_http_methods(['GET'])
+    def findTagByName(request, tagName):
+        try:
+            if Tag.objects.filter(name=tagName).exists():
+                data = {
+                    "isExisted": True
+                }
+                return responseData(data=data, message="Category already exists")
+        except IntegrityError as e:
+            print(e)
+            return responseData(None, status=500,message="Error when find category in Category-Services")
 
     @staticmethod
     @require_http_methods(['GET'])
