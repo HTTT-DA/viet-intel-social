@@ -12,6 +12,7 @@ import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {useNavigate} from "react-router-dom";
 import {useEffect} from "react";
+import bcrypt from "bcryptjs";
 
 const defaultTheme = createTheme();
 
@@ -49,6 +50,7 @@ export default function SignIn() {
         const data = new FormData(event.currentTarget);
         const email = data.get('email');
         const password = data.get('password');
+        const hashPassword = bcrypt.hashSync(password, "$2a$10$SYxZJIAtGW0.wS06D.hPJe");
 
         fetch('http://localhost:8000/api/users/sign-in', {
             method: 'POST',
@@ -57,7 +59,7 @@ export default function SignIn() {
             },
             body: JSON.stringify({
                 "email": email,
-                "password": password
+                "password": hashPassword
             })
         }).then(
             (res) => {

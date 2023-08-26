@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {useNavigate} from "react-router-dom";
+import bcrypt from "bcryptjs";
 
 const defaultTheme = createTheme();
 
@@ -37,6 +38,8 @@ export default function SignUp() {
         const fullName = data.get('fullName');
         const displayName = data.get('displayName');
 
+        const hashPassword = bcrypt.hashSync(password, "$2a$10$SYxZJIAtGW0.wS06D.hPJe");
+
         fetch('http://localhost:8000/api/users/sign-up', {
             method: 'POST',
             headers: {
@@ -44,7 +47,7 @@ export default function SignUp() {
             },
             body: JSON.stringify({
                 "email": email,
-                "password": password,
+                "password": hashPassword,
                 "full name": fullName,
                 "display name": displayName
             })
