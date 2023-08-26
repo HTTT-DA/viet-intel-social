@@ -364,7 +364,7 @@ class UserController(ViewSet):
                 return responseData(message=f"User {userEmail} is already has access token ! ", status=500, data={})
 
             vn_timezone = pytz.timezone('Asia/Ho_Chi_Minh')
-            expirationTime = datetime.now(vn_timezone) + timedelta(minutes=1)
+            expirationTime = datetime.now(vn_timezone) + timedelta(days=7)
 
             accessTokenPayload = {
                 'user_id': userId,
