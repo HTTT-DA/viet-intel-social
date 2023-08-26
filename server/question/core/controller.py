@@ -9,7 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.viewsets import ViewSet
 from django.db import IntegrityError
 
-from core.models import Tag
+from core.models import Tag, QuestionTag
 from core.serializer import QuestionSerializer, TagSerializer, QuestionAdminSerializer, QuestionAnswerSerializer, QuestionAuthenticatedUserSerializer
 from core.service import QuestionService
 from utils.response import responseData
@@ -189,6 +189,7 @@ class QuestionController(ViewSet):
     def deleteTag(request, tagId):
         try:
             Tag.objects.filter(id=tagId).delete()
+            QuestionTag.objects.filter(tag_id = tagId).delete()
             return responseData(None, message="Delete tag successfully from Question-Services")
         except IntegrityError as e:
             print(e)
